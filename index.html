@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giallo alla Tenuta - v0.29</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Henny+Penny&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+        .canvas-container { position: relative; width: 600px; height: 600px; }
+        canvas { border: 4px solid #334155; border-radius: 8px; cursor: pointer; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+        .modal { background-color: rgba(15, 23, 42, 0.95); backdrop-filter: blur(6px); }
+        .tab-btn.active { background-color: #f59e0b; color: #0f172a; font-weight: bold; }
+        .font-henny { font-family: 'Henny Penny', cursive; }
+
+        /* Messaggio a video per le ipotesi dei bot: cartiglio al centro dello schermo */
+        #bot-message { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 60; display: none;
+                       align-items: center; justify-content: center; pointer-events: none; }
+        #bot-message.open { display: flex; }
+        #bot-message-card { position: relative; background: url('cartiglio.png') center / 100% 100% no-repeat;
+                            filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.65)); }
+        /* area utile della pergamena (ricavata da cartiglio.png, esclusi gli angoli rientranti) */
+        #bot-message-text { position: absolute; left: 16%; width: 68%; top: 18%; height: 64%;
+                            display: flex; flex-direction: column; align-items: center; justify-content: center;
+                            text-align: center; overflow: hidden; line-height: 1.2; color: #3b2410;
+                            font-family: 'Henny Penny', cursive; }
+        #bot-message-text .bm-who  { font-size: 0.62em; }
+        #bot-message-text .bm-what { font-size: 1em; }
+        #bot-message-text .bm-hint { font-size: 0.42em; margin-top: 0.6em; opacity: 0.7; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-4">
+
+    <!-- HEADER -->
+    <header class="w-full max-w-5xl flex justify-between items-center py-4 mb-4 border-b border-slate-700">
+        <div>
+            <h1 class="text-4xl font-extrabold tracking-wider text-amber-500 flex items-center gap-2 font-henny">
+                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.29</span>
+            </h1>
+        </div>
+        <button id="btn-pause-header" class="hidden px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm font-semibold text-amber-400 flex items-center gap-2 transition">
+            ⏸️ Pausa / Menu (ESC)
+        </button>
+    </header>
+
+    <!-- SETUP SCREEN -->
+    <div id="setup-screen" class="w-full max-w-xl bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-2xl">
+        <h2 class="text-2xl font-bold mb-4 text-slate-200 border-b border-slate-700 pb-2 font-henny text-amber-400">Configurazione Partita</h2>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium mb-1 text-slate-300">Il tuo Nome Detective:</label>
+                <input type="text" id="input-player-name" value="Detective Rossi" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white focus:outline-none focus:border-amber-500">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-1 text-slate-300">Scegli il tuo Personaggio:</label>
+                <select id="select-character" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white focus:outline-none focus:border-amber-500">
+                    <option value="Ambasciatore Ambra">Ambasciatore Ambra</option>
+                    <option value="Baronessa Bianchi">Baronessa Bianchi</option>
+                    <option value="Colonnello Corallo">Colonnello Corallo</option>
+                    <option value="Dottoressa Domino">Dottoressa Domino</option>
+                    <option value="Generale Grigio">Generale Grigio</option>
+                    <option value="Visconte Viola">Visconte Viola</option>
+                </select>
+            </div>
+
+            <button type="button" id="btn-start-game" class="w-full mt-6 py-3 bg-green-600 hover:bg-green-500 font-bold rounded-lg text-xl shadow-lg transition font-henny tracking-wide">
+                Inizia Partita
+            </button>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="game-screen" class="hidden w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- CANVAS COLUMN -->
+        <div class="lg:col-span-7 flex flex-col items-center">
+            <div class="w-full bg-slate-800 p-3 rounded-t-xl border-t border-x border-slate-700 flex justify-between items-center text-sm">
+                <div>
+                    <span class="text-slate-400">Tu sei:</span> 
+                    <strong id="display-your-char" class="text-amber-400 font-henny text-base">-</strong>
+                </div>
+                <div><span class="text-slate-400">Turno:</span> <strong id="display-current-turn" class="text-green-400 font-henny text-base">-</strong></div>
+            </div>
+
+            <div class="canvas-container shadow-2xl">
+                <canvas id="gameBoard" width="600" height="600"></canvas>
+            </div>
+
+            <!-- LEGENDA VERTICALE -->
+            <div id="players-legend" class="w-full bg-slate-800 p-4 rounded-b-xl border-b border-x border-slate-700 mt-0 flex flex-col gap-2 text-sm"></div>
+        </div>
+
+        <!-- CONTROLS COLUMN -->
+        <div class="lg:col-span-5 flex flex-col gap-4">
+
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md">
+                <h3 class="text-md font-bold text-slate-200 mb-3 border-b border-slate-700 pb-1">Azioni Turno</h3>
+
+                <div class="flex gap-3 mb-3">
+                    <button id="btn-roll-dice" class="flex-1 py-3 bg-amber-600 hover:bg-amber-500 font-bold rounded flex justify-center items-center gap-2 transition disabled:opacity-50">
+                        🎲 Lancia Dadi (<span id="dice-result">-</span>)
+                    </button>
+                    <button id="btn-secret-passage" class="hidden py-3 px-3 bg-purple-600 hover:bg-purple-500 font-bold rounded text-xs transition">
+                        🌀 Passaggio Segreto
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="btn-hypothesis" disabled class="py-2 bg-blue-600 hover:bg-blue-500 font-semibold rounded text-sm transition disabled:opacity-40">
+                        ❓ Formula Ipotesi
+                    </button>
+                    <button id="btn-accusation" disabled class="py-2 bg-red-600 hover:bg-red-500 font-semibold rounded text-sm transition disabled:opacity-40">
+                        ⚖️ Accusa Finale
+                    </button>
+                </div>
+                <button id="btn-end-turn" disabled class="w-full mt-2 py-2 bg-slate-700 hover:bg-slate-600 font-semibold rounded text-sm transition disabled:opacity-40">
+                    ⏭️ Passa Turno
+                </button>
+            </div>
+
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md">
+                <h3 class="text-md font-bold text-slate-200 mb-2">Le Tue Carte</h3>
+                <div id="my-cards-container" class="flex flex-wrap gap-2"></div>
+            </div>
+
+            <!-- TACCUINO A SCHEDE -->
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md flex-1 flex flex-col">
+                <div class="flex justify-between items-center mb-2 border-b border-slate-700 pb-1">
+                    <h3 class="text-md font-bold text-slate-200">📒 Taccuino del Detective</h3>
+                    <span class="text-xs text-slate-400">Spunta indizi</span>
+                </div>
+
+                <!-- TAB HEADERS -->
+                <div class="flex gap-1 border-b border-slate-700 mb-2">
+                    <button id="tab-btn-suspects" onclick="switchNotebookTab('suspects')" class="tab-btn active px-3 py-1 rounded-t bg-slate-700 text-xs font-semibold">
+                        👤 Personaggi
+                    </button>
+                    <button id="tab-btn-weapons" onclick="switchNotebookTab('weapons')" class="tab-btn px-3 py-1 rounded-t bg-slate-700 text-xs font-semibold">
+                        🔪 Armi
+                    </button>
+                    <button id="tab-btn-rooms" onclick="switchNotebookTab('rooms')" class="tab-btn px-3 py-1 rounded-t bg-slate-700 text-xs font-semibold">
+                        🏰 Stanze
+                    </button>
+                </div>
+
+                <!-- TAB CONTENT -->
+                <div id="notebook-tab-suspects" class="notebook-tab-content overflow-y-auto max-h-40 space-y-1 text-xs pr-1"></div>
+                <div id="notebook-tab-weapons" class="notebook-tab-content hidden overflow-y-auto max-h-40 space-y-1 text-xs pr-1"></div>
+                <div id="notebook-tab-rooms" class="notebook-tab-content hidden overflow-y-auto max-h-40 space-y-1 text-xs pr-1"></div>
+            </div>
+
+            <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 h-32 flex flex-col">
+                <div class="text-xs font-bold text-slate-400 mb-1">Registro Eventi:</div>
+                <div id="game-log" class="overflow-y-auto text-xs text-slate-300 space-y-1 font-mono flex-1"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE PAUSA -->
+    <div id="modal-pause" class="hidden fixed inset-0 modal flex justify-center items-center p-4 z-50">
+        <div class="bg-slate-800 border border-slate-600 rounded-xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
+            <h3 class="text-2xl font-bold text-amber-500 font-henny">⏸️ GIOCO IN PAUSA</h3>
+            <p class="text-xs text-slate-400">Versione v0.29</p>
+            <div class="space-y-3 pt-2">
+                <button id="btn-resume-game" class="w-full py-3 bg-green-600 hover:bg-green-500 font-bold rounded-lg transition text-white">
+                    ▶️ Riprendi Partita
+                </button>
+                <button id="btn-return-menu" class="w-full py-3 bg-red-600 hover:bg-red-500 font-bold rounded-lg transition text-white">
+                    🏠 Torna al Menu Principale
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE IPOTESI -->
+    <div id="modal-hypothesis" class="hidden fixed inset-0 modal flex justify-center items-center p-4 z-50">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-md w-full p-6 shadow-2xl">
+            <h3 class="text-xl font-bold text-amber-500 mb-4 font-henny">Formula un'Ipotesi</h3>
+            <p class="text-xs text-slate-300 mb-4">Stanza: <strong id="hypo-room-name" class="text-amber-400 font-henny"></strong></p>
+            <div class="space-y-3 text-sm">
+                <div>
+                    <label class="block mb-1 text-slate-400">Sospettato:</label>
+                    <select id="hypo-suspect" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"></select>
+                </div>
+                <div>
+                    <label class="block mb-1 text-slate-400">Arma:</label>
+                    <select id="hypo-weapon" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"></select>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button id="btn-submit-hypo" class="flex-1 py-2 bg-blue-600 hover:bg-blue-500 rounded font-bold">Invia Ipotesi</button>
+                <button id="btn-cancel-hypo" class="py-2 px-4 bg-slate-700 hover:bg-slate-600 rounded">Annulla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE ACCUSA -->
+    <div id="modal-accusation" class="hidden fixed inset-0 modal flex justify-center items-center p-4 z-50">
+        <div class="bg-slate-800 border border-red-900 rounded-xl max-w-md w-full p-6 shadow-2xl">
+            <h3 class="text-xl font-bold text-red-500 mb-2 font-henny">⚠️ ACCUSA FINALE</h3>
+            <div class="space-y-3 text-sm">
+                <div>
+                    <label class="block mb-1 text-slate-400">Colpevole:</label>
+                    <select id="acc-suspect" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"></select>
+                </div>
+                <div>
+                    <label class="block mb-1 text-slate-400">Arma del Delitto:</label>
+                    <select id="acc-weapon" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"></select>
+                </div>
+                <div>
+                    <label class="block mb-1 text-slate-400">Stanza del Delitto:</label>
+                    <select id="acc-room" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"></select>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button id="btn-submit-acc" class="flex-1 py-2 bg-red-600 hover:bg-red-500 rounded font-bold">Conferma Accusa</button>
+                <button id="btn-cancel-acc" class="py-2 px-4 bg-slate-700 hover:bg-slate-600 rounded">Annulla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MESSAGGIO IPOTESI DEI BOT -->
+    <div id="bot-message" aria-live="polite">
+        <div id="bot-message-card">
+            <div id="bot-message-text"></div>
+        </div>
+    </div>
+
+    <script>
+        const VERSION = "v0.29";
+
+        const SUSPECTS = [
+            { id: "Ambasciatore Ambra", color: "#f59e0b", initial: "A", spriteRow: 0, spriteCol: 0 },
+            { id: "Baronessa Bianchi",  color: "#f8fafc", initial: "B", spriteRow: 0, spriteCol: 1 },
+            { id: "Colonnello Corallo", color: "#ef4444", initial: "C", spriteRow: 0, spriteCol: 2 },
+            { id: "Dottoressa Domino", color: "#3b82f6", initial: "D", spriteRow: 1, spriteCol: 0 },
+            { id: "Generale Grigio",   color: "#64748b", initial: "G", spriteRow: 1, spriteCol: 1 },
+            { id: "Visconte Viola",    color: "#8b5cf6", initial: "V", spriteRow: 1, spriteCol: 2 }
+        ];
+
+        const WEAPONS = [
+            { id: "Stiletto",   spriteRow: 0, spriteCol: 0, currentRoom: "", tile: null },
+            { id: "Attizzatoio", spriteRow: 0, spriteCol: 1, currentRoom: "", tile: null },
+            { id: "Veleno",     spriteRow: 0, spriteCol: 2, currentRoom: "", tile: null },
+            { id: "Cavo",       spriteRow: 1, spriteCol: 0, currentRoom: "", tile: null },
+            { id: "Statuetta",  spriteRow: 1, spriteCol: 1, currentRoom: "", tile: null },
+            { id: "Chiave inglese", spriteRow: 1, spriteCol: 2, currentRoom: "", tile: null }
+        ];
+
+        // Geometria ricavata da mappa.png (griglia 24x24, celle di 1254/24 px).
+        // Le porte sono caselle della stanza (sul muro); davanti a ogni porta c'è una casella di corridoio.
+        const ROOMS = [
+            { id: "Biliardo", tiles: [...getRectTiles(1,1,5,5), ...getRectTiles(1,6,4,1)], passage: "Sala da Pranzo", weaponOffset: { dx: -1, dy: -1 } },
+            { id: "Salone", tiles: [...getRectTiles(9,1,6,4), ...getRectTiles(11,5,2,2)], weaponOffset: { dx: 0, dy: -1 } },
+            { id: "Cucina", tiles: getRectTiles(18,1,5,6), passage: "Studio", weaponOffset: { dx: 1, dy: -1 } },
+            // Veranda: rettangolo 6x6 con la rientranza a destra (x 5-6, y 11-12)
+            { id: "Veranda", tiles: getRectTiles(1,9,6,6).filter(t => !(t.x >= 5 && t.y >= 11 && t.y <= 12)), weaponOffset: { dx: -1, dy: 0 } },
+            { id: "Serra", tiles: getRectTiles(9,8,6,7), weaponOffset: { dx: 0, dy: -1 } },
+            { id: "Ingresso", tiles: getRectTiles(18,8,5,7), weaponOffset: { dx: 1, dy: 0 } },
+            { id: "Studio", tiles: [...getRectTiles(1,17,6,4), ...getRectTiles(4,21,3,2)], passage: "Cucina", weaponOffset: { dx: -1, dy: 1 } },
+            { id: "Biblioteca", tiles: getRectTiles(9,17,6,5), weaponOffset: { dx: 0, dy: 1 } },
+            { id: "Sala da Pranzo", tiles: [...getRectTiles(18,17,5,5), ...getRectTiles(20,16,3,1)], passage: "Biliardo", weaponOffset: { dx: 1, dy: 1 } }
+        ];
+
+        // Una sola porta, larga una casella, per ogni stanza: quella illuminata sulla mappa (bagliore arancione).
+        // Per Salone, Serra e Biblioteca il bagliore è centrato sull'asse della mappa, a cavallo delle
+        // colonne 11 e 12: la porta è stata assegnata alla colonna 11.
+        const DOORS = [
+            { x: 2, y: 6, room: "Biliardo" },
+            { x: 11, y: 6, room: "Salone" },
+            { x: 20, y: 6, room: "Cucina" },
+            { x: 4, y: 14, room: "Veranda" },
+            { x: 11, y: 14, room: "Serra" },
+            { x: 20, y: 8, room: "Ingresso" },
+            { x: 5, y: 22, room: "Studio" },
+            { x: 11, y: 17, room: "Biblioteca" },
+            { x: 20, y: 21, room: "Sala da Pranzo" }
+        ];
+
+        // Caselle fuori dalle stanze occupate da un muro disegnato sulla mappa: non percorribili.
+        // (ricavate da mappa.png: caselle con almeno il 30% di pixel di muro, più i varchi delle porte
+        // laterali in legno, che sono decorative: le uniche porte sono quelle illuminate)
+        const BLOCKED = new Set([
+            "1,16", "1,21", "3,21", "3,22", "5,11", "5,12", "6,1", "6,2",
+            "6,3", "6,4", "6,5", "6,11", "6,16", "8,1", "8,3", "8,11",
+            "8,19", "9,22", "10,5", "10,22", "13,5", "13,22", "14,22", "15,1",
+            "15,3", "15,11", "15,19", "17,1", "17,2", "17,3", "17,4", "17,5",
+            "17,9", "17,11", "17,12", "17,13", "17,17", "17,18", "17,19", "17,20",
+            "17,21", "19,16", "23,15", "23,16", "23,17", "23,18", "23,19", "23,20",
+            "23,21"
+        ]);
+
+        const GRID_SIZE = 24;
+        const CELL_PX = 25;
+
+        let gameState = {
+            myPlayer: null,
+            players: [],
+            currentTurnIndex: 0,
+            diceRoll: 0,
+            hasMoved: false,
+            reachableCells: [],
+            solution: {},
+            notebook: {},
+            isPaused: false,
+            hoveredObject: null,
+            draggedWeapon: null,
+            dragOffset: { x: 0, y: 0 },
+            dragMoved: false,
+            gameOver: false
+        };
+
+        let canvas, ctx;
+        let boardBgImage = new Image();
+        let charsSpriteImage = new Image();
+        let weaponsSpriteImage = new Image();
+        let boardImageLoaded = false;
+        let charsImageLoaded = false;
+        let weaponsImageLoaded = false;
+        let animationFrameId = null;
+        let botTimer = null;
+        let CARDS_BY_CAT = { suspect: [], weapon: [], room: [] };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            canvas = document.getElementById('gameBoard');
+            ctx = canvas.getContext('2d');
+
+            if (document.fonts && document.fonts.load) {
+                document.fonts.load('13pt "Henny Penny"').then(() => drawBoard());
+            }
+
+            boardBgImage.src = 'mappa.png';
+            boardBgImage.onload = () => {
+                boardImageLoaded = true;
+                if (!document.getElementById('game-screen').classList.contains('hidden')) drawBoard();
+            };
+
+            charsSpriteImage.src = 'personaggi.png';
+            charsSpriteImage.onload = () => {
+                charsImageLoaded = true;
+                if (!document.getElementById('game-screen').classList.contains('hidden')) {
+                    drawBoard();
+                    updateLegend();
+                }
+            };
+
+            weaponsSpriteImage.src = 'armi.png';
+            weaponsSpriteImage.onload = () => {
+                weaponsImageLoaded = true;
+                if (!document.getElementById('game-screen').classList.contains('hidden')) drawBoard();
+            };
+
+            document.getElementById('btn-start-game').addEventListener('click', startGame);
+            document.getElementById('btn-roll-dice').addEventListener('click', handleRollDice);
+            document.getElementById('btn-hypothesis').addEventListener('click', openHypothesisModal);
+            document.getElementById('btn-accusation').addEventListener('click', openAccusationModal);
+            document.getElementById('btn-end-turn').addEventListener('click', endTurn);
+            document.getElementById('btn-submit-hypo').addEventListener('click', submitHypothesis);
+            document.getElementById('btn-cancel-hypo').addEventListener('click', () => closeModal('modal-hypothesis'));
+            document.getElementById('btn-submit-acc').addEventListener('click', submitAccusation);
+            document.getElementById('btn-cancel-acc').addEventListener('click', () => closeModal('modal-accusation'));
+            document.getElementById('btn-secret-passage').addEventListener('click', useSecretPassage);
+
+            document.getElementById('btn-pause-header').addEventListener('click', togglePause);
+            document.getElementById('btn-resume-game').addEventListener('click', togglePause);
+            document.getElementById('btn-return-menu').addEventListener('click', returnToMenu);
+
+            window.addEventListener('keydown', (e) => {
+                if (e.key === "Escape" && !document.getElementById('game-screen').classList.contains('hidden')) {
+                    togglePause();
+                }
+            });
+
+            // Barra spaziatrice: chiude il messaggio. Fase di cattura + blocco di keyup, così non attiva
+            // eventuali pulsanti col focus e non fa scorrere la pagina.
+            window.addEventListener('keydown', (e) => {
+                if (BOT_MESSAGE.visible && (e.code === 'Space' || e.key === ' ')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    BOT_MESSAGE.swallowSpaceUp = true;
+                    hideBotMessage();
+                }
+            }, true);
+            window.addEventListener('keyup', (e) => {
+                if (BOT_MESSAGE.swallowSpaceUp && (e.code === 'Space' || e.key === ' ')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    BOT_MESSAGE.swallowSpaceUp = false;
+                }
+            }, true);
+            window.addEventListener('resize', () => { if (BOT_MESSAGE.visible) layoutBotMessage(); });
+
+            canvas.addEventListener('mousedown', handleCanvasMouseDown);
+            canvas.addEventListener('mousemove', handleCanvasMouseMove);
+            canvas.addEventListener('mouseup', handleCanvasMouseUp);
+            canvas.addEventListener('mouseleave', handleCanvasMouseLeave);
+            canvas.addEventListener('click', handleCanvasClick);
+
+            startAnimationLoop();
+        });
+
+        // ---------- Messaggio a video per le ipotesi dei bot ----------
+        const BOT_MESSAGE = {
+            widthRatio: 0.75,        // larghezza del cartiglio = 75% dell'area di gioco (#game-screen)
+            timeoutMs: 10000,        // chiusura automatica dopo 10 secondi
+            aspect: 767 / 1536,      // altezza / larghezza di cartiglio.png
+            visible: false,
+            timer: null,
+            onClose: null,
+            swallowSpaceUp: false
+        };
+
+        // Dimensiona il cartiglio e sceglie il corpo del testo più grande che resta dentro la pergamena
+        function layoutBotMessage() {
+            const ref = document.getElementById('game-screen');
+            const card = document.getElementById('bot-message-card');
+            const text = document.getElementById('bot-message-text');
+            const refW = ref.getBoundingClientRect().width || ref.clientWidth || 600;
+            const w = refW * BOT_MESSAGE.widthRatio;
+            card.style.width = w + 'px';
+            card.style.height = (w * BOT_MESSAGE.aspect) + 'px';
+
+            let size = Math.min(90, Math.round(w * 0.085));
+            text.style.fontSize = size + 'px';
+            while (size > 8 && (text.scrollHeight > text.clientHeight + 1 || text.scrollWidth > text.clientWidth + 1)) {
+                size -= 1;
+                text.style.fontSize = size + 'px';
+            }
+        }
+
+        function showBotHypothesis(proposer, suspectId, weaponId, room, onClose) {
+            const text = document.getElementById('bot-message-text');
+            text.innerHTML = "";
+            const addLine = (cls, str) => {
+                const d = document.createElement('div');
+                d.className = cls;
+                d.textContent = str;
+                text.appendChild(d);
+            };
+            addLine('bm-who', `${proposer.character} ipotizza:`);
+            addLine('bm-what', `${suspectId}, con ${weaponId}, in ${room.id}`);
+            addLine('bm-hint', 'Premi SPAZIO per continuare');
+
+            BOT_MESSAGE.onClose = onClose || null;
+            BOT_MESSAGE.visible = true;
+            // Un pulsante rimasto col focus verrebbe attivato dalla barra spaziatrice
+            if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+            document.getElementById('bot-message').classList.add('open');
+            layoutBotMessage();
+            if (document.fonts && document.fonts.load) {
+                document.fonts.load('40px "Henny Penny"').then(() => { if (BOT_MESSAGE.visible) layoutBotMessage(); });
+            }
+            clearTimeout(BOT_MESSAGE.timer);
+            BOT_MESSAGE.timer = setTimeout(() => hideBotMessage(), BOT_MESSAGE.timeoutMs);
+        }
+
+        // cancel = true: chiude senza far proseguire il turno del bot (reset della partita)
+        function hideBotMessage(cancel) {
+            if (!BOT_MESSAGE.visible) return;
+            BOT_MESSAGE.visible = false;
+            clearTimeout(BOT_MESSAGE.timer);
+            BOT_MESSAGE.timer = null;
+            document.getElementById('bot-message').classList.remove('open');
+            const cb = BOT_MESSAGE.onClose;
+            BOT_MESSAGE.onClose = null;
+            if (!cancel && cb) cb();
+        }
+
+        function startAnimationLoop() {
+            function loop() {
+                if (!document.getElementById('game-screen').classList.contains('hidden')) {
+                    drawBoard();
+                }
+                animationFrameId = requestAnimationFrame(loop);
+            }
+            if (!animationFrameId) loop();
+        }
+
+        function getRectTiles(rx, ry, rw, rh) {
+            let tiles = [];
+            for (let x = rx; x < rx + rw; x++) {
+                for (let y = ry; y < ry + rh; y++) {
+                    tiles.push({ x: x, y: y });
+                }
+            }
+            return tiles;
+        }
+
+        function togglePause() {
+            gameState.isPaused = !gameState.isPaused;
+            document.getElementById('modal-pause').classList.toggle('hidden', !gameState.isPaused);
+        }
+
+        // Pianifica un passo del turno di un bot; se il gioco è in pausa riprova più tardi
+        function botDelay(fn, ms) {
+            clearTimeout(botTimer);
+            botTimer = setTimeout(function tick() {
+                if (gameState.isPaused) { botTimer = setTimeout(tick, 300); return; }
+                fn();
+            }, ms);
+        }
+
+        function resetFullGameState() {
+            hideBotMessage(true);
+            clearTimeout(botTimer);
+            botTimer = null;
+            gameState = {
+                myPlayer: null,
+                players: [],
+                currentTurnIndex: 0,
+                diceRoll: 0,
+                hasMoved: false,
+                reachableCells: [],
+                solution: {},
+                notebook: {},
+                isPaused: false,
+                hoveredObject: null,
+                draggedWeapon: null,
+                dragOffset: { x: 0, y: 0 },
+                dragMoved: false,
+                gameOver: false
+            };
+
+            WEAPONS.forEach(w => {
+                w.currentRoom = "";
+                w.tile = null;
+            });
+
+            document.getElementById('game-log').innerHTML = "";
+            document.getElementById('dice-result').innerText = "-";
+            document.getElementById('display-your-char').innerText = "-";
+            document.getElementById('display-current-turn').innerText = "-";
+            document.getElementById('my-cards-container').innerHTML = "";
+            document.getElementById('players-legend').innerHTML = "";
+            
+            document.getElementById('btn-secret-passage').classList.add('hidden');
+            document.getElementById('btn-hypothesis').disabled = true;
+            document.getElementById('btn-accusation').disabled = true;
+            document.getElementById('btn-end-turn').disabled = true;
+            document.getElementById('btn-roll-dice').disabled = false;
+        }
+
+        function returnToMenu() {
+            resetFullGameState();
+            document.getElementById('modal-pause').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('btn-pause-header').classList.add('hidden');
+            document.getElementById('setup-screen').classList.remove('hidden');
+        }
+
+        function startGame() {
+            resetFullGameState();
+
+            const myName = document.getElementById('input-player-name').value.trim() || "Detective";
+            const myCharId = document.getElementById('select-character').value;
+
+            populateSelects();
+            gameState.myPlayer = { name: myName, character: myCharId };
+
+            const randomSuspect = SUSPECTS[Math.floor(Math.random() * SUSPECTS.length)].id;
+            const randomWeapon = WEAPONS[Math.floor(Math.random() * WEAPONS.length)].id;
+            const validRooms = ROOMS.map(r => r.id);
+            const randomRoom = validRooms[Math.floor(Math.random() * validRooms.length)];
+
+            gameState.solution = { suspect: randomSuspect, weapon: randomWeapon, room: randomRoom };
+
+            const availableRoomsForWeapons = [...validRooms].sort(() => Math.random() - 0.5);
+            WEAPONS.forEach((w, index) => {
+                assignWeaponToRoom(w, availableRoomsForWeapons[index]);
+            });
+
+            let deck = [
+                ...SUSPECTS.map(s => s.id).filter(s => s !== randomSuspect),
+                ...WEAPONS.map(w => w.id).filter(w => w !== randomWeapon),
+                ...validRooms.filter(r => r !== randomRoom)
+            ].sort(() => Math.random() - 0.5);
+
+            // Posizioni fisse sul bordo, tutte a 5 caselle di percorso (fuori dalle stanze)
+            // dalla porta più vicina. Verificato da getDoorDistance (vedi test).
+            const startPositions = [
+                { x: 0, y: 5 }, { x: 23, y: 6 }, { x: 0, y: 15 },
+                { x: 23, y: 23 }, { x: 1, y: 23 }, { x: 17, y: 23 }
+            ];
+
+            gameState.players = [];
+            let posIdx = 0;
+
+            SUSPECTS.forEach(c => {
+                const isUser = (c.id === myCharId);
+                gameState.players.push({
+                    name: isUser ? myName : `Bot ${c.initial}`,
+                    character: c.id,
+                    color: c.color,
+                    initial: c.initial,
+                    spriteRow: c.spriteRow,
+                    spriteCol: c.spriteCol,
+                    x: startPositions[posIdx].x,
+                    y: startPositions[posIdx].y,
+                    cards: [],
+                    isBot: !isUser,
+                    active: true,
+                    canSuggestHere: false
+                });
+                posIdx++;
+            });
+
+            let turnIdx = 0;
+            while (deck.length > 0) {
+                gameState.players[turnIdx].cards.push(deck.pop());
+                turnIdx = (turnIdx + 1) % gameState.players.length;
+            }
+
+            CARDS_BY_CAT = {
+                suspect: SUSPECTS.map(s => s.id),
+                weapon: WEAPONS.map(w => w.id),
+                room: [...validRooms]
+            };
+            gameState.players.forEach(p => { if (p.isBot) initBotKnowledge(p); });
+
+            initNotebook();
+
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('btn-pause-header').classList.remove('hidden');
+            
+            document.getElementById('display-your-char').innerText = `${myCharId} (${myName})`;
+            
+            updateLegend();
+            renderMyCards();
+            drawBoard();
+            logEvent(`Partita ${VERSION} avviata.`);
+            updateTurnUI();
+
+            // Se il primo di turno è un bot, il suo turno deve partire da solo
+            if (gameState.players[gameState.currentTurnIndex].isBot) {
+                botDelay(playBotTurn, 800);
+            }
+        }
+
+        function assignWeaponToRoom(weapon, roomName, targetTile = null) {
+            weapon.currentRoom = roomName;
+            const room = ROOMS.find(r => r.id === roomName);
+            if (!room) return;
+
+            if (targetTile && room.tiles.some(t => t.x === targetTile.x && t.y === targetTile.y)) {
+                const occupied = WEAPONS.some(w => w !== weapon && w.currentRoom === roomName && w.tile && w.tile.x === targetTile.x && w.tile.y === targetTile.y);
+                if (!occupied) {
+                    weapon.tile = { x: targetTile.x, y: targetTile.y };
+                    return;
+                }
+            }
+
+            const tileTaken = (x, y) =>
+                WEAPONS.some(w => w !== weapon && w.currentRoom === roomName && w.tile && w.tile.x === x && w.tile.y === y) ||
+                gameState.players.some(p => p.active && p.x === x && p.y === y);
+
+            const defaultTile = calculateRoomDefaultWeaponTile(roomName);
+            const occupied = tileTaken(defaultTile.x, defaultTile.y);
+
+            if (!occupied) {
+                weapon.tile = defaultTile;
+            } else {
+                const freeTile = room.tiles.find(t => !tileTaken(t.x, t.y));
+                weapon.tile = freeTile ? { x: freeTile.x, y: freeTile.y } : defaultTile;
+            }
+        }
+
+        function calculateRoomDefaultWeaponTile(roomName) {
+            const room = ROOMS.find(r => r.id === roomName);
+            if (!room || room.tiles.length === 0) return { x: 0, y: 0 };
+            
+            let sumX = 0, sumY = 0;
+            room.tiles.forEach(t => { sumX += t.x; sumY += t.y; });
+            const avgX = Math.round(sumX / room.tiles.length);
+            const avgY = Math.round(sumY / room.tiles.length);
+
+            const offset = room.weaponOffset || { dx: 0, dy: 0 };
+            const targetX = avgX + offset.dx;
+            const targetY = avgY + offset.dy;
+
+            let closestTile = room.tiles[0];
+            let minDistance = Infinity;
+            room.tiles.forEach(t => {
+                const dist = Math.hypot(t.x - targetX, t.y - targetY);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    closestTile = t;
+                }
+            });
+            return { x: closestTile.x, y: closestTile.y };
+        }
+
+        function drawBoard() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (boardImageLoaded) {
+                ctx.save();
+                ctx.globalAlpha = 0.60;
+                ctx.drawImage(boardBgImage, 0, 0, canvas.width, canvas.height);
+                ctx.restore();
+            } else {
+                ctx.fillStyle = "#2a1508";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            const roomSet = new Set();
+            ROOMS.forEach(r => {
+                r.tiles.forEach(t => roomSet.add(`${t.x},${t.y}`));
+            });
+
+            ctx.strokeStyle = "rgba(0, 0, 0, 0.25)";
+            ctx.lineWidth = 1;
+            for (let x = 0; x < GRID_SIZE; x++) {
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    if (!roomSet.has(`${x},${y}`)) {
+                        ctx.strokeRect(x * CELL_PX, y * CELL_PX, CELL_PX, CELL_PX);
+                    }
+                }
+            }
+
+            if (gameState.reachableCells.length > 0) {
+                ctx.fillStyle = "rgba(34, 197, 94, 0.6)";
+                gameState.reachableCells.forEach(cell => {
+                    ctx.fillRect(cell.x * CELL_PX, cell.y * CELL_PX, CELL_PX, CELL_PX);
+                });
+            }
+
+            WEAPONS.forEach((w) => {
+                if (w === gameState.draggedWeapon) return;
+                if (gameState.hoveredObject && gameState.hoveredObject.type === 'weapon' && gameState.hoveredObject.item === w) return;
+                drawWeaponToken(w, false);
+            });
+
+            // Prima le pedine eliminate (attenuate), poi quelle in gioco
+            const drawOrder = [...gameState.players.filter(p => !p.active), ...gameState.players.filter(p => p.active)];
+            drawOrder.forEach(p => {
+                const isCurrent = p.active && (gameState.players[gameState.currentTurnIndex] === p);
+                if (gameState.hoveredObject && gameState.hoveredObject.type === 'player' && gameState.hoveredObject.item === p) return;
+                ctx.save();
+                if (!p.active) ctx.globalAlpha = 0.4;
+                drawPlayerToken(p, false, isCurrent);
+                ctx.restore();
+            });
+
+            if (gameState.hoveredObject) {
+                if (gameState.hoveredObject.type === 'player') {
+                    const hp = gameState.hoveredObject.item;
+                    const isCurrent = hp.active && (gameState.players[gameState.currentTurnIndex] === hp);
+                    ctx.save();
+                    if (!hp.active) ctx.globalAlpha = 0.6;
+                    drawPlayerToken(hp, true, isCurrent);
+                    ctx.restore();
+                } else if (gameState.hoveredObject.type === 'weapon' && gameState.hoveredObject.item !== gameState.draggedWeapon) {
+                    drawWeaponToken(gameState.hoveredObject.item, true);
+                }
+            }
+
+            if (gameState.draggedWeapon) {
+                drawWeaponToken(gameState.draggedWeapon, true);
+            }
+        }
+
+        // Ingrandimento al passaggio del mouse: il token cresce dalla sua casella (animazione breve)
+        // e, se uscirebbe dal tabellone, scorre fino alla posizione più vicina che lo contiene
+        // interamente; l'etichetta del nome passa sopra il token se sotto non c'è spazio.
+        const HOVER_SIZE = 100, HOVER_ANIM_MS = 150, HOVER_LABEL_H = 22, HOVER_LABEL_GAP = 6;
+        function hoverGeometry(cx, cy) {
+            const t = Math.min(1, (Date.now() - (gameState.hoverStart || 0)) / HOVER_ANIM_MS);
+            const e = 1 - Math.pow(1 - t, 3);
+            const size = (CELL_PX - 2) + (HOVER_SIZE - (CELL_PX - 2)) * e;
+            const m = HOVER_SIZE / 2 + 6;                        // metà token + alone
+            const W = canvas.width, H = canvas.height;
+            const tx = Math.min(Math.max(cx, m), W - m);
+            const ty = Math.min(Math.max(cy, m), H - m);
+            const px = cx + (tx - cx) * e, py = cy + (ty - cy) * e;
+            const labelAbove = ty + HOVER_SIZE / 2 + HOVER_LABEL_GAP + HOVER_LABEL_H > H - 2;
+            return { px, py, size, labelAbove };
+        }
+
+        function drawWeaponToken(w, isHovered) {
+            let px, py, size = isHovered ? HOVER_SIZE : CELL_PX - 2;
+            let labelAbove = false;
+
+            if (w === gameState.draggedWeapon) {
+                px = gameState.dragOffset.x;
+                py = gameState.dragOffset.y;
+            } else {
+                const tile = w.tile || calculateRoomDefaultWeaponTile(w.currentRoom);
+                px = tile.x * CELL_PX + CELL_PX / 2;
+                py = tile.y * CELL_PX + CELL_PX / 2;
+                if (isHovered) ({ px, py, size, labelAbove } = hoverGeometry(px, py));
+            }
+            const half = size / 2;
+
+            const rx = px - half;
+            const ry = py - half;
+
+            ctx.save();
+
+            if (isHovered || w === gameState.draggedWeapon) {
+                ctx.shadowColor = "rgba(245, 158, 11, 0.95)";
+                ctx.shadowBlur = 18;
+            }
+
+            if (weaponsImageLoaded) {
+                const spriteW = weaponsSpriteImage.width / 3;
+                const spriteH = weaponsSpriteImage.height / 2;
+                const sx = w.spriteCol * spriteW;
+                const sy = w.spriteRow * spriteH;
+
+                ctx.beginPath();
+                ctx.roundRect ? ctx.roundRect(rx, ry, size, size, 4) : ctx.rect(rx, ry, size, size);
+                ctx.clip();
+                ctx.drawImage(weaponsSpriteImage, sx, sy, spriteW, spriteH, rx, ry, size, size);
+                ctx.restore();
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.roundRect ? ctx.roundRect(rx, ry, size, size, 4) : ctx.rect(rx, ry, size, size);
+                ctx.strokeStyle = (isHovered || w === gameState.draggedWeapon) ? "#f59e0b" : "#e2e8f0";
+                ctx.lineWidth = (isHovered || w === gameState.draggedWeapon) ? 4 : 1.5;
+                ctx.stroke();
+                ctx.restore();
+            } else {
+                ctx.beginPath();
+                ctx.roundRect ? ctx.roundRect(rx, ry, size, size, 4) : ctx.rect(rx, ry, size, size);
+                ctx.fillStyle = "#475569";
+                ctx.fill();
+                ctx.strokeStyle = "#ffffff";
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            if (isHovered || w === gameState.draggedWeapon) {
+                ctx.save();
+                const fontStyle = '13pt "Henny Penny", cursive, sans-serif';
+                ctx.font = fontStyle;
+                
+                const nameText = w.id;
+                const textMetrics = ctx.measureText(nameText);
+                const paddingX = 10;
+                const rectW = textMetrics.width + paddingX * 2;
+                const rectH = 22;
+                const rectX = Math.min(Math.max(px - rectW / 2, 2), canvas.width - 2 - rectW);
+                const rectY = labelAbove ? py - half - 6 - rectH : py + half + 6;
+
+                ctx.fillStyle = "rgba(15, 23, 42, 0.92)";
+                ctx.strokeStyle = "#f59e0b";
+                ctx.lineWidth = 1.5;
+                
+                ctx.beginPath();
+                ctx.roundRect ? ctx.roundRect(rectX, rectY, rectW, rectH, 5) : ctx.rect(rectX, rectY, rectW, rectH);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = "#fef08a";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(nameText, rectX + rectW / 2, rectY + rectH / 2 + 1);
+                ctx.restore();
+            }
+        }
+
+        function drawPlayerToken(p, isHovered, isCurrentTurn) {
+            let px = p.x * CELL_PX + CELL_PX / 2;
+            let py = p.y * CELL_PX + CELL_PX / 2;
+            let size = CELL_PX - 2, labelAbove = false;
+            if (isHovered) ({ px, py, size, labelAbove } = hoverGeometry(px, py));
+            const radius = size / 2;
+
+            ctx.save();
+
+            // Alone luminoso pulsante per il personaggio del turno corrente
+            if (isCurrentTurn && !isHovered) {
+                const time = Date.now() * 0.005;
+                const pulseRadius = radius + 6 + Math.sin(time) * 3;
+                const glowAlpha = 0.5 + Math.sin(time) * 0.3;
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(px, py, pulseRadius, 0, 2 * Math.PI);
+                ctx.fillStyle = `rgba(245, 158, 11, ${glowAlpha * 0.4})`;
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(px, py, radius + 4, 0, 2 * Math.PI);
+                ctx.strokeStyle = `rgba(251, 191, 36, ${glowAlpha})`;
+                ctx.lineWidth = 3;
+                ctx.shadowColor = "#f59e0b";
+                ctx.shadowBlur = 12 + Math.sin(time) * 6;
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            if (isHovered) {
+                ctx.shadowColor = "rgba(245, 158, 11, 0.95)";
+                ctx.shadowBlur = 18;
+            }
+
+            if (charsImageLoaded) {
+                const spriteW = charsSpriteImage.width / 3;
+                const spriteH = charsSpriteImage.height / 2;
+                const sx = p.spriteCol * spriteW;
+                const sy = p.spriteRow * spriteH;
+
+                ctx.beginPath();
+                ctx.arc(px, py, radius, 0, 2 * Math.PI);
+                ctx.clip();
+                ctx.drawImage(charsSpriteImage, sx, sy, spriteW, spriteH, px - radius, py - radius, size, size);
+                ctx.restore();
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(px, py, radius, 0, 2 * Math.PI);
+                ctx.strokeStyle = isHovered ? "#f59e0b" : (isCurrentTurn ? "#fbbf24" : p.color);
+                ctx.lineWidth = isHovered ? 4 : (isCurrentTurn ? 3 : 1.5);
+                ctx.stroke();
+                ctx.restore();
+
+            } else {
+                ctx.beginPath();
+                ctx.arc(px, py, radius, 0, 2 * Math.PI);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+                ctx.strokeStyle = isCurrentTurn ? "#fbbf24" : "#ffffff";
+                ctx.lineWidth = isCurrentTurn ? 3 : 2;
+                ctx.stroke();
+
+                ctx.fillStyle = (p.color === "#f8fafc") ? "#0f172a" : "#ffffff";
+                ctx.font = isHovered ? "bold 20px monospace" : "bold 10px monospace";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(`${p.initial}`, px, py);
+                ctx.restore();
+            }
+
+            if (isHovered) {
+                ctx.save();
+                const fontStyle = '13pt "Henny Penny", cursive, sans-serif';
+                ctx.font = fontStyle;
+                
+                const nameText = p.character;
+                const textMetrics = ctx.measureText(nameText);
+                const paddingX = 10;
+                const rectW = textMetrics.width + paddingX * 2;
+                const rectH = 22;
+                const rectX = Math.min(Math.max(px - rectW / 2, 2), canvas.width - 2 - rectW);
+                const rectY = labelAbove ? py - radius - 6 - rectH : py + radius + 6;
+
+                ctx.fillStyle = "rgba(15, 23, 42, 0.92)";
+                ctx.strokeStyle = "#f59e0b";
+                ctx.lineWidth = 1.5;
+                
+                ctx.beginPath();
+                ctx.roundRect ? ctx.roundRect(rectX, rectY, rectW, rectH, 5) : ctx.rect(rectX, rectY, rectW, rectH);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = "#fef08a";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(nameText, rectX + rectW / 2, rectY + rectH / 2 + 1);
+                ctx.restore();
+            }
+        }
+
+        // Coordinate del mouse in pixel del canvas: toglie il bordo CSS (4px) e compensa un eventuale ridimensionamento
+        function getCanvasPoint(e) {
+            const rect = canvas.getBoundingClientRect();
+            const bx = canvas.clientLeft || 0, by = canvas.clientTop || 0;
+            const sx = canvas.clientWidth ? canvas.width / canvas.clientWidth : 1;
+            const sy = canvas.clientHeight ? canvas.height / canvas.clientHeight : 1;
+            return { x: (e.clientX - rect.left - bx) * sx, y: (e.clientY - rect.top - by) * sy };
+        }
+
+        function handleCanvasMouseDown(e) {
+            if (gameState.isPaused) return;
+            const { x: mouseX, y: mouseY } = getCanvasPoint(e);
+
+            gameState.dragMoved = false;
+
+            for (const w of WEAPONS) {
+                const tile = w.tile || calculateRoomDefaultWeaponTile(w.currentRoom);
+                const px = tile.x * CELL_PX + CELL_PX / 2;
+                const py = tile.y * CELL_PX + CELL_PX / 2;
+                const half = (CELL_PX - 2) / 2;
+
+                if (mouseX >= px - half && mouseX <= px + half && mouseY >= py - half && mouseY <= py + half) {
+                    gameState.draggedWeapon = w;
+                    gameState.dragOffset = { x: mouseX, y: mouseY };
+                    break;
+                }
+            }
+        }
+
+        function handleCanvasMouseMove(e) {
+            const { x: mouseX, y: mouseY } = getCanvasPoint(e);
+
+            if (gameState.draggedWeapon) {
+                gameState.dragOffset = { x: mouseX, y: mouseY };
+                gameState.dragMoved = true;
+                return;
+            }
+
+            const cellX = Math.floor(mouseX / CELL_PX);
+            const cellY = Math.floor(mouseY / CELL_PX);
+
+            const foundPlayer = gameState.players.find(p => p.active && p.x === cellX && p.y === cellY) ||
+                                gameState.players.find(p => p.x === cellX && p.y === cellY);
+            
+            let foundWeapon = null;
+            if (!foundPlayer) {
+                WEAPONS.forEach((w) => {
+                    const tile = w.tile || calculateRoomDefaultWeaponTile(w.currentRoom);
+                    if (tile.x === cellX && tile.y === cellY) foundWeapon = w;
+                });
+            }
+
+            let newHover = null;
+            if (foundPlayer) newHover = { type: 'player', item: foundPlayer };
+            else if (foundWeapon) newHover = { type: 'weapon', item: foundWeapon };
+
+            const sameHover = (!newHover && !gameState.hoveredObject) ||
+                (newHover && gameState.hoveredObject &&
+                 newHover.type === gameState.hoveredObject.type &&
+                 newHover.item === gameState.hoveredObject.item);
+            if (!sameHover) {
+                gameState.hoveredObject = newHover;
+                gameState.hoverStart = Date.now();
+            }
+        }
+
+        function handleCanvasMouseUp(e) {
+            if (!gameState.draggedWeapon) return;
+
+            const { x: mouseX, y: mouseY } = getCanvasPoint(e);
+
+            const targetTileX = Math.floor(mouseX / CELL_PX);
+            const targetTileY = Math.floor(mouseY / CELL_PX);
+
+            const room = ROOMS.find(r => r.id === gameState.draggedWeapon.currentRoom);
+
+            if (room && room.tiles.some(t => t.x === targetTileX && t.y === targetTileY)) {
+                const occupied = WEAPONS.some(w => w !== gameState.draggedWeapon && w.currentRoom === room.id && w.tile && w.tile.x === targetTileX && w.tile.y === targetTileY);
+                if (!occupied) {
+                    gameState.draggedWeapon.tile = { x: targetTileX, y: targetTileY };
+                }
+            }
+
+            gameState.draggedWeapon = null;
+        }
+
+        function handleCanvasMouseLeave() {
+            gameState.draggedWeapon = null;
+            gameState.dragMoved = false;
+            gameState.hoveredObject = null;
+        }
+
+        function handleRollDice() {
+            if (gameState.hasMoved || gameState.isPaused) return;
+            const currentPlayer = gameState.players[gameState.currentTurnIndex];
+            if (currentPlayer.isBot) return;
+
+            document.getElementById('btn-secret-passage').classList.add('hidden');
+
+            const d1 = Math.floor(Math.random() * 6) + 1;
+            const d2 = Math.floor(Math.random() * 6) + 1;
+            gameState.diceRoll = d1 + d2;
+
+            document.getElementById('dice-result').innerText = `${d1}+${d2} = ${gameState.diceRoll}`;
+            logEvent(`${currentPlayer.name} lancia dadi: **${d1} + ${d2} = ${gameState.diceRoll}**.`);
+
+            gameState.reachableCells = getReachableCells(currentPlayer.x, currentPlayer.y, gameState.diceRoll);
+            document.getElementById('btn-roll-dice').disabled = true;
+            drawBoard();
+        }
+
+        // Caselle raggiungibili con "steps" passi.
+        // - Dal corridoio o da una porta: ricerca a 4 direzioni.
+        // - Da una casella interna di una stanza: si esce da una qualunque porta della stanza;
+        //   i passi fino alla porta (distanza Manhattan) contano nel tiro.
+        // - Entrare in una stanza (porta) chiude il movimento; non si "rientra" nella stanza in cui si è.
+        // - Un corridoio occupato da un'altra pedina non si attraversa né si occupa.
+        function getReachableCells(startX, startY, steps) {
+            const startRoom = getCurrentRoom(startX, startY);
+            const onDoor = DOORS.some(d => d.x === startX && d.y === startY);
+
+            const sources = (startRoom && !onDoor)
+                ? DOORS.filter(d => d.room === startRoom.id).map(d => ({
+                    x: d.x, y: d.y, dist: Math.abs(d.x - startX) + Math.abs(d.y - startY) }))
+                : [{ x: startX, y: startY, dist: 0 }];
+
+            const best = new Map();
+            const expandable = new Set();
+            const buckets = Array.from({ length: steps + 1 }, () => []);
+            sources.forEach(src => {
+                const key = `${src.x},${src.y}`;
+                expandable.add(key);
+                if (src.dist <= steps && (!best.has(key) || best.get(key) > src.dist)) {
+                    best.set(key, src.dist);
+                    buckets[src.dist].push({ x: src.x, y: src.y });
+                }
+            });
+
+            const dirs = [{x:1,y:0}, {x:-1,y:0}, {x:0,y:1}, {x:0,y:-1}];
+            const reachable = [];
+
+            for (let d = 0; d <= steps; d++) {
+                for (const cur of buckets[d]) {
+                    const key = `${cur.x},${cur.y}`;
+                    if (best.get(key) !== d) continue;
+
+                    const sameRoom = startRoom && getCurrentRoom(cur.x, cur.y) === startRoom;
+                    if (d > 0 && !sameRoom && !(cur.x === startX && cur.y === startY)) {
+                        reachable.push({ x: cur.x, y: cur.y });
+                    }
+                    if (d === steps) continue;
+                    if (getCurrentRoom(cur.x, cur.y) && !expandable.has(key)) continue;
+
+                    for (const dir of dirs) {
+                        const nx = cur.x + dir.x, ny = cur.y + dir.y;
+                        if (nx < 0 || nx >= GRID_SIZE || ny < 0 || ny >= GRID_SIZE) continue;
+                        if (!isValidTile(nx, ny) || isCorridorBlocked(nx, ny, startX, startY)) continue;
+                        const nk = `${nx},${ny}`;
+                        if (!best.has(nk) || best.get(nk) > d + 1) {
+                            best.set(nk, d + 1);
+                            buckets[d + 1].push({ x: nx, y: ny });
+                        }
+                    }
+                }
+            }
+            return reachable;
+        }
+
+        // Un corridoio occupato da un'altra pedina in gioco non si attraversa né si occupa
+        // (nelle stanze, invece, possono stare più pedine insieme)
+        function isCorridorBlocked(x, y, moverX, moverY) {
+            if (getCurrentRoom(x, y)) return false;
+            return gameState.players.some(p => p.active && p.x === x && p.y === y && !(p.x === moverX && p.y === moverY));
+        }
+
+        function isValidTile(x, y) {
+            if (BLOCKED.has(`${x},${y}`)) return false;
+            for (let r of ROOMS) {
+                if (r.tiles.some(t => t.x === x && t.y === y)) {
+                    return DOORS.some(d => d.x === x && d.y === y);
+                }
+            }
+            return true;
+        }
+
+        function handleCanvasClick(e) {
+            if (gameState.dragMoved) { gameState.dragMoved = false; return; }
+            if (gameState.hasMoved || gameState.isPaused || gameState.gameOver) return;
+            if (!gameState.players.length) return;
+            const currPlayer = gameState.players[gameState.currentTurnIndex];
+            if (currPlayer.isBot) return;
+
+            const pt = getCanvasPoint(e);
+            const clickX = Math.floor(pt.x / CELL_PX);
+            const clickY = Math.floor(pt.y / CELL_PX);
+
+            if (gameState.reachableCells.some(c => c.x === clickX && c.y === clickY)) {
+                currPlayer.x = clickX;
+                currPlayer.y = clickY;
+                currPlayer.canSuggestHere = false;
+                gameState.hasMoved = true;
+                gameState.reachableCells = [];
+
+                const room = getCurrentRoom(clickX, clickY);
+                if (room) {
+                    logEvent(`${currPlayer.name} è entrato nella stanza **${room.id}**.`);
+                    document.getElementById('btn-hypothesis').disabled = false;
+                }
+
+                drawBoard();
+                checkTurnActions();
+            }
+        }
+
+        function getCurrentRoom(x, y) {
+            return ROOMS.find(r => r.tiles.some(t => t.x === x && t.y === y));
+        }
+
+        // Prima casella della stanza non occupata da pedine attive né da armi
+        // Si preferiscono le caselle più vicine a una porta, così la pedina può uscire con pochi passi
+        function findFreeRoomTile(room) {
+            const doors = DOORS.filter(d => d.room === room.id);
+            const isDoorTile = t => doors.some(d => d.x === t.x && d.y === t.y);
+            // Le caselle-porta vengono usate solo se non c'è altro posto
+            const doorDist = t => (isDoorTile(t) ? 1000 : 0) + (doors.length
+                ? Math.min(...doors.map(d => Math.abs(d.x - t.x) + Math.abs(d.y - t.y)))
+                : 0);
+            const sorted = [...room.tiles].sort((a, b) => doorDist(a) - doorDist(b));
+            const free = sorted.find(t =>
+                !gameState.players.some(p => p.active && p.x === t.x && p.y === t.y) &&
+                !WEAPONS.some(w => w.currentRoom === room.id && w.tile && w.tile.x === t.x && w.tile.y === t.y)
+            );
+            return free || sorted[0];
+        }
+
+        function useSecretPassage() {
+            const currPlayer = gameState.players[gameState.currentTurnIndex];
+            const room = getCurrentRoom(currPlayer.x, currPlayer.y);
+            if (!room || !room.passage) return;
+
+            const target = ROOMS.find(r => r.id === room.passage);
+            if (target) {
+                const t = findFreeRoomTile(target);
+                currPlayer.x = t.x;
+                currPlayer.y = t.y;
+                currPlayer.canSuggestHere = false;
+                gameState.hasMoved = true;
+                logEvent(`${currPlayer.name} usa il passaggio segreto per **${target.id}**!`);
+                document.getElementById('btn-secret-passage').classList.add('hidden');
+                document.getElementById('btn-roll-dice').disabled = true;
+                document.getElementById('btn-hypothesis').disabled = false;
+                drawBoard();
+                checkTurnActions();
+            }
+        }
+
+        function populateSelects() {
+            const hS = document.getElementById('hypo-suspect'), hW = document.getElementById('hypo-weapon');
+            const aS = document.getElementById('acc-suspect'), aW = document.getElementById('acc-weapon'), aR = document.getElementById('acc-room');
+
+            hS.innerHTML = ""; hW.innerHTML = ""; aS.innerHTML = ""; aW.innerHTML = ""; aR.innerHTML = "";
+
+            SUSPECTS.forEach(s => {
+                const opt = `<option value="${s.id}">${s.id}</option>`;
+                hS.innerHTML += opt; aS.innerHTML += opt;
+            });
+
+            WEAPONS.forEach(w => {
+                const opt = `<option value="${w.id}">${w.id}</option>`;
+                hW.innerHTML += opt; aW.innerHTML += opt;
+            });
+
+            ROOMS.forEach(r => {
+                aR.innerHTML += `<option value="${r.id}">${r.id}</option>`;
+            });
+        }
+
+        function openHypothesisModal() {
+            const currPlayer = gameState.players[gameState.currentTurnIndex];
+            const room = getCurrentRoom(currPlayer.x, currPlayer.y);
+            if (room) {
+                document.getElementById('hypo-room-name').innerText = room.id;
+                document.getElementById('modal-hypothesis').classList.remove('hidden');
+            }
+        }
+
+        // ---------- Utilità ----------
+        function pickRandom(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function markNotebook(card, symbol) {
+            gameState.notebook[card] = symbol;
+            const el = document.getElementById(`nb-${card.replace(/\s+/g, '-')}`);
+            if (el) el.innerText = symbol;
+        }
+
+        function disableAllActions() {
+            ['btn-roll-dice', 'btn-hypothesis', 'btn-accusation', 'btn-end-turn', 'btn-secret-passage'].forEach(id => {
+                document.getElementById(id).disabled = true;
+            });
+            document.getElementById('btn-secret-passage').classList.add('hidden');
+        }
+
+        // ---------- Ipotesi ----------
+        function submitHypothesis() {
+            const suspectId = document.getElementById('hypo-suspect').value;
+            const weaponId = document.getElementById('hypo-weapon').value;
+            const currPlayer = gameState.players[gameState.currentTurnIndex];
+            const room = getCurrentRoom(currPlayer.x, currPlayer.y);
+
+            closeModal('modal-hypothesis');
+            if (!room) return;
+            document.getElementById('btn-hypothesis').disabled = true;
+
+            resolveHypothesis(currPlayer, suspectId, weaponId, room);
+            checkTurnActions();
+        }
+
+        // Logica comune a giocatore umano e bot
+        function resolveHypothesis(proposer, suspectId, weaponId, room) {
+            // Prima l'arma, poi il sospettato, così il sospettato evita la casella dell'arma
+            const targetWeapon = WEAPONS.find(w => w.id === weaponId);
+            if (targetWeapon && targetWeapon.currentRoom !== room.id) {
+                assignWeaponToRoom(targetWeapon, room.id);
+            }
+
+            const targetPlayer = gameState.players.find(p => p.character === suspectId);
+            if (targetPlayer) {
+                const alreadyHere = getCurrentRoom(targetPlayer.x, targetPlayer.y) === room;
+                if (!alreadyHere) {
+                    const freeTile = findFreeRoomTile(room);
+                    targetPlayer.x = freeTile.x;
+                    targetPlayer.y = freeTile.y;
+                    // Chi viene spostato da un altro può ipotizzare all'inizio del proprio turno senza muoversi
+                    if (targetPlayer !== proposer) targetPlayer.canSuggestHere = true;
+                }
+            }
+
+            drawBoard();
+            logEvent(`❓ **${proposer.name}** ipotizza: **${suspectId}** con **${weaponId}** in **${room.id}**.`);
+
+            // Smentita: si procede in ordine di turno; i giocatori eliminati smentiscono ancora
+            const cards = [suspectId, weaponId, room.id];
+            const start = gameState.players.indexOf(proposer);
+            const passed = [];
+            let disprover = null;
+            let cardShown = null;
+
+            for (let i = 1; i < gameState.players.length; i++) {
+                const other = gameState.players[(start + i) % gameState.players.length];
+                const match = other.cards.filter(c => cards.includes(c));
+                if (match.length > 0) {
+                    disprover = other;
+                    cardShown = pickRandom(match);
+                    break;
+                }
+                passed.push(other);
+            }
+
+            passed.forEach(p => logEvent(`🚫 **${p.name}** non può smentire.`));
+
+            if (disprover) {
+                const iAmDisprover = !disprover.isBot && gameState.myPlayer && disprover.character === gameState.myPlayer.character;
+                logEvent(`🔍 **${disprover.name}** ha mostrato una carta a ${proposer.name}.` + (iAmDisprover ? ` (hai mostrato: "${cardShown}")` : ''));
+                if (!proposer.isBot) {
+                    markNotebook(cardShown, "❌");
+                    alert(`${disprover.name} ti mostra la carta: "${cardShown}"`);
+                }
+            } else {
+                logEvent(`❌ Nessun giocatore ha potuto smentire l'ipotesi!`);
+            }
+
+            // Tutti i bot vedono chi ha ipotizzato, chi non ha smentito e chi ha mostrato una carta
+            gameState.players.forEach(b => {
+                if (b.isBot && b.kb) observeHypothesis(b, proposer, cards, passed, disprover, cardShown);
+            });
+
+            // L'ipotesi conclude la fase di movimento del turno
+            proposer.canSuggestHere = false;
+            if (gameState.players[gameState.currentTurnIndex] === proposer) {
+                gameState.hasMoved = true;
+                gameState.reachableCells = [];
+                if (!proposer.isBot) {
+                    document.getElementById('btn-roll-dice').disabled = true;
+                    document.getElementById('btn-secret-passage').classList.add('hidden');
+                }
+            }
+            return { passed, disprover, cardShown };
+        }
+
+        // ---------- Conoscenza e deduzione dei bot ----------
+        // kb.held[carta]    = personaggio che la possiede (certo)
+        // kb.noHold[pers]   = carte che quel personaggio certamente non possiede
+        // kb.constraints    = { holder, cards } : holder possiede almeno una di queste carte
+        // kb.handSize[pers] = quante carte ha in mano (nel gioco reale è noto a tutti)
+        // kb.asked          = ipotesi già formulate dal bot (per non ripeterle)
+        function allCardList() {
+            return [...CARDS_BY_CAT.suspect, ...CARDS_BY_CAT.weapon, ...CARDS_BY_CAT.room];
+        }
+
+        function initBotKnowledge(bot) {
+            const kb = { held: {}, noHold: {}, constraints: [], handSize: {}, asked: new Set() };
+            gameState.players.forEach(q => {
+                kb.noHold[q.character] = new Set();
+                kb.handSize[q.character] = q.cards.length;
+            });
+            allCardList().forEach(c => {
+                if (bot.cards.includes(c)) kb.held[c] = bot.character;
+                else kb.noHold[bot.character].add(c);
+            });
+            bot.kb = kb;
+            propagateKnowledge(bot);
+        }
+
+        function observeHypothesis(bot, proposer, cards, passed, disprover, cardShown) {
+            const kb = bot.kb;
+            passed.forEach(p => {
+                if (p !== bot) cards.forEach(c => kb.noHold[p.character].add(c));
+            });
+            if (disprover && disprover !== bot) {
+                if (proposer === bot) kb.held[cardShown] = disprover.character;
+                else kb.constraints.push({ holder: disprover.character, cards: [...cards] });
+            }
+            propagateKnowledge(bot);
+        }
+
+        function propagateKnowledge(bot) {
+            const kb = bot.kb;
+            const all = allCardList();
+            let changed = true;
+            while (changed) {
+                changed = false;
+
+                // 1. Una carta posseduta da qualcuno non è in mano a nessun altro
+                all.forEach(c => {
+                    const h = kb.held[c];
+                    if (!h) return;
+                    gameState.players.forEach(p => {
+                        if (p.character !== h && !kb.noHold[p.character].has(c)) {
+                            kb.noHold[p.character].add(c);
+                            changed = true;
+                        }
+                    });
+                });
+
+                // 2. Vincoli "ha almeno una di queste carte"
+                kb.constraints = kb.constraints.filter(con => {
+                    const remaining = con.cards.filter(c =>
+                        !(kb.held[c] && kb.held[c] !== con.holder) && !kb.noHold[con.holder].has(c));
+                    if (remaining.some(c => kb.held[c] === con.holder)) return false; // già soddisfatto
+                    if (remaining.length === 1) {
+                        kb.held[remaining[0]] = con.holder;
+                        changed = true;
+                        return false;
+                    }
+                    con.cards = remaining;
+                    return remaining.length > 0;
+                });
+
+                // 3. Numero di carte in mano a ciascun giocatore
+                gameState.players.forEach(p => {
+                    const q = p.character;
+                    const size = kb.handSize[q];
+                    const heldBy = all.filter(c => kb.held[c] === q);
+                    if (heldBy.length >= size) {
+                        // mano completa: non ha nessun'altra carta
+                        all.forEach(c => {
+                            if (kb.held[c] !== q && !kb.noHold[q].has(c)) {
+                                kb.noHold[q].add(c);
+                                changed = true;
+                            }
+                        });
+                    } else {
+                        // le carte che può ancora avere sono tante quante ne servono: le ha tutte
+                        const possible = all.filter(c => kb.held[c] === q || (!kb.held[c] && !kb.noHold[q].has(c)));
+                        if (possible.length === size) {
+                            possible.forEach(c => {
+                                if (kb.held[c] !== q) { kb.held[c] = q; changed = true; }
+                            });
+                        }
+                    }
+                });
+            }
+        }
+
+        function botCandidates(bot, category) {
+            return CARDS_BY_CAT[category].filter(c => !bot.kb.held[c]);
+        }
+
+        // Restituisce { suspect, weapon, room } per le categorie di cui il bot è certo
+        function deduceEnvelope(bot) {
+            const result = {};
+            ['suspect', 'weapon', 'room'].forEach(cat => {
+                const cands = botCandidates(bot, cat);
+                const nobodyHolds = cands.filter(c => gameState.players.every(p => bot.kb.noHold[p.character].has(c)));
+                if (cands.length === 1) result[cat] = cands[0];
+                else if (nobodyHolds.length === 1) result[cat] = nobodyHolds[0];
+            });
+            return result;
+        }
+
+        // Punteggio di una carta candidata da inserire in un'ipotesi: più alto = più utile da chiedere.
+        // Le carte che meno giocatori possono ancora avere in mano sono le più probabili nella busta:
+        // se nessuno le smentisce, il bot scopre la soluzione. (Misurato su 400 partite simulate:
+        // è la scelta che chiude la partita più in fretta; pesare anche i vincoli aperti peggiora.)
+        function botCardScore(bot, card) {
+            const kb = bot.kb;
+            const others = gameState.players.filter(p => p.character !== bot.character);
+            const possibleHolders = others.filter(p => !kb.noHold[p.character].has(card)).length;
+            const likelyEnvelope = 1 - possibleHolders / others.length;
+            return likelyEnvelope + Math.random() * 0.4;
+        }
+
+        // Sceglie la carta (sospettato o arma) da citare nell'ipotesi
+        function botPickCard(bot, category) {
+            const cands = botCandidates(bot, category);
+            if (cands.length === 1) {
+                // categoria già risolta: si cita una carta propria, così non si rivela la certezza
+                const own = bot.cards.filter(c => CARDS_BY_CAT[category].includes(c));
+                return own.length ? pickRandom(own) : cands[0];
+            }
+            let best = cands[0], bestScore = -Infinity;
+            cands.forEach(c => {
+                const sc = botCardScore(bot, c);
+                if (sc > bestScore) { bestScore = sc; best = c; }
+            });
+            return best;
+        }
+
+        // ---------- Accusa ----------
+        function openAccusationModal() { document.getElementById('modal-accusation').classList.remove('hidden'); }
+
+        function submitAccusation() {
+            const suspect = document.getElementById('acc-suspect').value;
+            const weapon = document.getElementById('acc-weapon').value;
+            const room = document.getElementById('acc-room').value;
+            const currPlayer = gameState.players[gameState.currentTurnIndex];
+
+            closeModal('modal-accusation');
+
+            const won = resolveAccusation(currPlayer, suspect, weapon, room);
+            if (!won) endTurn();
+        }
+
+        // Restituisce true se l'accusa è corretta (partita finita)
+        function resolveAccusation(player, suspect, weapon, room) {
+            const sol = gameState.solution;
+            logEvent(`⚖️ **${player.name}** accusa: **${suspect}** con **${weapon}** in **${room}**.`);
+
+            if (suspect === sol.suspect && weapon === sol.weapon && room === sol.room) {
+                gameState.gameOver = true;
+                clearTimeout(botTimer);
+                botTimer = null;
+                gameState.reachableCells = [];
+                disableAllActions();
+                logEvent(`🏆 **${player.name} HA VINTO!** Soluzione: ${sol.suspect}, ${sol.weapon}, ${sol.room}.`);
+                alert(`🎉 ACCUSA CORRETTA! ${player.name} ha risolto il mistero!\nLa soluzione era: ${sol.suspect} con ${sol.weapon} in ${sol.room}.`);
+                return true;
+            }
+
+            player.active = false;
+            player.canSuggestHere = false;
+            logEvent(`💀 **${player.name}** ha sbagliato accusa ed è eliminato: potrà solo smentire le ipotesi altrui.`);
+            if (!player.isBot) {
+                alert(`❌ ACCUSA ERRATA! ${player.name} è eliminato: potrai solo smentire le ipotesi degli altri giocatori. La partita continua.`);
+            }
+            updateLegend();
+
+            if (!gameState.players.some(p => p.active)) {
+                gameState.gameOver = true;
+                clearTimeout(botTimer);
+                botTimer = null;
+                disableAllActions();
+                logEvent(`🕯️ Tutti i detective sono stati eliminati: il caso resta irrisolto. Soluzione: ${sol.suspect}, ${sol.weapon}, ${sol.room}.`);
+                alert(`Tutti i detective sono stati eliminati. La soluzione era: ${sol.suspect} con ${sol.weapon} in ${sol.room}.`);
+            }
+            return false;
+        }
+
+        // ---------- Turni ----------
+        function endTurn() {
+            if (gameState.gameOver || !gameState.players.length) return;
+            if (!gameState.players.some(p => p.active)) return;
+
+            gameState.players[gameState.currentTurnIndex].canSuggestHere = false;
+            gameState.hasMoved = false;
+            gameState.reachableCells = [];
+            document.getElementById('dice-result').innerText = "-";
+            document.getElementById('btn-secret-passage').classList.add('hidden');
+
+            do {
+                gameState.currentTurnIndex = (gameState.currentTurnIndex + 1) % gameState.players.length;
+            } while (!gameState.players[gameState.currentTurnIndex].active);
+
+            updateTurnUI();
+            drawBoard();
+
+            const currPlayer = gameState.players[gameState.currentTurnIndex];
+            if (currPlayer.isBot) botDelay(playBotTurn, 800);
+        }
+
+        // Distanza (in caselle di corridoio) dalle porte delle stanze indicate, ignorando le pedine
+        function roomDistanceMap(targetRooms) {
+            const dist = new Map();
+            const queue = [];
+            targetRooms.forEach(r => {
+                DOORS.filter(d => d.room === r.id).forEach(d => {
+                    dist.set(`${d.x},${d.y}`, 0);
+                    queue.push({ x: d.x, y: d.y, dist: 0 });
+                });
+            });
+            const dirs = [{x:1,y:0}, {x:-1,y:0}, {x:0,y:1}, {x:0,y:-1}];
+            while (queue.length > 0) {
+                const c = queue.shift();
+                if (c.dist > 0 && getCurrentRoom(c.x, c.y)) continue; // le stanze non si attraversano
+                for (const d of dirs) {
+                    const nx = c.x + d.x, ny = c.y + d.y;
+                    if (nx < 0 || nx >= GRID_SIZE || ny < 0 || ny >= GRID_SIZE) continue;
+                    const key = `${nx},${ny}`;
+                    if (!dist.has(key) && isValidTile(nx, ny)) {
+                        dist.set(key, c.dist + 1);
+                        queue.push({ x: nx, y: ny, dist: c.dist + 1 });
+                    }
+                }
+            }
+            return dist;
+        }
+
+        function botChooseDestination(bot, reachable) {
+            if (reachable.length === 0) return null;
+            const targetIds = new Set(botCandidates(bot, 'room'));
+            const targetRooms = ROOMS.filter(r => targetIds.has(r.id));
+
+            const inTarget = reachable.filter(c => {
+                const r = getCurrentRoom(c.x, c.y);
+                return r && targetIds.has(r.id);
+            });
+            if (inTarget.length > 0) return pickRandom(inTarget);
+
+            const distMap = roomDistanceMap(targetRooms);
+            let pool = reachable.filter(c => !getCurrentRoom(c.x, c.y)); // evita stanze inutili
+            if (pool.length === 0) pool = reachable;
+
+            let best = Infinity;
+            let bestCells = [];
+            pool.forEach(c => {
+                const d = distMap.has(`${c.x},${c.y}`) ? distMap.get(`${c.x},${c.y}`) : Infinity;
+                if (d < best) { best = d; bestCells = [c]; }
+                else if (d === best) bestCells.push(c);
+            });
+            return pickRandom(bestCells);
+        }
+
+        // Se il bot ha ricavato la soluzione, accusa; restituisce true se ha accusato
+        function botAccuseIfSolved(bot) {
+            const env = deduceEnvelope(bot);
+            if (env.suspect && env.weapon && env.room) {
+                resolveAccusation(bot, env.suspect, env.weapon, env.room);
+                if (!gameState.gameOver) botDelay(endTurn, 800);
+                return true;
+            }
+            return false;
+        }
+
+        function botHypothesize(bot, room) {
+            // Evita di ripetere un'ipotesi già fatta nella stessa stanza
+            let suspect, weapon, key;
+            for (let attempt = 0; attempt < 8; attempt++) {
+                suspect = botPickCard(bot, 'suspect');
+                weapon = botPickCard(bot, 'weapon');
+                key = `${suspect}|${weapon}|${room.id}`;
+                if (!bot.kb.asked.has(key)) break;
+            }
+            bot.kb.asked.add(key);
+            resolveHypothesis(bot, suspect, weapon, room);
+            // Il messaggio resta a video finché il detective preme SPAZIO (o dopo 10 s); poi il turno prosegue
+            showBotHypothesis(bot, suspect, weapon, room, () => {
+                botDelay(() => {
+                    if (gameState.gameOver) return;
+                    if (!botAccuseIfSolved(bot)) botDelay(endTurn, 500);
+                }, 300);
+            });
+        }
+
+        function playBotTurn() {
+            if (gameState.gameOver || !gameState.players.length) return;
+            const bot = gameState.players[gameState.currentTurnIndex];
+            if (!bot || !bot.isBot || !bot.active) return;
+
+            if (botAccuseIfSolved(bot)) return;
+
+            const roomNow = getCurrentRoom(bot.x, bot.y);
+            const isUsefulRoom = r => r && botCandidates(bot, 'room').includes(r.id);
+
+            // Spostato da un'ipotesi altrui in una stanza utile: ipotizza senza muoversi
+            if (bot.canSuggestHere && isUsefulRoom(roomNow)) {
+                botDelay(() => botHypothesize(bot, roomNow), 400);
+                return;
+            }
+
+            // Passaggio segreto verso una stanza ancora utile
+            if (roomNow && roomNow.passage) {
+                const dest = ROOMS.find(r => r.id === roomNow.passage);
+                if (isUsefulRoom(dest)) {
+                    const t = findFreeRoomTile(dest);
+                    bot.x = t.x; bot.y = t.y;
+                    bot.canSuggestHere = false;
+                    logEvent(`${bot.name} usa il passaggio segreto per **${dest.id}**!`);
+                    drawBoard();
+                    botDelay(() => botHypothesize(bot, dest), 800);
+                    return;
+                }
+            }
+
+            // Tiro dei dadi e avvicinamento alla stanza utile più vicina
+            const dice = (Math.floor(Math.random() * 6) + 1) + (Math.floor(Math.random() * 6) + 1);
+            const target = botChooseDestination(bot, getReachableCells(bot.x, bot.y, dice));
+            if (!target && roomNow && roomNow.passage) {
+                // Nessuna casella raggiungibile: il passaggio segreto evita di restare bloccati
+                const dest = ROOMS.find(r => r.id === roomNow.passage);
+                const t = findFreeRoomTile(dest);
+                bot.x = t.x; bot.y = t.y;
+                bot.canSuggestHere = false;
+                logEvent(`${bot.name} usa il passaggio segreto per **${dest.id}**!`);
+                drawBoard();
+                if (isUsefulRoom(dest)) botDelay(() => botHypothesize(bot, dest), 800);
+                else botDelay(endTurn, 800);
+                return;
+            }
+
+            if (target) {
+                bot.x = target.x; bot.y = target.y;
+                bot.canSuggestHere = false;
+                drawBoard();
+            }
+
+            const roomAfter = getCurrentRoom(bot.x, bot.y);
+            if (target && roomAfter) logEvent(`${bot.name} è entrato nella stanza **${roomAfter.id}**.`);
+            if (target && isUsefulRoom(roomAfter)) botDelay(() => botHypothesize(bot, roomAfter), 800);
+            else botDelay(endTurn, 800);
+        }
+
+        function updateTurnUI() {
+            const curr = gameState.players[gameState.currentTurnIndex];
+            document.getElementById('display-current-turn').innerText = `${curr.character}`;
+            const isMyTurn = !curr.isBot && curr.character === gameState.myPlayer.character;
+
+            const currentRoom = getCurrentRoom(curr.x, curr.y);
+            const canSuggestNow = isMyTurn && curr.canSuggestHere && !gameState.hasMoved && currentRoom;
+
+            document.getElementById('btn-roll-dice').disabled = !isMyTurn || gameState.hasMoved;
+            document.getElementById('btn-hypothesis').disabled = !canSuggestNow;
+            document.getElementById('btn-accusation').disabled = !isMyTurn;
+            document.getElementById('btn-end-turn').disabled = !isMyTurn;
+
+            if (canSuggestNow) {
+                logEvent(`ℹ️ Sei stato spostato in **${currentRoom.id}**: puoi formulare un'ipotesi senza muoverti.`);
+            }
+
+            const btnP = document.getElementById('btn-secret-passage');
+            if (isMyTurn && !gameState.hasMoved && currentRoom && currentRoom.passage) {
+                btnP.classList.remove('hidden');
+                btnP.innerText = `🌀 Passaggio per ${currentRoom.passage}`;
+            } else {
+                btnP.classList.add('hidden');
+            }
+        }
+
+        function checkTurnActions() {
+            const curr = gameState.players[gameState.currentTurnIndex];
+            if (!curr.isBot && gameState.hasMoved) {
+                document.getElementById('btn-end-turn').disabled = false;
+            }
+        }
+
+        function initNotebook() {
+            const tabSuspects = document.getElementById('notebook-tab-suspects');
+            const tabWeapons = document.getElementById('notebook-tab-weapons');
+            const tabRooms = document.getElementById('notebook-tab-rooms');
+
+            tabSuspects.innerHTML = "";
+            tabWeapons.innerHTML = "";
+            tabRooms.innerHTML = "";
+
+            SUSPECTS.forEach(s => {
+                const item = `${s.id}`;
+                const cleanKey = s.id;
+                gameState.notebook[cleanKey] = "❓";
+                tabSuspects.innerHTML += createNotebookRow(item, cleanKey);
+            });
+
+            WEAPONS.forEach(w => {
+                gameState.notebook[w.id] = "❓";
+                tabWeapons.innerHTML += createNotebookRow(w.id, w.id);
+            });
+
+            ROOMS.forEach(r => {
+                gameState.notebook[r.id] = "❓";
+                tabRooms.innerHTML += createNotebookRow(r.id, r.id);
+            });
+        }
+
+        function createNotebookRow(label, key) {
+            return `
+                <div class="flex justify-between items-center bg-slate-900 px-2.5 py-1.5 rounded cursor-pointer hover:bg-slate-700 transition" onclick="toggleNb('${key}')">
+                    <span>${label}</span>
+                    <span id="nb-${key.replace(/\s+/g, '-')}" class="font-bold text-amber-400">❓</span>
+                </div>
+            `;
+        }
+
+        function switchNotebookTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.notebook-tab-content').forEach(c => c.classList.add('hidden'));
+
+            document.getElementById(`tab-btn-${tabName}`).classList.add('active');
+            document.getElementById(`notebook-tab-${tabName}`).classList.remove('hidden');
+        }
+
+        function toggleNb(key) {
+            const cur = gameState.notebook[key];
+            let nxt = (cur === "❓") ? "❌" : (cur === "❌") ? "✔️" : "❓";
+            gameState.notebook[key] = nxt;
+            const el = document.getElementById(`nb-${key.replace(/\s+/g, '-')}`);
+            if (el) el.innerText = nxt;
+        }
+
+        function renderMyCards() {
+            const container = document.getElementById('my-cards-container');
+            container.innerHTML = "";
+            const me = gameState.players.find(p => p.character === gameState.myPlayer.character);
+            if (!me) return;
+
+            me.cards.forEach(card => {
+                container.innerHTML += `<span class="px-2 py-1 bg-amber-900/60 border border-amber-600 rounded text-xs text-amber-200">📜 ${card}</span>`;
+                gameState.notebook[card] = "❌";
+                const el = document.getElementById(`nb-${card.replace(/\s+/g, '-')}`);
+                if (el) el.innerText = "❌";
+            });
+        }
+
+        function updateLegend() {
+            const legend = document.getElementById('players-legend');
+            legend.innerHTML = "";
+
+            gameState.players.forEach(p => {
+                const isMe = gameState.myPlayer && p.character === gameState.myPlayer.character;
+                const outTag = p.active ? '' : ' · eliminato';
+                const playerTag = isMe ? `<span class="text-xs text-amber-400 font-bold ml-auto">(TU - ${p.name}${outTag})</span>` : `<span class="text-xs text-slate-500 ml-auto">${p.name}${outTag}</span>`;
+                
+                const row = document.createElement('div');
+                row.className = `flex items-center gap-3 bg-slate-900 p-2 rounded-lg border ${isMe ? 'border-amber-500/50 bg-amber-950/20' : 'border-slate-800'} ${p.active ? '' : 'opacity-50'}`;
+
+                const iconCanvas = document.createElement('canvas');
+                iconCanvas.width = 32;
+                iconCanvas.height = 32;
+                const iconCtx = iconCanvas.getContext('2d');
+
+                if (charsImageLoaded) {
+                    const spriteW = charsSpriteImage.width / 3;
+                    const spriteH = charsSpriteImage.height / 2;
+                    const sx = p.spriteCol * spriteW;
+                    const sy = p.spriteRow * spriteH;
+
+                    iconCtx.beginPath();
+                    iconCtx.arc(16, 16, 15, 0, 2 * Math.PI);
+                    iconCtx.clip();
+                    iconCtx.drawImage(charsSpriteImage, sx, sy, spriteW, spriteH, 1, 1, 30, 30);
+
+                    iconCtx.beginPath();
+                    iconCtx.arc(16, 16, 15, 0, 2 * Math.PI);
+                    iconCtx.strokeStyle = p.color;
+                    iconCtx.lineWidth = 2;
+                    iconCtx.stroke();
+                } else {
+                    iconCtx.beginPath();
+                    iconCtx.arc(16, 16, 14, 0, 2 * Math.PI);
+                    iconCtx.fillStyle = p.color;
+                    iconCtx.fill();
+                    iconCtx.fillStyle = "#ffffff";
+                    iconCtx.font = "bold 12px monospace";
+                    iconCtx.textAlign = "center";
+                    iconCtx.textBaseline = "middle";
+                    iconCtx.fillText(p.initial, 16, 16);
+                }
+
+                const iconWrap = document.createElement('div');
+                iconWrap.appendChild(iconCanvas);
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = "font-henny text-base text-amber-200 tracking-wide";
+                nameSpan.innerText = `${p.character}`;
+
+                row.appendChild(iconWrap);
+                row.appendChild(nameSpan);
+                row.insertAdjacentHTML('beforeend', playerTag);
+
+                legend.appendChild(row);
+            });
+        }
+
+        function logEvent(t) {
+            const l = document.getElementById('game-log');
+            l.innerHTML += `<p class="border-b border-slate-800 pb-0.5">${t}</p>`;
+            l.scrollTop = l.scrollHeight;
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    </script>
+</body>
+</html>
