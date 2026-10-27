@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giallo alla Tenuta - v0.29</title>
+    <title>Giallo alla Tenuta - v0.32</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Henny+Penny&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Henny+Penny&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
     <style>
         body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
         .canvas-container { position: relative; width: 600px; height: 600px; }
@@ -16,9 +16,15 @@
         .tab-btn.active { background-color: #f59e0b; color: #0f172a; font-weight: bold; }
         .font-henny { font-family: 'Henny Penny', cursive; }
 
+        /* Taccuino: le tre schede sono sovrapposte nella stessa cella della griglia, quindi hanno tutte
+           l'altezza della più alta (Stanze, 9 righe) e nessuna ha barre di scorrimento */
+        .notebook-stack { display: grid; }
+        .notebook-tab-content { grid-area: 1 / 1; align-content: start; }
+        .notebook-tab-content.nb-off { visibility: hidden; pointer-events: none; }
+
         /* Messaggio a video per le ipotesi dei bot: cartiglio al centro dello schermo */
         #bot-message { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 60; display: none;
-                       align-items: center; justify-content: center; pointer-events: none; }
+                       align-items: center; justify-content: center; cursor: pointer; }
         #bot-message.open { display: flex; }
         #bot-message-card { position: relative; background: url('cartiglio.png') center / 100% 100% no-repeat;
                             filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.65)); }
@@ -30,6 +36,77 @@
         #bot-message-text .bm-who  { font-size: 0.62em; }
         #bot-message-text .bm-what { font-size: 1em; }
         #bot-message-text .bm-hint { font-size: 0.42em; margin-top: 0.6em; opacity: 0.7; }
+
+        /* Elenco dei personaggi: riga del giocatore di turno */
+        #players-legend [data-character] { cursor: pointer; transition: box-shadow 0.2s ease, border-color 0.2s ease; }
+        #players-legend [data-character].legend-turn { border-color: #fbbf24;
+            box-shadow: 0 0 0 1px #fbbf24, 0 0 14px rgba(245, 158, 11, 0.55); background-color: rgba(120, 53, 15, 0.35); }
+
+        /* ---------- Introduzione "al cinema" ---------- */
+        #cinema { position: relative; width: 100%; max-width: 100%; aspect-ratio: 2.39 / 1; min-height: 230px; background: #000; overflow: hidden;
+                  border-radius: 6px; border: 1px solid #4a3416; box-shadow: 0 0 0 4px #000, 0 12px 40px rgba(0, 0, 0, 0.7); }
+        #cinema-bg { position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+                     background: url('mappa.png') center / cover no-repeat;
+                     filter: brightness(0.26) saturate(0.55) sepia(0.55) contrast(1.1);
+                     animation: cinema-drift 70s ease-in-out infinite alternate; }
+        @keyframes cinema-drift { from { transform: scale(1.08) translate(0, 0); } to { transform: scale(1.3) translate(-2.5%, -3%); } }
+        #cinema-vignette { position: absolute; top: 0; right: 0; bottom: 0; left: 0; pointer-events: none;
+                           background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 35%, rgba(0, 0, 0, 0.85) 100%); }
+        #cinema-grain { position: absolute; top: -50%; right: -50%; bottom: -50%; left: -50%; pointer-events: none; opacity: 0.09;
+                        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.2 -0.2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+                        animation: cinema-grain 0.6s steps(6) infinite; }
+        @keyframes cinema-grain { 0% { transform: translate(0, 0); } 20% { transform: translate(-3%, 2%); } 40% { transform: translate(2%, -3%); }
+                                  60% { transform: translate(-2%, -1%); } 80% { transform: translate(3%, 3%); } 100% { transform: translate(0, 0); } }
+        /* il testo sfuma ai bordi superiore e inferiore della finestra */
+        #cinema-window { position: absolute; top: 0; right: 0; bottom: 0; left: 0; overflow: hidden;
+                         -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 17%, #000 83%, transparent 100%);
+                                 mask-image: linear-gradient(to bottom, transparent 0%, #000 17%, #000 83%, transparent 100%); }
+        #cinema-crawl { position: absolute; top: 0; left: 0; right: 0; padding: 0 8%; text-align: center; will-change: transform;
+                        font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-weight: 500;
+                        font-size: clamp(1.05rem, 0.7rem + 1.5vw, 1.45rem); line-height: 1.65; letter-spacing: 0.02em;
+                        color: #f1e3c0; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 0 2px rgba(0, 0, 0, 0.9); }
+        #cinema-crawl p { margin: 0 0 1.35em; }
+        #cinema-crawl .cn-title-block { display: flex; align-items: center; justify-content: center; }
+        #cinema-crawl .cn-title { font-family: 'Henny Penny', cursive; font-weight: 400; color: #f59e0b; letter-spacing: 0.06em;
+                                  font-size: clamp(1.9rem, 1rem + 3.4vw, 3.2rem); text-transform: uppercase; line-height: 1.1;
+                                  opacity: 0; animation: cinema-title-in 2.2s ease-out 0.4s forwards; }
+        @keyframes cinema-title-in { from { opacity: 0; letter-spacing: 0.25em; } to { opacity: 1; letter-spacing: 0.06em; } }
+        #cinema-crawl .cn-head { font-family: 'Henny Penny', cursive; font-weight: 400; color: #f59e0b; font-size: 1.35em;
+                                 margin: 1.6em 0 0.5em; letter-spacing: 0.04em; }
+        #cinema-crawl em, #cinema-crawl strong { font-style: normal; font-weight: 500; color: #ffe08a; }
+        #cinema-final { position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: center;
+                        padding: 0 8%; text-align: center; opacity: 0; pointer-events: none; transition: opacity 1.6s ease;
+                        font-family: 'Henny Penny', cursive; color: #f59e0b; font-size: clamp(1.4rem, 0.8rem + 2.6vw, 2.5rem);
+                        text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95); }
+        #cinema-final.show { opacity: 1; }
+        #cinema-controls { position: absolute; right: 8px; bottom: 6px; z-index: 3; display: flex; gap: 6px; }
+        #cinema-controls button { background: rgba(0, 0, 0, 0.55); color: #d9c79a; border: 1px solid rgba(217, 199, 154, 0.35);
+                                  border-radius: 4px; padding: 2px 9px; font-size: 0.72rem; cursor: pointer; transition: background 0.2s, color 0.2s; }
+        #cinema-controls button:hover { background: rgba(245, 158, 11, 0.25); color: #fff; }
+        /* chi preferisce meno movimento: testo fermo, da far scorrere a mano */
+        #cinema.reduced #cinema-window { overflow-y: auto; -webkit-mask-image: none; mask-image: none; }
+        #cinema.reduced #cinema-crawl { position: static; }
+        #cinema.reduced #cinema-bg, #cinema.reduced #cinema-grain { animation: none; }
+        @media (prefers-reduced-motion: reduce) { #cinema-grain, #cinema-bg { animation: none; } }
+
+        /* Scheda del personaggio: compare passando il mouse sull'elenco dei personaggi */
+        #char-card-backdrop { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 54; display: none; cursor: pointer; }
+        #char-card-backdrop.open { display: block; }
+        #char-card { position: fixed; left: 0; top: 0; z-index: 55; visibility: hidden; opacity: 0; cursor: pointer;
+                     background: url('testo.png') center / 100% 100% no-repeat;
+                     filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.6));
+                     transform: translateY(12px) scale(0.96); transform-origin: 50% 100%;
+                     transition: opacity 0.22s ease, transform 0.22s ease, visibility 0s linear 0.22s; }
+        #char-card.open { visibility: visible; opacity: 1; transform: none;
+                          transition: opacity 0.22s ease, transform 0.22s ease, visibility 0s; }
+        /* area utile della pergamena di testo.png (86-1306 px su 1392, 84-738 su 820), esclusi gli angoli arrotondati */
+        #char-card-text { position: absolute; left: 11%; width: 78%; top: 16%; height: 68%;
+                          display: flex; flex-direction: column; align-items: center; justify-content: center;
+                          text-align: center; overflow: hidden; line-height: 1.25; color: #3b2410;
+                          font-family: 'Henny Penny', cursive; }
+        #char-card-text .cc-name { font-size: 1.4em; line-height: 1.1; }
+        #char-card-text .cc-role { font-size: 0.9em; color: #7a4a14; margin: 0.1em 0 0.6em; }
+        #char-card-text .cc-body { font-size: 0.78em; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-start p-4">
@@ -38,24 +115,56 @@
     <header class="w-full max-w-5xl flex justify-between items-center py-4 mb-4 border-b border-slate-700">
         <div>
             <h1 class="text-4xl font-extrabold tracking-wider text-amber-500 flex items-center gap-2 font-henny">
-                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.29</span>
+                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.32</span>
             </h1>
         </div>
+        <div class="flex items-center gap-2">
+        <button id="btn-music" type="button" title="Musica di sottofondo" aria-pressed="true" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm font-semibold text-amber-400 flex items-center gap-2 transition">
+            <span id="btn-music-icon">🔊</span><span class="hidden sm:inline">Musica</span>
+        </button>
         <button id="btn-pause-header" class="hidden px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm font-semibold text-amber-400 flex items-center gap-2 transition">
             ⏸️ Pausa / Menu (ESC)
         </button>
+        </div>
     </header>
 
     <!-- SETUP SCREEN -->
-    <div id="setup-screen" class="w-full max-w-xl bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-2xl">
+    <div id="setup-screen" class="w-full max-w-3xl bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-2xl">
+
+        <!-- PRESENTAZIONE DEL CASO, "al cinema" -->
+        <section id="case-intro" class="mb-6" aria-label="Il caso della Tenuta">
+            <div id="cinema">
+                <div id="cinema-bg"></div>
+                <div id="cinema-window">
+                    <div id="cinema-crawl">
+                        <div class="cn-title-block"><div class="cn-title">Il caso della Tenuta</div></div>
+                        <p><em>Ludovico Salvaterra</em>, padrone della Tenuta e collezionista di segreti, aveva invitato per il fine settimana sei ospiti.</p>
+                        <p>Ciascuno aveva ricevuto una lettera cortese e, tra le righe, un avvertimento che solo lui poteva capire.</p>
+                        <p>Con loro è arrivato anche un investigatore, convocato in segreto da Salvaterra: sei tu.</p>
+                        <p>Stamattina all'alba la governante lo ha trovato senza vita. Il corpo era stato spostato: non è nella stanza in cui è morto.</p>
+                        <p>Nella notte la tempesta ha interrotto la strada e il telefono, e la polizia non arriverà prima di sera.</p>
+                        <p>Nessuno ha lasciato la Tenuta e nessuno ha un alibi solido. L'assassino è uno dei sei ospiti, e ciascuno aveva un buon motivo per volere Salvaterra fuori dai piedi.</p>
+                        <div class="cn-head">Il tuo compito</div>
+                        <p>Scopri <strong>chi</strong> ha ucciso Salvaterra, <strong>con quale arma</strong> e <strong>in quale stanza</strong>, prima che lo facciano i cinque colleghi che i parenti di Salvaterra hanno ingaggiato e che indagano sotto le altre coperture.</p>
+                        <p>Gira per le stanze, formula ipotesi, interpreta chi ti smentisce e annota ogni deduzione nel taccuino.</p>
+                        <p>Quando sei certo, formula l'accusa finale: ne hai una sola. Se sbagli sei fuori dalla partita e potrai solo smentire le ipotesi degli altri.</p>
+                    </div>
+                </div>
+                <div id="cinema-final">Chi ha ucciso Ludovico Salvaterra?</div>
+                <div id="cinema-vignette"></div>
+                <div id="cinema-grain"></div>
+                <div id="cinema-controls">
+                    <button type="button" id="cinema-pause">⏸ Pausa</button>
+                    <button type="button" id="cinema-skip">⏭ Salta</button>
+                    <button type="button" id="cinema-replay" class="hidden">↻ Rivedi</button>
+                </div>
+            </div>
+        </section>
+
+        <div class="max-w-md mx-auto">
         <h2 class="text-2xl font-bold mb-4 text-slate-200 border-b border-slate-700 pb-2 font-henny text-amber-400">Configurazione Partita</h2>
         
         <div class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium mb-1 text-slate-300">Il tuo Nome Detective:</label>
-                <input type="text" id="input-player-name" value="Detective Rossi" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white focus:outline-none focus:border-amber-500">
-            </div>
-
             <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">Scegli il tuo Personaggio:</label>
                 <select id="select-character" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white focus:outline-none focus:border-amber-500">
@@ -71,6 +180,7 @@
             <button type="button" id="btn-start-game" class="w-full mt-6 py-3 bg-green-600 hover:bg-green-500 font-bold rounded-lg text-xl shadow-lg transition font-henny tracking-wide">
                 Inizia Partita
             </button>
+        </div>
         </div>
     </div>
 
@@ -129,7 +239,7 @@
             </div>
 
             <!-- TACCUINO A SCHEDE -->
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md flex-1 flex flex-col">
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md">
                 <div class="flex justify-between items-center mb-2 border-b border-slate-700 pb-1">
                     <h3 class="text-md font-bold text-slate-200">📒 Taccuino del Detective</h3>
                     <span class="text-xs text-slate-400">Spunta indizi</span>
@@ -149,14 +259,20 @@
                 </div>
 
                 <!-- TAB CONTENT -->
-                <div id="notebook-tab-suspects" class="notebook-tab-content overflow-y-auto max-h-40 space-y-1 text-xs pr-1"></div>
-                <div id="notebook-tab-weapons" class="notebook-tab-content hidden overflow-y-auto max-h-40 space-y-1 text-xs pr-1"></div>
-                <div id="notebook-tab-rooms" class="notebook-tab-content hidden overflow-y-auto max-h-40 space-y-1 text-xs pr-1"></div>
+                <div class="notebook-stack">
+                    <div id="notebook-tab-suspects" class="notebook-tab-content space-y-1 text-xs"></div>
+                    <div id="notebook-tab-weapons" class="notebook-tab-content nb-off space-y-1 text-xs"></div>
+                    <div id="notebook-tab-rooms" class="notebook-tab-content nb-off space-y-1 text-xs"></div>
+                </div>
             </div>
 
-            <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 h-32 flex flex-col">
-                <div class="text-xs font-bold text-slate-400 mb-1">Registro Eventi:</div>
-                <div id="game-log" class="overflow-y-auto text-xs text-slate-300 space-y-1 font-mono flex-1"></div>
+            <!-- Il registro occupa lo spazio rimasto in colonna (bottom allineato all'elenco dei personaggi);
+                 il contenuto è posizionato in modo assoluto, così un registro lungo scorre invece di allungare la colonna -->
+            <div class="relative bg-slate-900 rounded-xl border border-slate-800 flex-1 min-h-[8rem]">
+                <div class="absolute inset-3 flex flex-col">
+                    <div class="text-xs font-bold text-slate-400 mb-1">Registro Eventi:</div>
+                    <div id="game-log" class="overflow-y-auto text-xs text-slate-300 space-y-1 font-mono flex-1 min-h-0"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -165,7 +281,7 @@
     <div id="modal-pause" class="hidden fixed inset-0 modal flex justify-center items-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-600 rounded-xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
             <h3 class="text-2xl font-bold text-amber-500 font-henny">⏸️ GIOCO IN PAUSA</h3>
-            <p class="text-xs text-slate-400">Versione v0.29</p>
+            <p class="text-xs text-slate-400">Versione v0.32</p>
             <div class="space-y-3 pt-2">
                 <button id="btn-resume-game" class="w-full py-3 bg-green-600 hover:bg-green-500 font-bold rounded-lg transition text-white">
                     ▶️ Riprendi Partita
@@ -224,6 +340,10 @@
         </div>
     </div>
 
+    <!-- SCHEDA DEL PERSONAGGIO (hover sull'elenco) -->
+    <div id="char-card-backdrop"></div>
+    <div id="char-card" aria-hidden="true"><div id="char-card-text"></div></div>
+
     <!-- MESSAGGIO IPOTESI DEI BOT -->
     <div id="bot-message" aria-live="polite">
         <div id="bot-message-card">
@@ -232,13 +352,13 @@
     </div>
 
     <script>
-        const VERSION = "v0.29";
+        const VERSION = "v0.32";
 
         const SUSPECTS = [
             { id: "Ambasciatore Ambra", color: "#f59e0b", initial: "A", spriteRow: 0, spriteCol: 0 },
-            { id: "Baronessa Bianchi",  color: "#f8fafc", initial: "B", spriteRow: 0, spriteCol: 1 },
+            { id: "Baronessa Bianchi",  color: "#f8fafc", initial: "B", spriteRow: 0, spriteCol: 1, female: true },
             { id: "Colonnello Corallo", color: "#ef4444", initial: "C", spriteRow: 0, spriteCol: 2 },
-            { id: "Dottoressa Domino", color: "#3b82f6", initial: "D", spriteRow: 1, spriteCol: 0 },
+            { id: "Dottoressa Domino", color: "#3b82f6", initial: "D", spriteRow: 1, spriteCol: 0, female: true },
             { id: "Generale Grigio",   color: "#64748b", initial: "G", spriteRow: 1, spriteCol: 1 },
             { id: "Visconte Viola",    color: "#8b5cf6", initial: "V", spriteRow: 1, spriteCol: 2 }
         ];
@@ -376,14 +496,24 @@
                 }
             });
 
-            // Barra spaziatrice: chiude il messaggio. Fase di cattura + blocco di keyup, così non attiva
-            // eventuali pulsanti col focus e non fa scorrere la pagina.
+            // Tasti che chiudono le finestre informative (fase di cattura, prima degli altri gestori):
+            //  - messaggio dei bot: barra spaziatrice, Esc (o clic sul messaggio);
+            //  - scheda del personaggio: Esc, Invio (o clic ovunque).
+            // Il tasto viene consumato, così Esc non apre il menu di pausa e Spazio/Invio non attivano
+            // eventuali pulsanti col focus né fanno scorrere la pagina.
             window.addEventListener('keydown', (e) => {
-                if (BOT_MESSAGE.visible && (e.code === 'Space' || e.key === ' ')) {
+                const isSpace = (e.code === 'Space' || e.key === ' ');
+                const isEsc = (e.key === 'Escape');
+                const isEnter = (e.key === 'Enter');
+                if (BOT_MESSAGE.visible && (isSpace || isEsc)) {
                     e.preventDefault();
                     e.stopPropagation();
-                    BOT_MESSAGE.swallowSpaceUp = true;
+                    if (isSpace) BOT_MESSAGE.swallowSpaceUp = true;
                     hideBotMessage();
+                } else if (!BOT_MESSAGE.visible && CHAR_CARD.current && (isEsc || isEnter)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    hideCharCard();
                 }
             }, true);
             window.addEventListener('keyup', (e) => {
@@ -393,6 +523,7 @@
                     BOT_MESSAGE.swallowSpaceUp = false;
                 }
             }, true);
+            document.getElementById('bot-message').addEventListener('click', () => hideBotMessage());
             window.addEventListener('resize', () => { if (BOT_MESSAGE.visible) layoutBotMessage(); });
 
             canvas.addEventListener('mousedown', handleCanvasMouseDown);
@@ -400,13 +531,446 @@
             canvas.addEventListener('mouseup', handleCanvasMouseUp);
             canvas.addEventListener('mouseleave', handleCanvasMouseLeave);
             canvas.addEventListener('click', handleCanvasClick);
+            bindCharCard();
+            initCinema();
+            initMusic();
 
             startAnimationLoop();
         });
 
+        // ---------- Musica di sottofondo (sintesi con Web Audio, nessun file audio) ----------
+        // Ciclo di 16 battute a 66 BPM (circa 58 s) in re minore armonico: pad scuro, basso, arpeggio a pizzico,
+        // melodia rada con vibrato e riverbero. Parte con il primo clic o tasto (vincolo dei browser).
+        const MUSIC = {
+            bpm: 66, level: 0.7, ctx: null, bus: null, timer: null, next: 0, bar: 0,
+            enabled: true, started: false
+        };
+        const MUSIC_CHORDS = [
+            { bass: 38, pad: [50, 53, 57],     arp: [62, 65, 69, 74] },   // Dm
+            { bass: 46, pad: [53, 58, 62],     arp: [58, 62, 65, 70] },   // Bb
+            { bass: 45, pad: [49, 52, 57],     arp: [61, 64, 69, 73] },   // A (dominante)
+            { bass: 43, pad: [50, 55, 58],     arp: [62, 67, 70, 74] },   // Gm
+            { bass: 40, pad: [52, 55, 58, 62], arp: [64, 67, 70, 74] }    // Em7b5
+        ];
+        const MUSIC_PROG = [0, 0, 1, 2, 0, 3, 4, 2];                      // Dm Dm Bb A Dm Gm Em7b5 A
+        // [battuta, nota MIDI, durata in battute]
+        const MUSIC_MELODY = [
+            [ [[0,69,3],[3,70,1]], [[0,69,2],[2,65,2]], [[0,74,2],[2,72,1],[3,70,1]], [[0,73,2],[2,69,2]],
+              [[0,74,3],[3,76,1]], [[0,77,2],[2,74,1],[3,70,1]], [[0,69,2],[2,67,1],[3,64,1]], [[0,73,1],[1,76,1],[2,73,2]] ],
+            [ [[1,62,2],[3,65,1]], [[0,69,3]], [[0,70,2],[2,69,2]], [[0,68,2],[2,69,2]],
+              [[0,74,2],[2,72,2]], [[0,70,2],[2,67,2]], [[0,64,2],[2,67,1],[3,70,1]], [[0,73,4]] ]
+        ];
+        const MUSIC_ARP_PATTERNS = [[0,1,2,3,2,1,2,1], [0,-1,2,-1,1,-1,3,-1]];
+        const midiHz = m => 440 * Math.pow(2, (m - 69) / 12);
+
+        function musicBuildBus(ctx) {
+            const master = ctx.createGain();
+            master.gain.value = 0;
+            const comp = ctx.createDynamicsCompressor();
+            comp.threshold.value = -18; comp.ratio.value = 4;
+            master.connect(comp); comp.connect(ctx.destination);
+            const dry = ctx.createGain(); dry.gain.value = 1; dry.connect(master);
+            // riverbero: rumore con decadimento esponenziale (2.8 s)
+            const len = Math.floor(ctx.sampleRate * 2.8), ir = ctx.createBuffer(2, len, ctx.sampleRate);
+            for (let c = 0; c < 2; c++) {
+                const d = ir.getChannelData(c);
+                for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+            }
+            const conv = ctx.createConvolver(); conv.buffer = ir;
+            const wet = ctx.createGain(); wet.gain.value = 0.55;
+            const send = ctx.createGain(); send.gain.value = 1;
+            send.connect(conv); conv.connect(wet); wet.connect(master);
+            // eco per la melodia
+            const dl = ctx.createDelay(1.5); dl.delayTime.value = 0.9;
+            const fb = ctx.createGain(); fb.gain.value = 0.32;
+            const dlf = ctx.createBiquadFilter(); dlf.type = 'lowpass'; dlf.frequency.value = 1800;
+            const dsend = ctx.createGain(); dsend.gain.value = 0.5;
+            dsend.connect(dl); dl.connect(dlf); dlf.connect(fb); fb.connect(dl); dlf.connect(master);
+            dlf.connect(send);
+            return { master, dry, send, dsend };
+        }
+
+        function musicNote(ctx, bus, type, freq, t, dur, peak, opts) {
+            opts = opts || {};
+            const o = ctx.createOscillator();
+            o.type = type; o.frequency.value = freq;
+            if (opts.detune) o.detune.value = opts.detune;
+            const g = ctx.createGain();
+            const a = opts.attack || 0.01, rel = opts.release || 0.4;
+            g.gain.setValueAtTime(0.0001, t);
+            g.gain.linearRampToValueAtTime(peak, t + a);
+            if (opts.pluck) g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+            else {
+                g.gain.setValueAtTime(peak, Math.max(t + a, t + dur - rel));
+                g.gain.linearRampToValueAtTime(0.0001, t + dur);
+            }
+            let node = o;
+            if (opts.lp) {
+                const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = opts.lp;
+                o.connect(f); node = f;
+            }
+            node.connect(g);
+            g.connect(bus.dry);
+            if (opts.reverb) { const s = ctx.createGain(); s.gain.value = opts.reverb; g.connect(s); s.connect(bus.send); }
+            if (opts.echo) { const s = ctx.createGain(); s.gain.value = opts.echo; g.connect(s); s.connect(bus.dsend); }
+            if (opts.vibrato) {
+                const l = ctx.createOscillator(), lg = ctx.createGain();
+                l.frequency.value = 5; lg.gain.value = 5;
+                l.connect(lg); lg.connect(o.detune); l.start(t); l.stop(t + dur + 0.1);
+            }
+            o.start(t); o.stop(t + dur + 0.1);
+        }
+
+        // Programma una battuta (barIndex 0..15) a partire dal tempo t
+        function musicScheduleBar(ctx, bus, t, barIndex) {
+            const beat = 60 / MUSIC.bpm, barDur = beat * 4;
+            const part = Math.floor(barIndex / 8) % 2, b = barIndex % 8;
+            const ch = MUSIC_CHORDS[MUSIC_PROG[b]];
+            // pad
+            ch.pad.forEach(m => [-7, 7].forEach(dt =>
+                musicNote(ctx, bus, 'sawtooth', midiHz(m), t, barDur + 1.2, 0.012,
+                    { attack: 1.2, release: 1.6, detune: dt, lp: 650, reverb: 0.5 })));
+            // basso: battute 1 e 3
+            [0, 2].forEach(k => {
+                musicNote(ctx, bus, 'sine', midiHz(ch.bass), t + k * beat, beat * 2.4, 0.2, { pluck: true, attack: 0.02, reverb: 0.2 });
+                musicNote(ctx, bus, 'triangle', midiHz(ch.bass + 12), t + k * beat, beat * 1.2, 0.03, { pluck: true, attack: 0.02 });
+            });
+            // arpeggio a pizzico (crescendo nella seconda parte della battuta)
+            MUSIC_ARP_PATTERNS[part].forEach((idx, i) => {
+                if (idx < 0) return;
+                musicNote(ctx, bus, 'triangle', midiHz(ch.arp[idx]), t + i * beat / 2, 1.1,
+                    0.05 + 0.012 * (i % 4 === 0 ? 1 : 0), { pluck: true, attack: 0.008, reverb: 0.6, echo: 0.25 });
+            });
+            // melodia
+            MUSIC_MELODY[part][b].forEach(([bt, m, d]) => {
+                const tt = t + bt * beat, dd = d * beat;
+                musicNote(ctx, bus, 'sine', midiHz(m), tt, dd + 0.5, 0.09, { attack: 0.08, release: 0.7, vibrato: true, reverb: 0.7, echo: 0.5 });
+                musicNote(ctx, bus, 'sine', midiHz(m) * 2, tt, dd + 0.3, 0.02, { attack: 0.08, release: 0.5, reverb: 0.7 });
+            });
+            // rintocco grave sulla dominante, ogni ciclo
+            if (b === 7 && part === 1) musicNote(ctx, bus, 'sine', midiHz(33), t + 3 * beat, beat * 4, 0.16, { pluck: true, attack: 0.02, reverb: 0.5 });
+        }
+
+        function musicPump() {
+            if (!MUSIC.ctx) return;
+            const barDur = 60 / MUSIC.bpm * 4;
+            while (MUSIC.next < MUSIC.ctx.currentTime + 2.5) {
+                musicScheduleBar(MUSIC.ctx, MUSIC.bus, MUSIC.next, MUSIC.bar % 16);
+                MUSIC.next += barDur; MUSIC.bar++;
+            }
+        }
+
+        function musicStart() {
+            const AC = (typeof window !== 'undefined') && (window.AudioContext || window.webkitAudioContext);
+            if (!AC || !MUSIC.enabled) return;
+            try {
+                if (!MUSIC.ctx) {
+                    MUSIC.ctx = new AC();
+                    MUSIC.bus = musicBuildBus(MUSIC.ctx);
+                    MUSIC.next = MUSIC.ctx.currentTime + 0.15; MUSIC.bar = 0;
+                    // vento: rumore filtrato con lenta modulazione
+                    const c = MUSIC.ctx, nb = c.createBuffer(1, c.sampleRate * 4, c.sampleRate), d = nb.getChannelData(0);
+                    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+                    const src = c.createBufferSource(); src.buffer = nb; src.loop = true;
+                    const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 380; bp.Q.value = 0.6;
+                    const wg = c.createGain(); wg.gain.value = 0.02;
+                    const lfo = c.createOscillator(), lg = c.createGain(); lfo.frequency.value = 0.07; lg.gain.value = 0.014;
+                    lfo.connect(lg); lg.connect(wg.gain); lfo.start();
+                    src.connect(bp); bp.connect(wg); wg.connect(MUSIC.bus.dry); src.start();
+                }
+                if (MUSIC.ctx.state === 'suspended') MUSIC.ctx.resume();
+                MUSIC.bus.master.gain.cancelScheduledValues(MUSIC.ctx.currentTime);
+                MUSIC.bus.master.gain.setTargetAtTime(MUSIC.level, MUSIC.ctx.currentTime, 0.8);
+                if (MUSIC.next < MUSIC.ctx.currentTime) MUSIC.next = MUSIC.ctx.currentTime + 0.1;
+                if (!MUSIC.timer) MUSIC.timer = setInterval(musicPump, 250);
+                musicPump();
+                MUSIC.started = true;
+            } catch (err) { MUSIC.started = false; }
+        }
+
+        function musicStop() {
+            if (!MUSIC.ctx) return;
+            try {
+                MUSIC.bus.master.gain.cancelScheduledValues(MUSIC.ctx.currentTime);
+                MUSIC.bus.master.gain.setTargetAtTime(0, MUSIC.ctx.currentTime, 0.2);
+            } catch (err) { /* ignora */ }
+            clearInterval(MUSIC.timer); MUSIC.timer = null;
+            const ctx = MUSIC.ctx;
+            // dopo la dissolvenza si ferma il clock audio; al riavvio la partitura riparte dal tempo corrente
+            setTimeout(() => { if (!MUSIC.enabled && ctx.state === 'running') ctx.suspend(); }, 1200);
+        }
+
+        function musicUpdateButton() {
+            const b = document.getElementById('btn-music');
+            if (!b) return;
+            document.getElementById('btn-music-icon').innerText = MUSIC.enabled ? '🔊' : '🔇';
+            b.setAttribute('aria-pressed', MUSIC.enabled ? 'true' : 'false');
+            b.title = MUSIC.enabled ? 'Musica attiva: clicca per disattivarla' : 'Musica disattivata: clicca per attivarla';
+        }
+
+        function musicToggle() {
+            MUSIC.enabled = !MUSIC.enabled;
+            try { localStorage.setItem('giallo_music', MUSIC.enabled ? 'on' : 'off'); } catch (err) { /* ignora */ }
+            if (MUSIC.enabled) musicStart(); else musicStop();
+            musicUpdateButton();
+        }
+
+        function initMusic() {
+            const b = document.getElementById('btn-music');
+            if (!b || typeof b.setAttribute !== 'function') return;
+            try { if (localStorage.getItem('giallo_music') === 'off') MUSIC.enabled = false; } catch (err) { /* ignora */ }
+            musicUpdateButton();
+            b.addEventListener('click', (e) => { e.stopPropagation(); musicToggle(); b.blur(); });
+            // I browser permettono l'audio solo dopo un gesto dell'utente: parte al primo clic o tasto
+            const first = (e) => {
+                if (e.target && e.target.closest && e.target.closest('#btn-music')) return;
+                window.removeEventListener('pointerdown', first, true);
+                window.removeEventListener('keydown', first, true);
+                if (!MUSIC.started) musicStart();
+            };
+            window.addEventListener('pointerdown', first, true);
+            window.addEventListener('keydown', first, true);
+            document.addEventListener('visibilitychange', () => {
+                if (!MUSIC.ctx || !MUSIC.enabled) return;
+                if (document.hidden) MUSIC.ctx.suspend(); else MUSIC.ctx.resume();
+            });
+        }
+
+        // ---------- Introduzione "al cinema" ----------
+        // Il testo scorre dal basso verso l'alto a una velocità legata al numero di parole (parole al minuto),
+        // quindi resta leggibile a qualunque larghezza. Il titolo resta fermo al centro per qualche istante.
+        const CINEMA = {
+            wpm: 125,               // velocità di lettura (parole al minuto)
+            holdMs: 3200,           // pausa iniziale sul titolo
+            raf: null, last: 0, y: 0, speed: 0, hold: 0,
+            paused: false, done: false, started: false, reduced: false
+        };
+
+        function cinemaEls() {
+            return {
+                box: document.getElementById('cinema'), win: document.getElementById('cinema-window'),
+                crawl: document.getElementById('cinema-crawl'), fin: document.getElementById('cinema-final'),
+                bPause: document.getElementById('cinema-pause'), bSkip: document.getElementById('cinema-skip'),
+                bReplay: document.getElementById('cinema-replay')
+            };
+        }
+
+        // Calcola altezze e velocità; conserva la posizione se la finestra viene ridimensionata
+        function cinemaLayout() {
+            const e = cinemaEls();
+            if (!e.box || CINEMA.reduced) return;
+            const h = e.win.clientHeight;
+            const titleBlock = e.crawl.querySelector('.cn-title-block');
+            const frac = CINEMA.crawlH ? (-CINEMA.y / CINEMA.crawlH) : 0;
+            titleBlock.style.height = h + 'px';
+            const ch = e.crawl.scrollHeight;
+            const words = (e.crawl.innerText.split(/\s+/).filter(Boolean).length) - 4;       // titolo escluso
+            const textPx = Math.max(1, ch - h);
+            CINEMA.crawlH = ch;
+            CINEMA.speed = (textPx / Math.max(1, words)) * (CINEMA.wpm / 60);            // px al secondo
+            if (CINEMA.started) CINEMA.y = -frac * ch;
+            e.crawl.style.transform = `translateY(${CINEMA.y}px)`;
+        }
+
+        function cinemaFrame(t) {
+            CINEMA.raf = requestAnimationFrame(cinemaFrame);
+            const dt = Math.min(100, t - (CINEMA.last || t));
+            CINEMA.last = t;
+            if (CINEMA.paused || CINEMA.done) return;
+            const e = cinemaEls();
+            if (CINEMA.hold > 0) { CINEMA.hold -= dt; return; }
+            CINEMA.started = true;
+            CINEMA.y -= CINEMA.speed * dt / 1000;
+            if (CINEMA.y <= -CINEMA.crawlH) { cinemaFinish(); return; }
+            e.crawl.style.transform = `translateY(${CINEMA.y}px)`;
+        }
+
+        function cinemaFinish() {
+            const e = cinemaEls();
+            CINEMA.done = true;
+            CINEMA.paused = false;
+            CINEMA.y = -CINEMA.crawlH;
+            e.crawl.style.transform = `translateY(${CINEMA.y}px)`;
+            e.fin.classList.add('show');
+            e.bPause.classList.add('hidden');
+            e.bSkip.classList.add('hidden');
+            e.bReplay.classList.remove('hidden');
+        }
+
+        function cinemaRestart() {
+            const e = cinemaEls();
+            if (!e.crawl || typeof e.crawl.querySelector !== 'function') return;
+            CINEMA.done = false; CINEMA.paused = false; CINEMA.started = false;
+            CINEMA.y = 0; CINEMA.hold = CINEMA.holdMs; CINEMA.last = 0;
+            e.fin.classList.remove('show');
+            e.bPause.classList.remove('hidden');
+            e.bPause.innerText = '⏸ Pausa';
+            e.bSkip.classList.remove('hidden');
+            e.bReplay.classList.add('hidden');
+            const tb = e.crawl.querySelector('.cn-title');
+            tb.style.animation = 'none'; void tb.offsetWidth; tb.style.animation = '';
+            cinemaLayout();
+            if (!CINEMA.raf) CINEMA.raf = requestAnimationFrame(cinemaFrame);
+        }
+
+        function cinemaStop() {
+            if (CINEMA.raf) cancelAnimationFrame(CINEMA.raf);
+            CINEMA.raf = null;
+        }
+
+        function initCinema() {
+            const e = cinemaEls();
+            if (!e.box || !e.crawl || typeof e.crawl.querySelector !== 'function') return;
+            CINEMA.reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+            e.bPause.addEventListener('click', () => {
+                CINEMA.paused = !CINEMA.paused;
+                e.bPause.innerText = CINEMA.paused ? '▶ Riprendi' : '⏸ Pausa';
+            });
+            e.bSkip.addEventListener('click', () => cinemaFinish());
+            e.bReplay.addEventListener('click', () => cinemaRestart());
+            if (CINEMA.reduced) {
+                e.box.classList.add('reduced');
+                e.bPause.classList.add('hidden'); e.bSkip.classList.add('hidden');
+                return;
+            }
+            cinemaRestart();
+            if (document.fonts && document.fonts.ready) document.fonts.ready.then(cinemaLayout);
+            window.addEventListener('resize', cinemaLayout);
+        }
+
+        // ---------- Schede dei personaggi (testo di ambientazione) ----------
+        const CHARACTER_BIOS = {
+            "Ambasciatore Ambra": {
+                role: "Il diplomatico",
+                text: "Sorride sempre, e proprio per questo nessuno sa che cosa pensi davvero. Ambra ha chiuso vent'anni di carriera con un trattato celebre e un congedo improvviso, che non ha mai spiegato. Alla Tenuta porta una valigetta sigillata che non perde mai di vista. Dice di essere venuto per riconciliarsi con il padrone di casa. Nessuno gli crede fino in fondo."
+            },
+            "Baronessa Bianchi": {
+                role: "La custode del casato",
+                text: "Veste sempre di bianco e non è mai in ritardo. La baronessa Bianchi custodisce il nome di una famiglia illustre e, si mormora, anche il vuoto delle sue casse. Da anni sostituisce di nascosto i gioielli di famiglia con copie perfette. Il padrone di casa conosce un perito capace di accorgersene: ecco perché ha accettato l'invito."
+            },
+            "Colonnello Corallo": {
+                role: "Il veterano",
+                text: "Voce tonante, stretta di mano da stritolare e un debito dopo l'altro. Il colonnello Corallo allevava cavalli di razza, finché la passione per le scommesse non gli ha ipotecato le scuderie. Una parte dei suoi pagherò è finita nelle mani del padrone di casa. Si è presentato alla Tenuta con un sorriso largo e l'intenzione di chiudere la faccenda."
+            },
+            "Dottoressa Domino": {
+                role: "La mente fredda",
+                text: "Parla piano, osserva tutto e non annota mai nulla in pubblico. La dottoressa Domino è stata per anni il medico di fiducia della casa, prima di lasciare l'incarico da un giorno all'altro. Custodisce un registro di cure e confidenze che qualcuno vorrebbe vedere bruciato. È venuta alla Tenuta per riprenderselo, prima che finisca in mani sbagliate."
+            },
+            "Generale Grigio": {
+                role: "Lo stratega",
+                text: "Il generale Grigio non perdeva mai. Poi, dopo trent'anni di partite a scacchi per corrispondenza con il padrone di casa, ha perso l'ultima con una mossa troppo geniale per essere sua. È arrivato alla Tenuta con la scacchiera sotto il braccio e una sola domanda, che intende porre guardando l'avversario negli occhi."
+            },
+            "Visconte Viola": {
+                role: "Il dandy",
+                text: "Non indossa mai lo stesso abito due volte e non dimentica mai una confidenza. Il visconte Viola vive di ospitalità, di pettegolezzi e di segreti altrui, che scambia come moneta. Nella lettera d'invito il padrone di casa chiedeva, con garbo, di portare «un certo taccuino». Viola ha capito di essere desiderato per ciò che sa, e non ha ancora deciso se esserne lusingato o spaventato."
+            }
+        };
+
+        const CHAR_CARD = { aspect: 820 / 1392, gap: 8, current: null };   // altezza / larghezza di testo.png
+
+        // Dimensiona la scheda (stessa larghezza dell'elenco), la colloca sopra la riga e adatta il corpo del testo
+        function layoutCharCard(rowEl) {
+            const legend = document.getElementById('players-legend');
+            const card = document.getElementById('char-card');
+            const text = document.getElementById('char-card-text');
+            const lr = legend.getBoundingClientRect();
+            const w = lr.width, h = w * CHAR_CARD.aspect;
+            card.style.width = w + 'px';
+            card.style.height = h + 'px';
+
+            const rr = rowEl.getBoundingClientRect();
+            const vh = window.innerHeight || 800, vw = window.innerWidth || w;
+            let top = rr.top - h - CHAR_CARD.gap;
+            if (top < CHAR_CARD.gap) top = rr.bottom + CHAR_CARD.gap;        // sopra non c'è spazio: sotto la riga
+            top = Math.max(CHAR_CARD.gap, Math.min(top, vh - h - CHAR_CARD.gap));
+            const left = Math.max(0, Math.min(lr.left, vw - w));
+            card.style.left = left + 'px';
+            card.style.top = top + 'px';
+
+            let size = Math.min(34, Math.round(w * 0.055));
+            text.style.fontSize = size + 'px';
+            while (size > 8 && (text.scrollHeight > text.clientHeight + 1 || text.scrollWidth > text.clientWidth + 1)) {
+                size -= 1;
+                text.style.fontSize = size + 'px';
+            }
+        }
+
+        function showCharCard(characterId, rowEl) {
+            const bio = CHARACTER_BIOS[characterId];
+            if (!bio) return;
+            const card = document.getElementById('char-card');
+            const text = document.getElementById('char-card-text');
+            text.innerHTML = "";
+            [['cc-name', characterId], ['cc-role', bio.role], ['cc-body', bio.text]].forEach(([cls, str]) => {
+                const d = document.createElement('div');
+                d.className = cls;
+                d.textContent = str;
+                text.appendChild(d);
+            });
+            CHAR_CARD.current = characterId;
+            if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+            document.getElementById('char-card-backdrop').classList.add('open');
+            layoutCharCard(rowEl);
+            // la breve animazione riparte a ogni cambio di personaggio
+            card.style.transition = 'none';
+            card.classList.remove('open');
+            void card.offsetWidth;
+            card.style.transition = '';
+            card.classList.add('open');
+            if (document.fonts && document.fonts.load) {
+                document.fonts.load('40px "Henny Penny"').then(() => {
+                    if (CHAR_CARD.current === characterId && rowEl.isConnected) layoutCharCard(rowEl);
+                });
+            }
+        }
+
+        function hideCharCard() {
+            CHAR_CARD.current = null;
+            document.getElementById('char-card').classList.remove('open');
+            document.getElementById('char-card-backdrop').classList.remove('open');
+        }
+
+        // Evidenzia nell'elenco la riga del giocatore di turno
+        function updateLegendTurn() {
+            const cur = gameState.players[gameState.currentTurnIndex];
+            document.querySelectorAll('#players-legend [data-character]').forEach(row => {
+                row.classList.toggle('legend-turn', !!cur && row.dataset.character === cur.character);
+            });
+        }
+
+        // Mouse sulla riga: la pedina corrispondente viene evidenziata sul tabellone (onde luminose)
+        function highlightPawn(characterId) {
+            gameState.pawnHighlight = characterId;
+        }
+
+        // Elenco personaggi: mouseover = evidenzia la pedina; clic = apre la scheda del personaggio.
+        // La scheda si chiude con un clic (ovunque), Esc o Invio (vedi i gestori dei tasti).
+        function bindCharCard() {
+            const legend = document.getElementById('players-legend');
+            const rowOf = e => {
+                const row = e.target.closest ? e.target.closest('[data-character]') : null;
+                return (row && legend.contains(row)) ? row : null;
+            };
+            legend.addEventListener('mouseover', e => {
+                const row = rowOf(e);
+                if (row) highlightPawn(row.dataset.character);
+            });
+            legend.addEventListener('mouseleave', () => highlightPawn(null));
+            legend.addEventListener('click', e => {
+                const row = rowOf(e);
+                if (row) showCharCard(row.dataset.character, row);
+            });
+            const close = () => hideCharCard();
+            document.getElementById('char-card-backdrop').addEventListener('click', close);
+            document.getElementById('char-card').addEventListener('click', close);
+            window.addEventListener('resize', hideCharCard);
+        }
+
         // ---------- Messaggio a video per le ipotesi dei bot ----------
         const BOT_MESSAGE = {
             widthRatio: 0.75,        // larghezza del cartiglio = 75% dell'area di gioco (#game-screen)
+            smallRatio: 0.5625,      // cartiglio piccolo (conferme al giocatore): 75% del cartiglio delle ipotesi dei bot
+            ratio: 0.75,             // rapporto in uso per il cartiglio attualmente a video
             timeoutMs: 10000,        // chiusura automatica dopo 10 secondi
             aspect: 767 / 1536,      // altezza / larghezza di cartiglio.png
             visible: false,
@@ -421,7 +985,7 @@
             const card = document.getElementById('bot-message-card');
             const text = document.getElementById('bot-message-text');
             const refW = ref.getBoundingClientRect().width || ref.clientWidth || 600;
-            const w = refW * BOT_MESSAGE.widthRatio;
+            const w = refW * BOT_MESSAGE.ratio;
             card.style.width = w + 'px';
             card.style.height = (w * BOT_MESSAGE.aspect) + 'px';
 
@@ -433,19 +997,23 @@
             }
         }
 
-        function showBotHypothesis(proposer, suspectId, weaponId, room, onClose) {
+        // Mostra un cartiglio con righe di testo [{cls, text}]; small = versione al 75% (conferme al giocatore)
+        function showCartouche(lines, onClose, small) {
             const text = document.getElementById('bot-message-text');
             text.innerHTML = "";
-            const addLine = (cls, str) => {
+            lines.forEach(l => {
                 const d = document.createElement('div');
-                d.className = cls;
-                d.textContent = str;
+                d.className = l.cls;
+                d.textContent = l.text;
                 text.appendChild(d);
-            };
-            addLine('bm-who', `${proposer.character} ipotizza:`);
-            addLine('bm-what', `${suspectId}, con ${weaponId}, in ${room.id}`);
-            addLine('bm-hint', 'Premi SPAZIO per continuare');
+            });
+            const hint = document.createElement('div');
+            hint.className = 'bm-hint';
+            hint.textContent = 'Premi SPAZIO, ESC o clicca per continuare';
+            text.appendChild(hint);
 
+            clearTimeout(BOT_MESSAGE.timer);
+            BOT_MESSAGE.ratio = small ? BOT_MESSAGE.smallRatio : BOT_MESSAGE.widthRatio;
             BOT_MESSAGE.onClose = onClose || null;
             BOT_MESSAGE.visible = true;
             // Un pulsante rimasto col focus verrebbe attivato dalla barra spaziatrice
@@ -455,8 +1023,37 @@
             if (document.fonts && document.fonts.load) {
                 document.fonts.load('40px "Henny Penny"').then(() => { if (BOT_MESSAGE.visible) layoutBotMessage(); });
             }
-            clearTimeout(BOT_MESSAGE.timer);
             BOT_MESSAGE.timer = setTimeout(() => hideBotMessage(), BOT_MESSAGE.timeoutMs);
+        }
+
+        function showBotHypothesis(proposer, suspectId, weaponId, room, onClose) {
+            showCartouche([
+                { cls: 'bm-who', text: `${proposer.character} ipotizza:` },
+                { cls: 'bm-what', text: `${suspectId}, con ${weaponId}, in ${room.id}` }
+            ], onClose, false);
+        }
+
+        // Conferma al giocatore umano (cartiglio piccolo): chi chiede e che cosa deve mostrare
+        function showAskedToYou(proposer, cardShown, onClose) {
+            showCartouche([
+                { cls: 'bm-who', text: `${proposer.character} chiede una smentita:` },
+                { cls: 'bm-what', text: `Mostri: ${cardShown}` }
+            ], onClose, true);
+        }
+
+        // Esito della propria ipotesi (cartiglio piccolo): chi smentisce e con quale carta, oppure nessuno
+        function showHypothesisResult(disprover, cardShown, onClose) {
+            if (disprover) {
+                showCartouche([
+                    { cls: 'bm-who', text: `${disprover.character} ti smentisce:` },
+                    { cls: 'bm-what', text: `${cardShown}` }
+                ], onClose, true);
+            } else {
+                showCartouche([
+                    { cls: 'bm-who', text: 'Nessuno ha potuto smentire:' },
+                    { cls: 'bm-what', text: 'la tua ipotesi regge' }
+                ], onClose, true);
+            }
         }
 
         // cancel = true: chiude senza far proseguire il turno del bot (reset della partita)
@@ -507,6 +1104,7 @@
 
         function resetFullGameState() {
             hideBotMessage(true);
+            hideCharCard();
             clearTimeout(botTimer);
             botTimer = null;
             gameState = {
@@ -551,16 +1149,16 @@
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('btn-pause-header').classList.add('hidden');
             document.getElementById('setup-screen').classList.remove('hidden');
+            if (typeof cinemaRestart === 'function' && !CINEMA.reduced) cinemaRestart();
         }
 
         function startGame() {
             resetFullGameState();
 
-            const myName = document.getElementById('input-player-name').value.trim() || "Detective";
             const myCharId = document.getElementById('select-character').value;
 
             populateSelects();
-            gameState.myPlayer = { name: myName, character: myCharId };
+            gameState.myPlayer = { character: myCharId };
 
             const randomSuspect = SUSPECTS[Math.floor(Math.random() * SUSPECTS.length)].id;
             const randomWeapon = WEAPONS[Math.floor(Math.random() * WEAPONS.length)].id;
@@ -593,7 +1191,7 @@
             SUSPECTS.forEach(c => {
                 const isUser = (c.id === myCharId);
                 gameState.players.push({
-                    name: isUser ? myName : `Bot ${c.initial}`,
+                    name: c.id,        // nei messaggi ogni giocatore è indicato con il nome del suo personaggio
                     character: c.id,
                     color: c.color,
                     initial: c.initial,
@@ -625,10 +1223,11 @@
             initNotebook();
 
             document.getElementById('setup-screen').classList.add('hidden');
+            cinemaStop();
             document.getElementById('game-screen').classList.remove('hidden');
             document.getElementById('btn-pause-header').classList.remove('hidden');
             
-            document.getElementById('display-your-char').innerText = `${myCharId} (${myName})`;
+            document.getElementById('display-your-char').innerText = myCharId;
             
             updateLegend();
             renderMyCards();
@@ -746,6 +1345,29 @@
                 drawPlayerToken(p, false, isCurrent);
                 ctx.restore();
             });
+
+            if (gameState.pawnHighlight) {
+                const hp = gameState.players.find(p => p.character === gameState.pawnHighlight);
+                if (hp) {
+                    const fx = hp.x * CELL_PX + CELL_PX / 2, fy = hp.y * CELL_PX + CELL_PX / 2;
+                    const phase = (Date.now() % 1000) / 1000;        // un'onda al secondo, finché il mouse è sulla riga
+                    ctx.save();
+                    ctx.strokeStyle = '#fde047';
+                    ctx.shadowColor = '#f59e0b';
+                    ctx.shadowBlur = 12;
+                    ctx.globalAlpha = 0.95 * (1 - phase);
+                    ctx.lineWidth = 4 * (1 - phase) + 1;
+                    ctx.beginPath();
+                    ctx.arc(fx, fy, 14 + phase * 34, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    ctx.globalAlpha = 0.9;
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(fx, fy, 15, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
 
             if (gameState.hoveredObject) {
                 if (gameState.hoveredObject.type === 'player') {
@@ -1175,7 +1797,7 @@
 
                 const room = getCurrentRoom(clickX, clickY);
                 if (room) {
-                    logEvent(`${currPlayer.name} è entrato nella stanza **${room.id}**.`);
+                    logEvent(`${currPlayer.name} è entrat${genderEnd(currPlayer)} nella stanza **${room.id}**.`);
                     document.getElementById('btn-hypothesis').disabled = false;
                 }
 
@@ -1337,10 +1959,11 @@
                 logEvent(`🔍 **${disprover.name}** ha mostrato una carta a ${proposer.name}.` + (iAmDisprover ? ` (hai mostrato: "${cardShown}")` : ''));
                 if (!proposer.isBot) {
                     markNotebook(cardShown, "❌");
-                    alert(`${disprover.name} ti mostra la carta: "${cardShown}"`);
+                    showHypothesisResult(disprover, cardShown);
                 }
             } else {
                 logEvent(`❌ Nessun giocatore ha potuto smentire l'ipotesi!`);
+                if (!proposer.isBot) showHypothesisResult(null, null);
             }
 
             // Tutti i bot vedono chi ha ipotizzato, chi non ha smentito e chi ha mostrato una carta
@@ -1533,9 +2156,9 @@
 
             player.active = false;
             player.canSuggestHere = false;
-            logEvent(`💀 **${player.name}** ha sbagliato accusa ed è eliminato: potrà solo smentire le ipotesi altrui.`);
+            logEvent(`💀 **${player.name}** ha sbagliato accusa ed è eliminat${genderEnd(player)}: potrà solo smentire le ipotesi altrui.`);
             if (!player.isBot) {
-                alert(`❌ ACCUSA ERRATA! ${player.name} è eliminato: potrai solo smentire le ipotesi degli altri giocatori. La partita continua.`);
+                alert(`❌ ACCUSA ERRATA! ${player.name} è eliminat${genderEnd(player)}: potrai solo smentire le ipotesi degli altri giocatori. La partita continua.`);
             }
             updateLegend();
 
@@ -1645,14 +2268,19 @@
                 if (!bot.kb.asked.has(key)) break;
             }
             bot.kb.asked.add(key);
-            resolveHypothesis(bot, suspect, weapon, room);
-            // Il messaggio resta a video finché il detective preme SPAZIO (o dopo 10 s); poi il turno prosegue
-            showBotHypothesis(bot, suspect, weapon, room, () => {
+            const res = resolveHypothesis(bot, suspect, weapon, room);
+            const proceed = () => {
                 botDelay(() => {
                     if (gameState.gameOver) return;
                     if (!botAccuseIfSolved(bot)) botDelay(endTurn, 500);
                 }, 300);
-            });
+            };
+            // Il messaggio resta a video finché il detective preme SPAZIO (o dopo 10 s); poi il turno prosegue.
+            // Se a smentire è il giocatore umano, segue un secondo cartiglio (piccolo) con la carta che mostra.
+            const humanRefutes = res.disprover && !res.disprover.isBot;
+            showBotHypothesis(bot, suspect, weapon, room, humanRefutes
+                ? () => showAskedToYou(bot, res.cardShown, proceed)
+                : proceed);
         }
 
         function playBotTurn() {
@@ -1708,7 +2336,7 @@
             }
 
             const roomAfter = getCurrentRoom(bot.x, bot.y);
-            if (target && roomAfter) logEvent(`${bot.name} è entrato nella stanza **${roomAfter.id}**.`);
+            if (target && roomAfter) logEvent(`${bot.name} è entrat${genderEnd(bot)} nella stanza **${roomAfter.id}**.`);
             if (target && isUsefulRoom(roomAfter)) botDelay(() => botHypothesize(bot, roomAfter), 800);
             else botDelay(endTurn, 800);
         }
@@ -1716,6 +2344,7 @@
         function updateTurnUI() {
             const curr = gameState.players[gameState.currentTurnIndex];
             document.getElementById('display-current-turn').innerText = `${curr.character}`;
+            updateLegendTurn();
             const isMyTurn = !curr.isBot && curr.character === gameState.myPlayer.character;
 
             const currentRoom = getCurrentRoom(curr.x, curr.y);
@@ -1784,10 +2413,10 @@
 
         function switchNotebookTab(tabName) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.notebook-tab-content').forEach(c => c.classList.add('hidden'));
+            document.querySelectorAll('.notebook-tab-content').forEach(c => c.classList.add('nb-off'));
 
             document.getElementById(`tab-btn-${tabName}`).classList.add('active');
-            document.getElementById(`notebook-tab-${tabName}`).classList.remove('hidden');
+            document.getElementById(`notebook-tab-${tabName}`).classList.remove('nb-off');
         }
 
         function toggleNb(key) {
@@ -1818,10 +2447,11 @@
 
             gameState.players.forEach(p => {
                 const isMe = gameState.myPlayer && p.character === gameState.myPlayer.character;
-                const outTag = p.active ? '' : ' · eliminato';
-                const playerTag = isMe ? `<span class="text-xs text-amber-400 font-bold ml-auto">(TU - ${p.name}${outTag})</span>` : `<span class="text-xs text-slate-500 ml-auto">${p.name}${outTag}</span>`;
+                const outTag = p.active ? '' : ` · eliminat${genderEnd(p)}`;
+                const playerTag = isMe ? `<span class="text-xs text-amber-400 font-bold ml-auto">TU${outTag}</span>` : `<span class="text-xs text-slate-500 ml-auto">Computer${outTag}</span>`;
                 
                 const row = document.createElement('div');
+                row.dataset.character = p.character;
                 row.className = `flex items-center gap-3 bg-slate-900 p-2 rounded-lg border ${isMe ? 'border-amber-500/50 bg-amber-950/20' : 'border-slate-800'} ${p.active ? '' : 'opacity-50'}`;
 
                 const iconCanvas = document.createElement('canvas');
@@ -1870,6 +2500,13 @@
 
                 legend.appendChild(row);
             });
+            updateLegendTurn();
+        }
+
+        // Concordanza di genere nei messaggi: "entrato/entrata", "eliminato/eliminata"
+        function genderEnd(p) {
+            const c = SUSPECTS.find(x => x.id === p.character);
+            return (c && c.female) ? 'a' : 'o';
         }
 
         function logEvent(t) {
