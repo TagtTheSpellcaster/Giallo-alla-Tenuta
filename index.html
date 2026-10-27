@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giallo alla Tenuta - v0.33</title>
+    <title>Giallo alla Tenuta - v0.34</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -147,7 +147,7 @@
     <header class="w-full max-w-5xl flex justify-between items-center py-4 mb-4 border-b border-slate-700">
         <div>
             <h1 class="text-4xl font-extrabold tracking-wider text-amber-500 flex items-center gap-2 font-henny">
-                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.33</span>
+                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.34</span>
             </h1>
         </div>
         <div class="flex items-center gap-2 flex-wrap justify-end">
@@ -315,7 +315,7 @@
     <div id="modal-pause" class="hidden fixed inset-0 modal flex justify-center items-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-600 rounded-xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
             <h3 class="text-2xl font-bold text-amber-500 font-henny">⏸️ GIOCO IN PAUSA</h3>
-            <p class="text-xs text-slate-400">Versione v0.33</p>
+            <p class="text-xs text-slate-400">Versione v0.34</p>
             <div class="space-y-3 pt-2">
                 <button id="btn-resume-game" class="w-full py-3 bg-green-600 hover:bg-green-500 font-bold rounded-lg transition text-white">
                     ▶️ Riprendi Partita
@@ -383,7 +383,7 @@
     </div>
     <script type="text/markdown" id="doc-md-regole"># Giallo alla Tenuta — Regole del gioco
 
-Versione del gioco: v0.33. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
+Versione del gioco: v0.34. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
 
 ## Il caso
 
@@ -641,7 +641,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
     </div>
 
     <script>
-        const VERSION = "v0.33";
+        const VERSION = "v0.34";
 
         const SUSPECTS = [
             { id: "Ambasciatore Ambra", color: "#f59e0b", initial: "A", spriteRow: 0, spriteCol: 0 },
@@ -935,7 +935,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
         // melodia rada con vibrato e riverbero. Parte con il primo clic o tasto (vincolo dei browser).
         const MUSIC = {
             bpm: 66, level: 0.7, ctx: null, bus: null, timer: null, next: 0, bar: 0,
-            enabled: true, started: false
+            enabled: true, started: false, hooked: false
         };
         const MUSIC_CHORDS = [
             { bass: 38, pad: [50, 53, 57],     arp: [62, 65, 69, 74] },   // Dm
@@ -1070,7 +1070,8 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
                     lfo.connect(lg); lg.connect(wg.gain); lfo.start();
                     src.connect(bp); bp.connect(wg); wg.connect(MUSIC.bus.dry); src.start();
                 }
-                if (MUSIC.ctx.state === 'suspended') MUSIC.ctx.resume();
+                if (MUSIC.ctx.state === 'suspended') MUSIC.ctx.resume().then(musicUpdateButton, () => {});
+                if (!MUSIC.hooked) { MUSIC.hooked = true; MUSIC.ctx.onstatechange = musicUpdateButton; }
                 MUSIC.bus.master.gain.cancelScheduledValues(MUSIC.ctx.currentTime);
                 MUSIC.bus.master.gain.setTargetAtTime(MUSIC.level, MUSIC.ctx.currentTime, 0.8);
                 if (MUSIC.next < MUSIC.ctx.currentTime) MUSIC.next = MUSIC.ctx.currentTime + 0.1;
@@ -1097,7 +1098,10 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             if (!b) return;
             document.getElementById('btn-music-icon').innerText = MUSIC.enabled ? '🔊' : '🔇';
             b.setAttribute('aria-pressed', MUSIC.enabled ? 'true' : 'false');
-            b.title = MUSIC.enabled ? 'Musica attiva: clicca per disattivarla' : 'Musica disattivata: clicca per attivarla';
+            const waiting = MUSIC.enabled && MUSIC.ctx && MUSIC.ctx.state === 'suspended' && !document.hidden;
+            b.title = !MUSIC.enabled ? 'Musica disattivata: clicca per attivarla'
+                    : waiting ? 'Il browser blocca l\'audio automatico: clicca ovunque per avviare la musica'
+                    : 'Musica attiva: clicca per disattivarla';
         }
 
         function musicToggle() {
@@ -1113,15 +1117,19 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             try { if (localStorage.getItem('giallo_music') === 'off') MUSIC.enabled = false; } catch (err) { /* ignora */ }
             musicUpdateButton();
             b.addEventListener('click', (e) => { e.stopPropagation(); musicToggle(); b.blur(); });
-            // I browser permettono l'audio solo dopo un gesto dell'utente: parte al primo clic o tasto
+            // La musica parte appena la pagina è caricata. Se il browser blocca l'audio automatico (di norma lo fa
+            // finché l'utente non interagisce con la pagina), l'audio resta in attesa e parte al primo clic o tasto.
             const first = (e) => {
                 if (e.target && e.target.closest && e.target.closest('#btn-music')) return;
-                window.removeEventListener('pointerdown', first, true);
-                window.removeEventListener('keydown', first, true);
-                if (!MUSIC.started) musicStart();
+                if (!MUSIC.enabled) return;
+                musicStart();
+                if (MUSIC.ctx && MUSIC.ctx.state === 'running') {
+                    ['pointerdown', 'keydown', 'touchstart'].forEach(t => window.removeEventListener(t, first, true));
+                }
             };
-            window.addEventListener('pointerdown', first, true);
-            window.addEventListener('keydown', first, true);
+            ['pointerdown', 'keydown', 'touchstart'].forEach(t => window.addEventListener(t, first, true));
+            const auto = () => { if (MUSIC.enabled) { musicStart(); musicUpdateButton(); } };
+            if (document.readyState === 'complete') auto(); else window.addEventListener('load', auto);
             document.addEventListener('visibilitychange', () => {
                 if (!MUSIC.ctx || !MUSIC.enabled) return;
                 if (document.hidden) MUSIC.ctx.suspend(); else MUSIC.ctx.resume();
