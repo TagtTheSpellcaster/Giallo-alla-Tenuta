@@ -8,7 +8,7 @@ Questo documento spiega come si usa il gioco: schermate, pulsanti e comandi. Per
 2. Scegli il tuo personaggio dal menu **Scegli il tuo Personaggio**.
 3. Premi **Inizia Partita**. Gli altri cinque personaggi sono controllati dal computer.
 
-In alternativa, **Tutorial guidato (partita di prova)** avvia una partita con l'Ambasciatore Ambra e ti accompagna passo passo tra i comandi (vedi sezione 7).
+In alternativa, **Tutorial guidato (partita di prova)** avvia una partita con l'Ambasciatore Ambra e ti accompagna passo passo tra i comandi (vedi sezione 8).
 
 Dalla schermata iniziale puoi aprire in qualsiasi momento il **Tutorial**, le **Regole**, le **Istruzioni** e il pulsante **Musica** che si trovano nell'intestazione della pagina.
 
@@ -22,7 +22,7 @@ Dalla schermata iniziale puoi aprire in qualsiasi momento il **Tutorial**, le **
 **A destra**
 
 - **Azioni Turno**: i pulsanti per giocare (vedi sezione 3).
-- **Le Tue Carte**: le tre carte che ti sono state date.
+- **Le Tue Carte**: le tre carte che ti sono state date. Accanto c'è la **busta del caso**, chiusa, con le tre carte della soluzione. All'inizio della partita compare al centro dello schermo e va al suo posto.
 - **Taccuino del Detective**: tre schede (Personaggi, Armi, Stanze) per annotare le deduzioni.
 - **Registro Eventi**: la cronologia di movimenti, ipotesi, smentite e accuse.
 
@@ -66,7 +66,11 @@ Alcune informazioni compaiono al centro dello schermo, in una pergamena:
 
 Ogni messaggio si chiude con **Spazio**, **Esc** o con un **clic** in qualsiasi punto. Se non fai nulla si chiude da solo dopo 10 secondi.
 
-## 5. Il taccuino
+## 5. La fine della partita
+
+Quando qualcuno formula un'accusa esatta, o quando tutti i detective sono stati eliminati, la busta del caso si ingrandisce al centro dello schermo, si apre e ne escono le tre carte della soluzione: personaggio, arma e stanza. Si chiude con **Spazio**, **Esc**, **Invio** o un clic; la busta resta aperta nell'interfaccia. Un'accusa sbagliata non rivela la soluzione.
+
+## 6. Il taccuino
 
 Ogni voce ha tre stati; a ogni clic cambia in sequenza:
 
@@ -78,24 +82,24 @@ Ogni voce ha tre stati; a ogni clic cambia in sequenza:
 
 Le tue carte sono segnate in automatico con ❌, così come le carte che ti vengono mostrate per smentirti. Il resto lo compili tu. Cambia scheda con i tre pulsanti sopra l'elenco. Le schede hanno la stessa altezza e mostrano tutte le voci senza scorrere.
 
-## 6. Il mouse sul tabellone e sull'elenco
+## 7. Il mouse sul tabellone e sull'elenco
 
 - **Pedine e armi**: passandoci sopra con il mouse compare un'immagine ingrandita con il nome. Se uscirebbe dal tabellone, scorre fino a restare interamente visibile.
 - **Armi**: puoi trascinare un'arma in un'altra casella libera della stessa stanza. È solo un modo per tenere in ordine il tabellone: non cambia le regole.
 - **Elenco dei personaggi**: passando il mouse su una riga, la pedina corrispondente viene evidenziata sul tabellone con onde luminose. Cliccando una riga si apre la scheda con la descrizione del personaggio. Si chiude con un clic, con **Esc** o con **Invio**.
 
-## 7. Pausa, menu, musica
+## 8. Pausa, menu, musica
 
 - **Pausa / Menu (ESC)**: in partita sospende il gioco dei computer. Dal menu di pausa puoi riprendere o tornare al menu principale. Tornando al menu, la partita in corso viene abbandonata.
 - **Musica**: il pulsante con l'altoparlante nell'intestazione attiva o disattiva il sottofondo musicale, sia nel menu iniziale sia durante la partita. La scelta viene ricordata. La musica parte al primo clic o tasto premuto, perché i browser non permettono l'audio prima di un gesto dell'utente.
-- **Tutorial**: un percorso guidato di 15 passi. Evidenzia sul gioco vero ogni comando (tabellone, pedina, porte, elenco dei personaggi, dadi, ipotesi, accusa, passa turno, carte, taccuino, registro, intestazione) con una breve spiegazione. Si avanza con **Avanti** (o freccia destra / Invio), si torna indietro con **Indietro** (o freccia sinistra) e si esce con **Esci** o **Esc**. Mentre è aperto la partita è in pausa; si può rivedere in qualsiasi momento dal pulsante **Tutorial** dell'intestazione.
+- **Tutorial**: un percorso guidato di 16 passi. Evidenzia sul gioco vero ogni comando (tabellone, pedina, porte, elenco dei personaggi, dadi, ipotesi, accusa, passa turno, carte, busta, taccuino, registro, intestazione) con una breve spiegazione. Si avanza con **Avanti** (o freccia destra / Invio), si torna indietro con **Indietro** (o freccia sinistra) e si esce con **Esci** o **Esc**. Mentre è aperto la partita è in pausa; si può rivedere in qualsiasi momento dal pulsante **Tutorial** dell'intestazione.
 - **Regole** e **Istruzioni**: si consultano dall'intestazione in qualsiasi momento. Durante la partita il gioco si sospende finché il documento è aperto. Si chiude con il pulsante di chiusura, con **Esc** o con un clic fuori dalla finestra.
 
-## 8. Gli avversari
+## 9. Gli avversari
 
 I cinque avversari controllati dal computer seguono le stesse regole del giocatore umano. Ogni computer annota le carte che vede e deduce quelle degli altri dalle smentite. Si muove verso le stanze che potrebbero ancora essere quella del delitto e **accusa solo quando è certo** della soluzione: non sbaglia mai l'accusa. Non ci si può quindi fermare ad aspettare: il tempo gioca a favore di chi deduce più in fretta.
 
-## 9. Consigli
+## 10. Consigli
 
 - Registra tutto nel taccuino subito: ipotesi e smentite sono l'unica fonte di informazioni.
 - Un'ipotesi in una stanza in cui non hai ancora escluso nulla è più utile di una in una stanza già nota.

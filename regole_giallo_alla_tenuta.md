@@ -1,6 +1,6 @@
 # Giallo alla Tenuta — Regole del gioco
 
-Versione del gioco: v0.39. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
+Versione del gioco: v0.40. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
 
 ## Il caso
 
@@ -42,7 +42,7 @@ Tutte le stanze hanno le stesse regole: ciascuna può essere la stanza del delit
 
 1. **Pedine.** Ogni personaggio parte da una posizione fissa sul bordo del tabellone. Le sei posizioni sono sempre le stesse e sono tutte alla stessa distanza (5 caselle di corridoio) dalla porta più vicina.
 2. **Armi.** Le 6 armi sono collocate in 6 stanze diverse, scelte a caso.
-3. **Busta.** Una carta personaggio, una carta arma e una carta stanza, scelte a caso, finiscono nella busta del caso. Nessuno le vede.
+3. **Busta.** Una carta personaggio, una carta arma e una carta stanza, scelte a caso, finiscono nella busta del caso. Nessuno le vede. La busta resta chiusa e visibile nell'interfaccia fino alla fine della partita.
 4. **Distribuzione.** Le restanti 18 carte sono mescolate e distribuite a turno ai 6 giocatori: ogni giocatore ha 3 carte.
 5. **Taccuino.** Il gioco mostra le proprie carte e le segna automaticamente nel taccuino come escluse dalla busta. Il taccuino serve ad annotare a mano le proprie deduzioni.
 
@@ -127,13 +127,13 @@ Il giocatore umano termina il turno quando ha finito; i turni dei bot terminano 
 - Si può formulare **solo durante il proprio turno**, anche prima di muoversi, e **senza trovarsi nella stanza nominata**.
 - Si indicano personaggio, arma e stanza.
 - Ogni giocatore ha **una sola accusa per tutta la partita**.
-- Se **tutte e tre** le carte corrispondono alla busta, il giocatore **vince** e la partita termina. La soluzione viene rivelata.
+- Se **tutte e tre** le carte corrispondono alla busta, il giocatore **vince** e la partita termina. La busta viene aperta e le tre carte vengono mostrate.
 - Se **anche una sola** carta è diversa, l'accusa è sbagliata:
   - il giocatore è **eliminato**: non gioca più turni e non può più vincere;
   - la sua pedina resta sul tabellone, mostrata attenuata;
   - **continua a mostrare le proprie carte** per smentire le ipotesi degli altri;
   - la soluzione **non** viene rivelata e la partita prosegue.
-- Se **tutti** i detective sono eliminati, la partita finisce senza vincitori e la soluzione viene rivelata.
+- Se **tutti** i detective sono eliminati, la partita finisce senza vincitori e la busta viene aperta per mostrare la soluzione.
 
 ## 7. Differenze dal gioco da tavolo
 

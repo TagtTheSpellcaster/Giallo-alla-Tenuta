@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giallo alla Tenuta - v0.39</title>
+    <title>Giallo alla Tenuta - v0.40</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -169,6 +169,41 @@
         #tour-cursor.click::after { animation: tour-ripple 0.6s ease-out; }
         @keyframes tour-ripple { 0% { opacity: 1; transform: scale(0.3); } 100% { opacity: 0; transform: scale(1.8); } }
 
+        /* ---------- Busta del caso: nell'interfaccia, animazione iniziale e rivelazione finale ---------- */
+        #case-envelope { flex: none; width: 104px; text-align: center; cursor: help; }
+        #case-envelope img { display: block; width: 100%; height: auto; border-radius: 3px; filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.55)); }
+        #case-envelope span { display: block; margin-top: 3px; font-size: 0.62rem; line-height: 1.1; color: #94a3b8; letter-spacing: 0.02em; }
+        #case-envelope img.thump { animation: env-thump 0.7s ease-out; }
+        @keyframes env-thump { 0% { transform: scale(1.25); filter: drop-shadow(0 0 14px rgba(245, 158, 11, 0.95)); } 55% { transform: scale(0.94); } 100% { transform: scale(1); } }
+        #env-intro { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 50; pointer-events: none; background: rgba(2, 6, 23, 0); transition: background 0.8s ease; }
+        #env-intro.dim { background: rgba(2, 6, 23, 0.62); }
+        #env-intro img { position: fixed; height: auto; border-radius: 8px; transform: translate(-50%, -50%); filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.7));
+                         transition: opacity 0.8s ease, left 0.95s ease-in-out, top 0.95s ease-in-out, width 0.95s ease-in-out; }
+        #env-intro .ei-cap { position: fixed; transform: translate(-50%, 0); font-family: 'Henny Penny', cursive; color: #fbbf24; font-size: clamp(1.2rem, 0.9rem + 1.4vw, 1.9rem);
+                             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95); text-align: center; white-space: nowrap; transition: opacity 0.6s ease; }
+        #reveal { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 75; display: none; cursor: pointer; }
+        #reveal.open { display: block; }
+        #reveal .rv-dim { position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: radial-gradient(ellipse at center, rgba(8, 10, 22, 0.86), rgba(0, 0, 0, 0.96)); opacity: 0; transition: opacity 0.7s ease; }
+        #reveal.show .rv-dim { opacity: 1; }
+        #reveal .rv-title { position: absolute; left: 0; right: 0; top: 3.5vh; text-align: center; padding: 0 5%; opacity: 0; transition: opacity 0.9s ease; }
+        #reveal.show .rv-title { opacity: 1; }
+        #reveal .rv-title h2 { font-family: 'Henny Penny', cursive; font-weight: 400; color: #f59e0b; font-size: clamp(1.7rem, 1rem + 3vw, 3rem); line-height: 1.1; text-shadow: 0 3px 14px rgba(0, 0, 0, 0.9); margin: 0; }
+        #reveal .rv-title p { font-family: 'EB Garamond', Georgia, serif; color: #f1e3c0; font-size: clamp(1rem, 0.8rem + 0.8vw, 1.35rem); margin: 6px 0 0; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9); }
+        #reveal .rv-env { position: absolute; aspect-ratio: 1417 / 1024; z-index: 1; transition: left 1.1s ease-in-out, top 1.1s ease-in-out, width 1.1s ease-in-out, opacity 0.8s ease;
+                          filter: drop-shadow(0 20px 34px rgba(0, 0, 0, 0.75)); }
+        #reveal .rv-env img { position: absolute; left: 0; width: 100%; height: auto; transition: opacity 0.55s ease; }
+        #reveal .rv-env .rv-closed { bottom: 0; }
+        #reveal .rv-env .rv-open { top: 0; opacity: 0; }
+        #reveal .rv-env.opened .rv-open { opacity: 1; }
+        #reveal .rv-env.opened .rv-closed { opacity: 0; }
+        #reveal .rv-env.wiggle { animation: rv-wiggle 0.7s ease-in-out; }
+        @keyframes rv-wiggle { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(-2.5deg); } 45% { transform: rotate(2.5deg); } 70% { transform: rotate(-1.2deg); } }
+        #reveal canvas.rv-card { position: absolute; z-index: 2; opacity: 0; transition: left 0.85s cubic-bezier(.2, .9, .3, 1.15), top 0.85s cubic-bezier(.2, .9, .3, 1.15), transform 0.85s cubic-bezier(.2, .9, .3, 1.15), opacity 0.4s ease;
+                                 filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.7)); border-radius: 14px; }
+        #reveal .rv-hint { position: absolute; left: 0; right: 0; bottom: 2.5vh; text-align: center; font-family: 'Henny Penny', cursive; color: #d9c79a; font-size: 1rem; opacity: 0; transition: opacity 0.8s ease; }
+        #reveal .rv-hint.on { opacity: 0.85; }
+        #reveal.rv-fast .rv-dim, #reveal.rv-fast .rv-title, #reveal.rv-fast .rv-env, #reveal.rv-fast .rv-env img, #reveal.rv-fast canvas.rv-card, #reveal.rv-fast .rv-hint { transition-duration: 0.01s !important; }
+
         /* Scheda del personaggio: compare passando il mouse sull'elenco dei personaggi */
         #char-card-backdrop { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 54; display: none; cursor: pointer; }
         #char-card-backdrop.open { display: block; }
@@ -195,7 +230,7 @@
     <header class="w-full max-w-5xl flex justify-between items-center py-4 mb-4 border-b border-slate-700">
         <div>
             <h1 class="text-4xl font-extrabold tracking-wider text-amber-500 flex items-center gap-2 font-henny">
-                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.39</span>
+                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.40</span>
             </h1>
         </div>
         <div id="hdr-controls" class="flex items-center gap-2 flex-wrap justify-end">
@@ -324,8 +359,16 @@
             </div>
 
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md">
-                <h3 class="text-md font-bold text-slate-200 mb-2">Le Tue Carte</h3>
-                <div id="my-cards-container" class="flex flex-wrap gap-2"></div>
+                <div class="flex items-center gap-4">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-md font-bold text-slate-200 mb-2">Le Tue Carte</h3>
+                        <div id="my-cards-container" class="flex flex-wrap gap-2"></div>
+                    </div>
+                    <div id="case-envelope" title="La busta del caso: contiene le tre carte della soluzione (personaggio, arma, stanza)">
+                        <img id="case-envelope-img" src="busta_chiusa.jpg" alt="Busta del caso">
+                        <span>Busta del caso</span>
+                    </div>
+                </div>
             </div>
 
             <!-- TACCUINO A SCHEDE -->
@@ -371,7 +414,7 @@
     <div id="modal-pause" class="hidden fixed inset-0 modal flex justify-center items-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-600 rounded-xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
             <h3 class="text-2xl font-bold text-amber-500 font-henny">⏸️ GIOCO IN PAUSA</h3>
-            <p class="text-xs text-slate-400">Versione v0.39</p>
+            <p class="text-xs text-slate-400">Versione v0.40</p>
             <div class="space-y-3 pt-2">
                 <button id="btn-resume-game" class="w-full py-3 bg-green-600 hover:bg-green-500 font-bold rounded-lg transition text-white">
                     ▶️ Riprendi Partita
@@ -430,6 +473,9 @@
         </div>
     </div>
 
+    <!-- RIVELAZIONE DELLA SOLUZIONE -->
+    <div id="reveal" role="dialog" aria-label="La soluzione del caso"></div>
+
     <!-- TUTORIAL GUIDATO -->
     <div id="tour-layer" role="dialog" aria-live="polite" aria-label="Tutorial guidato">
         <div id="tour-block"></div>
@@ -456,7 +502,7 @@
     </div>
     <script type="text/markdown" id="doc-md-regole"># Giallo alla Tenuta — Regole del gioco
 
-Versione del gioco: v0.39. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
+Versione del gioco: v0.40. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
 
 ## Il caso
 
@@ -498,7 +544,7 @@ Tutte le stanze hanno le stesse regole: ciascuna può essere la stanza del delit
 
 1. **Pedine.** Ogni personaggio parte da una posizione fissa sul bordo del tabellone. Le sei posizioni sono sempre le stesse e sono tutte alla stessa distanza (5 caselle di corridoio) dalla porta più vicina.
 2. **Armi.** Le 6 armi sono collocate in 6 stanze diverse, scelte a caso.
-3. **Busta.** Una carta personaggio, una carta arma e una carta stanza, scelte a caso, finiscono nella busta del caso. Nessuno le vede.
+3. **Busta.** Una carta personaggio, una carta arma e una carta stanza, scelte a caso, finiscono nella busta del caso. Nessuno le vede. La busta resta chiusa e visibile nell'interfaccia fino alla fine della partita.
 4. **Distribuzione.** Le restanti 18 carte sono mescolate e distribuite a turno ai 6 giocatori: ogni giocatore ha 3 carte.
 5. **Taccuino.** Il gioco mostra le proprie carte e le segna automaticamente nel taccuino come escluse dalla busta. Il taccuino serve ad annotare a mano le proprie deduzioni.
 
@@ -583,13 +629,13 @@ Il giocatore umano termina il turno quando ha finito; i turni dei bot terminano 
 - Si può formulare **solo durante il proprio turno**, anche prima di muoversi, e **senza trovarsi nella stanza nominata**.
 - Si indicano personaggio, arma e stanza.
 - Ogni giocatore ha **una sola accusa per tutta la partita**.
-- Se **tutte e tre** le carte corrispondono alla busta, il giocatore **vince** e la partita termina. La soluzione viene rivelata.
+- Se **tutte e tre** le carte corrispondono alla busta, il giocatore **vince** e la partita termina. La busta viene aperta e le tre carte vengono mostrate.
 - Se **anche una sola** carta è diversa, l'accusa è sbagliata:
   - il giocatore è **eliminato**: non gioca più turni e non può più vincere;
   - la sua pedina resta sul tabellone, mostrata attenuata;
   - **continua a mostrare le proprie carte** per smentire le ipotesi degli altri;
   - la soluzione **non** viene rivelata e la partita prosegue.
-- Se **tutti** i detective sono eliminati, la partita finisce senza vincitori e la soluzione viene rivelata.
+- Se **tutti** i detective sono eliminati, la partita finisce senza vincitori e la busta viene aperta per mostrare la soluzione.
 
 ## 7. Differenze dal gioco da tavolo
 
@@ -610,7 +656,7 @@ Questo documento spiega come si usa il gioco: schermate, pulsanti e comandi. Per
 2. Scegli il tuo personaggio dal menu **Scegli il tuo Personaggio**.
 3. Premi **Inizia Partita**. Gli altri cinque personaggi sono controllati dal computer.
 
-In alternativa, **Tutorial guidato (partita di prova)** avvia una partita con l'Ambasciatore Ambra e ti accompagna passo passo tra i comandi (vedi sezione 7).
+In alternativa, **Tutorial guidato (partita di prova)** avvia una partita con l'Ambasciatore Ambra e ti accompagna passo passo tra i comandi (vedi sezione 8).
 
 Dalla schermata iniziale puoi aprire in qualsiasi momento il **Tutorial**, le **Regole**, le **Istruzioni** e il pulsante **Musica** che si trovano nell'intestazione della pagina.
 
@@ -624,7 +670,7 @@ Dalla schermata iniziale puoi aprire in qualsiasi momento il **Tutorial**, le **
 **A destra**
 
 - **Azioni Turno**: i pulsanti per giocare (vedi sezione 3).
-- **Le Tue Carte**: le tre carte che ti sono state date.
+- **Le Tue Carte**: le tre carte che ti sono state date. Accanto c'è la **busta del caso**, chiusa, con le tre carte della soluzione. All'inizio della partita compare al centro dello schermo e va al suo posto.
 - **Taccuino del Detective**: tre schede (Personaggi, Armi, Stanze) per annotare le deduzioni.
 - **Registro Eventi**: la cronologia di movimenti, ipotesi, smentite e accuse.
 
@@ -668,7 +714,11 @@ Alcune informazioni compaiono al centro dello schermo, in una pergamena:
 
 Ogni messaggio si chiude con **Spazio**, **Esc** o con un **clic** in qualsiasi punto. Se non fai nulla si chiude da solo dopo 10 secondi.
 
-## 5. Il taccuino
+## 5. La fine della partita
+
+Quando qualcuno formula un'accusa esatta, o quando tutti i detective sono stati eliminati, la busta del caso si ingrandisce al centro dello schermo, si apre e ne escono le tre carte della soluzione: personaggio, arma e stanza. Si chiude con **Spazio**, **Esc**, **Invio** o un clic; la busta resta aperta nell'interfaccia. Un'accusa sbagliata non rivela la soluzione.
+
+## 6. Il taccuino
 
 Ogni voce ha tre stati; a ogni clic cambia in sequenza:
 
@@ -680,24 +730,24 @@ Ogni voce ha tre stati; a ogni clic cambia in sequenza:
 
 Le tue carte sono segnate in automatico con ❌, così come le carte che ti vengono mostrate per smentirti. Il resto lo compili tu. Cambia scheda con i tre pulsanti sopra l'elenco. Le schede hanno la stessa altezza e mostrano tutte le voci senza scorrere.
 
-## 6. Il mouse sul tabellone e sull'elenco
+## 7. Il mouse sul tabellone e sull'elenco
 
 - **Pedine e armi**: passandoci sopra con il mouse compare un'immagine ingrandita con il nome. Se uscirebbe dal tabellone, scorre fino a restare interamente visibile.
 - **Armi**: puoi trascinare un'arma in un'altra casella libera della stessa stanza. È solo un modo per tenere in ordine il tabellone: non cambia le regole.
 - **Elenco dei personaggi**: passando il mouse su una riga, la pedina corrispondente viene evidenziata sul tabellone con onde luminose. Cliccando una riga si apre la scheda con la descrizione del personaggio. Si chiude con un clic, con **Esc** o con **Invio**.
 
-## 7. Pausa, menu, musica
+## 8. Pausa, menu, musica
 
 - **Pausa / Menu (ESC)**: in partita sospende il gioco dei computer. Dal menu di pausa puoi riprendere o tornare al menu principale. Tornando al menu, la partita in corso viene abbandonata.
 - **Musica**: il pulsante con l'altoparlante nell'intestazione attiva o disattiva il sottofondo musicale, sia nel menu iniziale sia durante la partita. La scelta viene ricordata. La musica parte al primo clic o tasto premuto, perché i browser non permettono l'audio prima di un gesto dell'utente.
-- **Tutorial**: un percorso guidato di 15 passi. Evidenzia sul gioco vero ogni comando (tabellone, pedina, porte, elenco dei personaggi, dadi, ipotesi, accusa, passa turno, carte, taccuino, registro, intestazione) con una breve spiegazione. Si avanza con **Avanti** (o freccia destra / Invio), si torna indietro con **Indietro** (o freccia sinistra) e si esce con **Esci** o **Esc**. Mentre è aperto la partita è in pausa; si può rivedere in qualsiasi momento dal pulsante **Tutorial** dell'intestazione.
+- **Tutorial**: un percorso guidato di 16 passi. Evidenzia sul gioco vero ogni comando (tabellone, pedina, porte, elenco dei personaggi, dadi, ipotesi, accusa, passa turno, carte, busta, taccuino, registro, intestazione) con una breve spiegazione. Si avanza con **Avanti** (o freccia destra / Invio), si torna indietro con **Indietro** (o freccia sinistra) e si esce con **Esci** o **Esc**. Mentre è aperto la partita è in pausa; si può rivedere in qualsiasi momento dal pulsante **Tutorial** dell'intestazione.
 - **Regole** e **Istruzioni**: si consultano dall'intestazione in qualsiasi momento. Durante la partita il gioco si sospende finché il documento è aperto. Si chiude con il pulsante di chiusura, con **Esc** o con un clic fuori dalla finestra.
 
-## 8. Gli avversari
+## 9. Gli avversari
 
 I cinque avversari controllati dal computer seguono le stesse regole del giocatore umano. Ogni computer annota le carte che vede e deduce quelle degli altri dalle smentite. Si muove verso le stanze che potrebbero ancora essere quella del delitto e **accusa solo quando è certo** della soluzione: non sbaglia mai l'accusa. Non ci si può quindi fermare ad aspettare: il tempo gioca a favore di chi deduce più in fretta.
 
-## 9. Consigli
+## 10. Consigli
 
 - Registra tutto nel taccuino subito: ipotesi e smentite sono l'unica fonte di informazioni.
 - Un'ipotesi in una stanza in cui non hai ancora escluso nulla è più utile di una in una stanza già nota.
@@ -717,7 +767,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
     </div>
 
     <script>
-        const VERSION = "v0.39";
+        const VERSION = "v0.40";
 
         const SUSPECTS = [
             { id: "Ambasciatore Ambra", color: "#f59e0b", initial: "A", spriteRow: 0, spriteCol: 0 },
@@ -901,9 +951,218 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             initMusic();
             initDocs();
             initTour();
+            initReveal();
 
             startAnimationLoop();
         });
+
+        // ---------- Busta del caso: animazione iniziale e rivelazione della soluzione ----------
+        const REVEAL = { open: false, timers: [], last: null, intro: null, introTimers: [], imgs: null };
+
+        function revImages() {
+            if (!REVEAL.imgs && typeof Image === 'function') {
+                const mk = src => { const i = new Image(); i.src = src; return i; };
+                REVEAL.imgs = { carta: mk('carta.jpg'), closed: mk('busta_chiusa.jpg'), open: mk('busta_aperta.png') };
+            }
+            return REVEAL.imgs;
+        }
+        function revReduced() { return !!(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+        function revDom() { return typeof document !== 'undefined' && document.body && typeof document.body.appendChild === 'function'; }
+        function revLater(fn, ms) { REVEAL.timers.push(setTimeout(fn, ms)); }
+
+        // Animazione di inizio partita: la busta compare al centro e vola nella sua posizione nell'interfaccia
+        function envelopeIntroCancel() {
+            REVEAL.introTimers.forEach(clearTimeout); REVEAL.introTimers = [];
+            if (REVEAL.intro && REVEAL.intro.remove) REVEAL.intro.remove();
+            REVEAL.intro = null;
+            const slot = document.getElementById('case-envelope-img');
+            if (slot && slot.style) slot.style.visibility = 'visible';
+        }
+
+        function envelopeIntro() {
+            if (!revDom()) return;
+            envelopeIntroCancel();
+            const slot = document.getElementById('case-envelope-img');
+            if (!slot || typeof slot.getBoundingClientRect !== 'function') return;
+            slot.src = 'busta_chiusa.jpg';
+            if (revReduced()) return;
+            window.scrollTo(0, 0);
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const W = Math.min(440, vw * 0.62);
+            const ov = document.createElement('div'); ov.id = 'env-intro';
+            const img = document.createElement('img'); img.src = 'busta_chiusa.jpg'; img.alt = '';
+            Object.assign(img.style, { left: vw / 2 + 'px', top: vh * 0.44 + 'px', width: W + 'px', opacity: '0' });
+            const cap = document.createElement('div'); cap.className = 'ei-cap'; cap.textContent = 'La soluzione è chiusa nella busta';
+            Object.assign(cap.style, { left: vw / 2 + 'px', top: (vh * 0.44 + W * 902 / 1429 / 2 + 18) + 'px', opacity: '0' });
+            ov.appendChild(img); ov.appendChild(cap); document.body.appendChild(ov);
+            REVEAL.intro = ov;
+            slot.style.visibility = 'hidden';
+            const t = (fn, ms) => REVEAL.introTimers.push(setTimeout(fn, ms));
+            t(() => { ov.classList.add('dim'); img.style.opacity = '1'; cap.style.opacity = '1'; }, 60);
+            t(() => {
+                const r = slot.getBoundingClientRect();
+                cap.style.opacity = '0'; ov.classList.remove('dim');
+                Object.assign(img.style, { left: (r.left + r.width / 2) + 'px', top: (r.top + r.height / 2) + 'px', width: r.width + 'px' });
+            }, 2300);
+            t(() => {
+                envelopeIntroCancel();
+                slot.classList.remove('thump'); void slot.offsetWidth; slot.classList.add('thump');
+            }, 3350);
+        }
+
+        // ---- carte della soluzione, ricavate da carta.jpg ----
+        function revWrap(ctx, text, maxW, maxSize, minSize) {
+            const font = s => `${s}px "Henny Penny", cursive`;
+            for (let s = maxSize; s >= minSize; s -= 2) { ctx.font = font(s); if (ctx.measureText(text).width <= maxW) return { lines: [text], size: s }; }
+            const words = text.split(' ');
+            let best = null;
+            for (let k = 1; k < words.length; k++) {
+                const l1 = words.slice(0, k).join(' '), l2 = words.slice(k).join(' ');
+                for (let s = maxSize; s >= minSize; s -= 2) {
+                    ctx.font = font(s);
+                    if (Math.max(ctx.measureText(l1).width, ctx.measureText(l2).width) <= maxW) {
+                        if (!best || s > best.size) best = { lines: [l1, l2], size: s };
+                        break;
+                    }
+                }
+            }
+            if (best) return best;
+            ctx.font = font(minSize);
+            return { lines: [text], size: minSize };
+        }
+
+        function revCardCanvas(kind, id) {
+            const imgs = revImages();
+            const W = 560, H = Math.round(W * 1503 / 934);
+            const c = document.createElement('canvas'); c.width = W; c.height = H; c.className = 'rv-card';
+            const ctx = c.getContext('2d');
+            if (imgs.carta.complete && imgs.carta.naturalWidth) ctx.drawImage(imgs.carta, 0, 0, W, H);
+            else { ctx.fillStyle = '#f3dfae'; ctx.fillRect(0, 0, W, H); }
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#8a5a1c'; ctx.font = '30px "Henny Penny", cursive';
+            ctx.fillText({ suspect: 'Personaggio', weapon: 'Arma', room: 'Stanza' }[kind], W / 2, H * 0.175);
+            ctx.fillStyle = '#3b2410';
+            if (kind === 'room') {
+                const w = revWrap(ctx, id, W * 0.66, 92, 44);
+                ctx.font = `${w.size}px "Henny Penny", cursive`;
+                const lh = w.size * 1.15, y0 = H / 2 - (w.lines.length - 1) * lh / 2;
+                w.lines.forEach((ln, i) => ctx.fillText(ln, W / 2, y0 + i * lh));
+            } else {
+                const sheet = kind === 'suspect' ? charsSpriteImage : weaponsSpriteImage;
+                const def = kind === 'suspect' ? SUSPECTS.find(s => s.id === id) : WEAPONS.find(x => x.id === id);
+                const size = W * 0.62, x = (W - size) / 2, y = H * 0.225;
+                ctx.save();
+                ctx.beginPath();
+                if (ctx.roundRect) ctx.roundRect(x, y, size, size, 16); else ctx.rect(x, y, size, size);
+                ctx.fillStyle = '#2a1b0d'; ctx.fill(); ctx.clip();
+                if (sheet && sheet.width) {
+                    const sw = sheet.width / 3, sh = sheet.height / 2;
+                    ctx.drawImage(sheet, def.spriteCol * sw, def.spriteRow * sh, sw, sh, x, y, size, size);
+                }
+                ctx.restore();
+                ctx.beginPath();
+                if (ctx.roundRect) ctx.roundRect(x, y, size, size, 16); else ctx.rect(x, y, size, size);
+                ctx.lineWidth = 5; ctx.strokeStyle = '#7a4a14'; ctx.stroke();
+                ctx.fillStyle = '#3b2410';
+                const w = revWrap(ctx, id, W * 0.7, 58, 34);
+                ctx.font = `${w.size}px "Henny Penny", cursive`;
+                const lh = w.size * 1.12, y1 = y + size + (H * 0.87 - (y + size)) / 2 - (w.lines.length - 1) * lh / 2;
+                w.lines.forEach((ln, i) => ctx.fillText(ln, W / 2, y1 + i * lh));
+            }
+            return c;
+        }
+
+        // kind: 'won' | 'unsolved'
+        function showSolutionReveal(kind, winnerName, sol, winnerIsHuman) {
+            REVEAL.last = { kind, winner: winnerName, sol: { suspect: sol.suspect, weapon: sol.weapon, room: sol.room } };
+            try { revealBuild(kind, winnerName, sol, winnerIsHuman); } catch (err) { REVEAL.last.error = String(err); }
+        }
+
+        function revealBuild(kind, winnerName, sol, winnerIsHuman) {
+            const root = document.getElementById('reveal');
+            if (!revDom() || !root || typeof root.appendChild !== 'function' || !root.classList) return;
+            envelopeIntroCancel();
+            REVEAL.timers.forEach(clearTimeout); REVEAL.timers = [];
+            const fast = revReduced();
+            root.classList.toggle('rv-fast', fast);
+            root.innerHTML = '';
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const slot = document.getElementById('case-envelope-img');
+            const sr = (slot && slot.getBoundingClientRect) ? slot.getBoundingClientRect() : { left: vw - 140, top: vh / 2, width: 100, height: 63, bottom: vh / 2 + 63 };
+            if (slot) slot.style.visibility = 'hidden';
+
+            const mk = (tag, cls, parent) => { const e = document.createElement(tag); if (cls) e.className = cls; (parent || root).appendChild(e); return e; };
+            mk('div', 'rv-dim');
+            const title = mk('div', 'rv-title');
+            const h2 = mk('h2', '', title), p = mk('p', '', title);
+            if (kind === 'won') {
+                h2.textContent = winnerIsHuman ? 'Hai risolto il caso!' : 'Il caso è risolto!';
+                p.textContent = winnerIsHuman ? 'Ecco che cosa conteneva la busta.' : `${winnerName} ha risolto il mistero. Ecco che cosa conteneva la busta.`;
+            } else {
+                h2.textContent = 'Il caso resta irrisolto';
+                p.textContent = 'Tutti i detective sono stati eliminati. Ecco che cosa conteneva la busta.';
+            }
+            // busta: parte dalla sua posizione nell'interfaccia, va al centro, si apre
+            const envW = Math.min(540, vw * 0.7), envH = envW * 1024 / 1417;
+            const env = mk('div', 'rv-env');
+            const cl = mk('img', 'rv-closed', env); cl.src = 'busta_chiusa.jpg'; cl.alt = '';
+            const op = mk('img', 'rv-open', env); op.src = 'busta_aperta.png'; op.alt = '';
+            const startH = sr.width * 1024 / 1417;
+            Object.assign(env.style, { left: sr.left + 'px', top: (sr.bottom - startH) + 'px', width: sr.width + 'px' });
+            const hint = mk('div', 'rv-hint'); hint.textContent = 'Premi SPAZIO, ESC o clicca per chiudere';
+
+            // carte
+            const gap = 18;
+            const cardW = Math.max(70, Math.min(250, (vw - 40 - 2 * gap) / 3, vh * 0.54 * 934 / 1503));
+            const cardH = cardW * 1503 / 934;
+            const rowLeft = vw / 2 - (3 * cardW + 2 * gap) / 2, rowTop = Math.max(vh * 0.2, vh * 0.52 - cardH / 2);
+            const cards = [['suspect', sol.suspect], ['weapon', sol.weapon], ['room', sol.room]].map(([k, id], i) => {
+                const cv = revCardCanvas(k, id);
+                root.appendChild(cv);
+                Object.assign(cv.style, { width: cardW + 'px', height: cardH + 'px', left: (vw / 2 - cardW / 2) + 'px', top: (vh * 0.62) + 'px', transform: `scale(0.35) rotate(${(i - 1) * 9}deg)` });
+                cv.dataset.final = (rowLeft + i * (cardW + gap)) + '';
+                return cv;
+            });
+
+            REVEAL.open = true;
+            root.classList.add('open');
+            void root.offsetWidth;
+            const T = fast ? 0.01 : 1;
+            revLater(() => root.classList.add('show'), 30);
+            revLater(() => {                 // la busta va al centro
+                Object.assign(env.style, { left: (vw - envW) / 2 + 'px', top: (vh * 0.54 - envH / 2) + 'px', width: envW + 'px' });
+            }, 500 * T);
+            revLater(() => { env.classList.add('opened', 'wiggle'); }, 1750 * T);
+            revLater(() => {                 // la busta scende, le carte escono una alla volta
+                Object.assign(env.style, { top: (vh - envH * 0.42) + 'px', opacity: '0.95' });
+            }, 2700 * T);
+            cards.forEach((cv, i) => revLater(() => {
+                Object.assign(cv.style, { left: cv.dataset.final + 'px', top: rowTop + 'px', transform: 'scale(1) rotate(0deg)', opacity: '1' });
+            }, (2900 + i * 650) * T));
+            revLater(() => hint.classList.add('on'), (2900 + 3 * 650 + 600) * T);
+        }
+
+        function closeReveal() {
+            if (!REVEAL.open) return;
+            REVEAL.open = false;
+            REVEAL.timers.forEach(clearTimeout); REVEAL.timers = [];
+            const root = document.getElementById('reveal');
+            if (root && root.classList) { root.classList.remove('show'); root.classList.remove('open'); root.innerHTML = ''; }
+            const slot = document.getElementById('case-envelope-img');
+            if (slot && slot.style) { slot.src = 'busta_aperta.png'; slot.style.visibility = 'visible'; }
+        }
+
+        function initReveal() {
+            const root = document.getElementById('reveal');
+            if (!root || typeof root.addEventListener !== 'function') return;
+            revImages();
+            root.addEventListener('click', closeReveal);
+            window.addEventListener('keydown', (e) => {
+                if (REVEAL.open && (e.key === 'Escape' || e.key === 'Enter' || e.code === 'Space' || e.key === ' ')) {
+                    e.preventDefault(); e.stopImmediatePropagation(); closeReveal();
+                }
+            }, true);
+        }
 
         // ---------- Tutorial guidato ----------
         const TOUR = { active: false, i: 0, autoPaused: false, token: 0, timers: [], steps: null, tab: 'suspects' };
@@ -939,6 +1198,8 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
                   text: 'Quando hai finito, passa il turno. I computer giocano da soli.', click: true },
                 { sel: '#my-cards-container', parent: true, title: 'Le tue carte',
                   text: 'Sono le tre carte che hai in mano. Non fanno parte della soluzione: il gioco le segna da sé nel taccuino.' },
+                { sel: '#case-envelope', title: 'La busta del caso',
+                  text: 'In questa busta sono chiuse le tre carte della soluzione: il colpevole, l\'arma e la stanza del delitto. Nessuno le vede finché il caso non è risolto: allora la busta si apre e le carte vengono mostrate.' },
                 { sel: '#notebook-card', title: 'Il taccuino',
                   text: 'Annota qui le tue deduzioni. A ogni clic una voce passa da ❓ a ❌ (esclusa) a ✔️ (sospettata). Le schede Personaggi, Armi e Stanze si cambiano dai pulsanti in alto.', demo: 'notebook' },
                 { sel: '#log-card', title: 'Il registro eventi',
@@ -1063,7 +1324,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
         function startTour() {
             if (TOUR.active) return;
             if (typeof hideBotMessage === 'function') hideBotMessage();
-            closeDoc(); hideCharCard();
+            closeDoc(); hideCharCard(); envelopeIntroCancel();
             const inGame = !document.getElementById('game-screen').classList.contains('hidden');
             if (!inGame) return;
             document.getElementById('modal-pause').classList.add('hidden');
@@ -1838,6 +2099,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
         function resetFullGameState() {
             if (typeof closeDoc === 'function') closeDoc();
             if (typeof endTour === 'function') endTour();
+            if (typeof closeReveal === 'function') { closeReveal(); envelopeIntroCancel(); const sl = document.getElementById('case-envelope-img'); if (sl) sl.src = 'busta_chiusa.jpg'; }
             hideBotMessage(true);
             hideCharCard();
             clearTimeout(botTimer);
@@ -1969,6 +2231,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             drawBoard();
             logEvent(`Partita ${VERSION} avviata.`);
             updateTurnUI();
+            envelopeIntro();
 
             // Se il primo di turno è un bot, il suo turno deve partire da solo
             if (gameState.players[gameState.currentTurnIndex].isBot) {
@@ -2885,7 +3148,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
                 gameState.reachableCells = [];
                 disableAllActions();
                 logEvent(`🏆 **${player.name} HA VINTO!** Soluzione: ${sol.suspect}, ${sol.weapon}, ${sol.room}.`);
-                alert(`🎉 ACCUSA CORRETTA! ${player.name} ha risolto il mistero!\nLa soluzione era: ${sol.suspect} con ${sol.weapon} in ${sol.room}.`);
+                showSolutionReveal('won', player.name, sol, !player.isBot);
                 return true;
             }
 
@@ -2903,7 +3166,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
                 botTimer = null;
                 disableAllActions();
                 logEvent(`🕯️ Tutti i detective sono stati eliminati: il caso resta irrisolto. Soluzione: ${sol.suspect}, ${sol.weapon}, ${sol.room}.`);
-                alert(`Tutti i detective sono stati eliminati. La soluzione era: ${sol.suspect} con ${sol.weapon} in ${sol.room}.`);
+                showSolutionReveal('unsolved', null, sol, false);
             }
             return false;
         }
