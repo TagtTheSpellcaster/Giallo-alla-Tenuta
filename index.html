@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giallo alla Tenuta - v0.32</title>
+    <title>Giallo alla Tenuta - v0.33</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -89,6 +89,38 @@
         #cinema.reduced #cinema-bg, #cinema.reduced #cinema-grain { animation: none; }
         @media (prefers-reduced-motion: reduce) { #cinema-grain, #cinema-bg { animation: none; } }
 
+        /* ---------- Consultazione di Regole e Istruzioni ---------- */
+        #doc-modal { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 70; display: none; align-items: center; justify-content: center;
+                     padding: 12px; background: rgba(2, 6, 23, 0.78); }
+        #doc-modal.open { display: flex; }
+        #doc-panel { width: 100%; max-width: 52rem; max-height: min(88vh, 900px); display: flex; flex-direction: column;
+                     background: #111827; border: 1px solid #475569; border-radius: 12px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7); overflow: hidden; }
+        #doc-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid #334155; background: #1e293b; }
+        #doc-title { font-family: 'Henny Penny', cursive; color: #f59e0b; font-size: 1.35rem; }
+        #doc-close { background: #334155; color: #e2e8f0; border: 1px solid #475569; border-radius: 6px; padding: 4px 12px; font-size: 0.85rem; cursor: pointer; }
+        #doc-close:hover { background: #475569; }
+        #doc-body { overflow-y: auto; padding: 18px 22px 26px; color: #d7dde8; line-height: 1.6;
+                    font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 1.12rem; }
+        #doc-body h1 { font-family: 'Henny Penny', cursive; color: #f59e0b; font-size: 1.7rem; font-weight: 400; margin: 0 0 0.6em; line-height: 1.2; }
+        #doc-body h2 { font-family: 'Henny Penny', cursive; color: #fbbf24; font-size: 1.35rem; font-weight: 400; margin: 1.6em 0 0.5em; padding-bottom: 0.2em; border-bottom: 1px solid #334155; }
+        #doc-body h3 { color: #fcd34d; font-size: 1.15em; font-weight: 600; margin: 1.3em 0 0.4em; }
+        #doc-body h4 { color: #fde68a; font-size: 1.05em; font-weight: 600; font-style: italic; margin: 1.1em 0 0.3em; }
+        #doc-body p { margin: 0 0 0.8em; }
+        #doc-body ul, #doc-body ol { margin: 0 0 0.8em; padding-left: 1.5em; }
+        #doc-body ul { list-style: disc; } #doc-body ol { list-style: decimal; }
+        #doc-body li { margin: 0.2em 0; }
+        #doc-body li > ul { margin: 0.2em 0 0.2em; list-style: circle; }
+        #doc-body strong { color: #f8fafc; font-weight: 600; }
+        #doc-body em { color: #e2e8f0; }
+        #doc-body code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.85em; background: #1e293b; padding: 1px 5px; border-radius: 4px; }
+        #doc-body table { border-collapse: collapse; margin: 0.4em 0 1em; font-size: 0.95em; }
+        #doc-body th, #doc-body td { border: 1px solid #475569; padding: 4px 12px; text-align: left; }
+        #doc-body th { background: #1e293b; color: #fcd34d; }
+        #doc-body hr { border: 0; border-top: 1px solid #334155; margin: 1.2em 0; }
+        .hdr-btn { padding: 8px 12px; background: #1e293b; border: 1px solid #475569; border-radius: 8px; font-size: 0.875rem; font-weight: 600; color: #fbbf24;
+                   display: flex; align-items: center; gap: 6px; transition: background 0.2s; cursor: pointer; }
+        .hdr-btn:hover { background: #334155; }
+
         /* Scheda del personaggio: compare passando il mouse sull'elenco dei personaggi */
         #char-card-backdrop { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 54; display: none; cursor: pointer; }
         #char-card-backdrop.open { display: block; }
@@ -115,14 +147,16 @@
     <header class="w-full max-w-5xl flex justify-between items-center py-4 mb-4 border-b border-slate-700">
         <div>
             <h1 class="text-4xl font-extrabold tracking-wider text-amber-500 flex items-center gap-2 font-henny">
-                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.32</span>
+                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.33</span>
             </h1>
         </div>
-        <div class="flex items-center gap-2">
-        <button id="btn-music" type="button" title="Musica di sottofondo" aria-pressed="true" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm font-semibold text-amber-400 flex items-center gap-2 transition">
+        <div class="flex items-center gap-2 flex-wrap justify-end">
+        <button id="btn-doc-rules" type="button" class="hdr-btn" title="Regole del gioco"><span>📜</span><span class="hidden sm:inline">Regole</span></button>
+        <button id="btn-doc-help" type="button" class="hdr-btn" title="Istruzioni di gioco"><span>📖</span><span class="hidden sm:inline">Istruzioni</span></button>
+        <button id="btn-music" type="button" title="Musica di sottofondo" aria-pressed="true" class="hdr-btn">
             <span id="btn-music-icon">🔊</span><span class="hidden sm:inline">Musica</span>
         </button>
-        <button id="btn-pause-header" class="hidden px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm font-semibold text-amber-400 flex items-center gap-2 transition">
+        <button id="btn-pause-header" class="hidden hdr-btn">
             ⏸️ Pausa / Menu (ESC)
         </button>
         </div>
@@ -281,7 +315,7 @@
     <div id="modal-pause" class="hidden fixed inset-0 modal flex justify-center items-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-600 rounded-xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
             <h3 class="text-2xl font-bold text-amber-500 font-henny">⏸️ GIOCO IN PAUSA</h3>
-            <p class="text-xs text-slate-400">Versione v0.32</p>
+            <p class="text-xs text-slate-400">Versione v0.33</p>
             <div class="space-y-3 pt-2">
                 <button id="btn-resume-game" class="w-full py-3 bg-green-600 hover:bg-green-500 font-bold rounded-lg transition text-white">
                     ▶️ Riprendi Partita
@@ -340,6 +374,261 @@
         </div>
     </div>
 
+    <!-- CONSULTAZIONE DI REGOLE E ISTRUZIONI (testo Markdown incorporato sotto) -->
+    <div id="doc-modal" role="dialog" aria-modal="true" aria-labelledby="doc-title">
+        <div id="doc-panel">
+            <div id="doc-head"><div id="doc-title"></div><button id="doc-close" type="button">✕ Chiudi (Esc)</button></div>
+            <div id="doc-body" tabindex="0"></div>
+        </div>
+    </div>
+    <script type="text/markdown" id="doc-md-regole"># Giallo alla Tenuta — Regole del gioco
+
+Versione del gioco: v0.33. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
+
+## Il caso
+
+Ludovico Salvaterra, padrone della Tenuta e collezionista di segreti, aveva invitato per il fine settimana sei ospiti. Stamattina all'alba la governante lo ha trovato senza vita: il corpo era stato spostato e non si trova nella stanza in cui è morto. La tempesta ha interrotto la strada e il telefono, e la polizia non arriverà prima di sera. L'assassino è uno dei sei ospiti, e ciascuno aveva un buon motivo per volere Salvaterra fuori dai piedi. Il giocatore è l'investigatore che Salvaterra aveva convocato in segreto: e deve scoprire chi, con quale arma e in quale stanza, prima dei cinque colleghi controllati dal computer.
+
+## 1. Obiettivo
+
+Un delitto è stato commesso nella tenuta. La soluzione, nascosta in una busta, è composta da tre carte:
+
+- **chi** ha commesso il delitto (un personaggio);
+- **con quale arma**;
+- **in quale stanza**.
+
+Vince il primo detective che formula un'**accusa corretta**. Chi sbaglia l'accusa è eliminato. Se tutti i detective vengono eliminati, nessuno vince e il caso resta irrisolto.
+
+## 2. Componenti
+
+### Personaggi (6)
+
+Ambasciatore Ambra, Baronessa Bianchi, Colonnello Corallo, Dottoressa Domino, Generale Grigio, Visconte Viola.
+
+Sono sempre tutti presenti sul tabellone. Il giocatore sceglie il proprio personaggio nel menu iniziale; gli altri cinque sono bot.
+
+### Armi (6)
+
+Stiletto, Attizzatoio, Veleno, Cavo, Statuetta, Chiave inglese.
+
+### Stanze (9)
+
+Biliardo, Salone, Cucina, Veranda, Serra, Ingresso, Studio, Biblioteca, Sala da Pranzo.
+
+Tutte le stanze hanno le stesse regole: ciascuna può essere la stanza del delitto e in ciascuna si può ipotizzare e accusare.
+
+### Carte
+
+21 carte in tutto: 6 personaggi, 6 armi, 9 stanze.
+
+## 3. Preparazione
+
+1. **Pedine.** Ogni personaggio parte da una posizione fissa sul bordo del tabellone. Le sei posizioni sono sempre le stesse e sono tutte alla stessa distanza (5 caselle di corridoio) dalla porta più vicina.
+2. **Armi.** Le 6 armi sono collocate in 6 stanze diverse, scelte a caso.
+3. **Busta.** Una carta personaggio, una carta arma e una carta stanza, scelte a caso, finiscono nella busta del caso. Nessuno le vede.
+4. **Distribuzione.** Le restanti 18 carte sono mescolate e distribuite a turno ai 6 giocatori: ogni giocatore ha 3 carte.
+5. **Taccuino.** Il gioco mostra le proprie carte e le segna automaticamente nel taccuino come escluse dalla busta. Il taccuino serve ad annotare a mano le proprie deduzioni.
+
+## 4. Ordine dei turni
+
+- Comincia sempre **Ambasciatore Ambra**, chiunque sia il giocatore umano.
+- Si gioca poi nell'ordine dell'elenco dei personaggi: Ambra, Bianchi, Corallo, Domino, Grigio, Viola, e di nuovo Ambra.
+- I giocatori eliminati vengono saltati.
+
+## 5. Il turno
+
+In un turno si può, nell'ordine: muoversi, formulare un'ipotesi, terminare il turno. L'accusa si può fare in qualunque momento del proprio turno (vedi sezione 8).
+
+### 5.1 Movimento
+
+Il giocatore può scegliere **una** di queste opzioni:
+
+- **Tirare i dadi**: si lanciano due dadi a sei facce e la pedina si sposta di **al massimo** il totale ottenuto (da 2 a 12 caselle). Non c'è obbligo di usare tutti i passi.
+- **Usare un passaggio segreto** (solo se si inizia il turno in una stanza collegata, vedi 5.3). Non si può usare dopo aver tirato i dadi.
+- **Non muoversi.** Si termina il turno senza spostarsi.
+
+Regole di movimento:
+
+- Si muove solo in orizzontale e in verticale, mai in diagonale.
+- Non si passa due volte sulla stessa casella nello stesso turno.
+- Una casella di **corridoio** occupata da un'altra pedina in gioco non si può occupare né attraversare.
+- Le **stanze** non hanno limiti di occupazione: più pedine possono stare nella stessa stanza.
+- I **muri** disegnati sulla mappa non si attraversano.
+- Un giocatore eliminato lascia la pedina sul tabellone, ma questa non blocca più i corridoi.
+
+### 5.2 Porte e stanze
+
+- Ogni stanza ha **una sola porta**, larga una casella, corrispondente al riquadro illuminato sulla mappa. Le porte non illuminate (ad esempio quelle laterali in legno) sono solo decorative.
+- Si entra in una stanza **solo dalla sua porta**, e **entrare in una stanza termina il movimento**, anche se restano passi. La pedina si ferma sulla casella della porta ed è considerata nella stanza.
+- Non si può "muoversi" restando nella stessa stanza: le caselle della stanza in cui ci si trova non sono mete valide.
+- Se la pedina si trova all'interno di una stanza (perché vi è stata spostata da un'ipotesi), esce dalla porta della stanza: i passi per raggiungere la porta, contati in linea retta orizzontale più verticale, fanno parte del tiro.
+
+### 5.3 Passaggi segreti
+
+Due coppie di stanze d'angolo sono collegate da un passaggio segreto:
+
+| Stanza | Collegata a |
+|---|---|
+| Biliardo | Sala da Pranzo |
+| Cucina | Studio |
+
+Se si inizia il turno in una di queste stanze e non si sono ancora tirati i dadi, si può usare il passaggio: la pedina si sposta nella stanza collegata e il movimento termina. Dopo il passaggio si può formulare un'ipotesi.
+
+### 5.4 Ipotesi
+
+Si può formulare un'ipotesi quando la pedina si trova in una stanza, e solo se:
+
+- si è **appena entrati** nella stanza in questo turno (con i dadi o con il passaggio segreto), oppure
+- si è stati **spostati nella stanza dall'ipotesi di un altro giocatore** (vedi sotto).
+
+L'ipotesi riguarda **sempre la stanza in cui ci si trova**. Il giocatore sceglie un personaggio e un'arma.
+
+Effetti:
+
+1. L'arma indicata viene **spostata** nella stanza.
+2. Il personaggio indicato viene **spostato** nella stanza (se non c'è già). Né l'arma né il personaggio tornano poi automaticamente al posto di prima.
+3. Se il personaggio spostato è un altro giocatore, può formulare a sua volta un'ipotesi all'inizio del proprio turno **senza muoversi**. In alternativa può tirare i dadi e muoversi normalmente. Se ipotizza senza muoversi, il suo movimento in quel turno è concluso.
+4. Formulare un'ipotesi conclude la fase di movimento del turno.
+
+#### Smentita
+
+1. Si procede nell'ordine dei turni, partendo dal giocatore successivo a chi ha ipotizzato.
+2. Il primo giocatore che possiede almeno una delle tre carte nominate (personaggio, arma, stanza) la mostra a chi ha ipotizzato. Se ne ha più di una, la carta mostrata è scelta a caso dal gioco.
+3. Gli altri giocatori non vedono la carta, ma vengono a sapere chi ha smentito e chi non ha potuto farlo.
+4. Se nessuno può smentire, non succede nulla: l'informazione è comunque utile.
+5. **I giocatori eliminati continuano a smentire** con le proprie carte.
+6. Le carte di chi ha ipotizzato non vengono mai usate per smentirlo.
+7. Quando è il giocatore umano a ipotizzare, vede chi ha smentito e con quale carta (o che nessuno ha potuto smentire); la carta ricevuta viene segnata nel taccuino come esclusa dalla busta.
+8. Quando a ipotizzare è un bot e a smentire è il giocatore umano, il gioco gli indica chi chiede la smentita e quale carta mostra (la sceglie il gioco).
+
+### 5.5 Fine del turno
+
+Il giocatore umano termina il turno quando ha finito; i turni dei bot terminano da soli.
+
+## 6. L'accusa
+
+- Si può formulare **solo durante il proprio turno**, anche prima di muoversi, e **senza trovarsi nella stanza nominata**.
+- Si indicano personaggio, arma e stanza.
+- Ogni giocatore ha **una sola accusa per tutta la partita**.
+- Se **tutte e tre** le carte corrispondono alla busta, il giocatore **vince** e la partita termina. La soluzione viene rivelata.
+- Se **anche una sola** carta è diversa, l'accusa è sbagliata:
+  - il giocatore è **eliminato**: non gioca più turni e non può più vincere;
+  - la sua pedina resta sul tabellone, mostrata attenuata;
+  - **continua a mostrare le proprie carte** per smentire le ipotesi degli altri;
+  - la soluzione **non** viene rivelata e la partita prosegue.
+- Se **tutti** i detective sono eliminati, la partita finisce senza vincitori e la soluzione viene rivelata.
+
+## 7. Differenze dal gioco da tavolo
+
+- Non sono presenti le carte Indizio né il dado con il simbolo della lente.
+- Si muove di **al massimo** il tiro dei dadi, e il tiro è la somma di due dadi normali.
+- Restare in una stanza non consente di ipotizzare di nuovo, se non si è stati spostati lì da un altro giocatore.
+- Chi smentisce non sceglie la carta da mostrare: la sceglie il gioco a caso.
+- La pedina di un giocatore eliminato non blocca i corridoi.
+- Comincia sempre il primo personaggio dell'elenco, non quello scelto dal giocatore.
+</script>
+    <script type="text/markdown" id="doc-md-istruzioni"># Giallo alla Tenuta — Istruzioni di gioco
+
+Questo documento spiega come si usa il gioco: schermate, pulsanti e comandi. Per le regole (come si vince, come ci si muove, come funzionano ipotesi e accuse) vedi il documento *Regole del gioco*.
+
+## 1. Iniziare una partita
+
+1. Nella schermata iniziale scorre la presentazione del caso. Puoi metterla in **Pausa**, **Saltarla** o **Rivederla** con i pulsanti in basso a destra della finestra. Non serve aspettare la fine.
+2. Scegli il tuo personaggio dal menu **Scegli il tuo Personaggio**.
+3. Premi **Inizia Partita**. Gli altri cinque personaggi sono controllati dal computer.
+
+Dalla schermata iniziale puoi aprire in qualsiasi momento le **Regole**, le **Istruzioni** e il pulsante **Musica** che si trovano nell'intestazione della pagina.
+
+## 2. La schermata di gioco
+
+**A sinistra**
+
+- **Il tabellone** con le stanze, le pedine dei personaggi e le armi. Sopra il tabellone vedi chi sei tu e di chi è il turno.
+- **L'elenco dei personaggi**, sotto il tabellone: per ogni personaggio indica se lo controlli tu (**TU**) o il computer. La riga di chi ha il turno ha il bordo giallo. Un personaggio eliminato è mostrato attenuato.
+
+**A destra**
+
+- **Azioni Turno**: i pulsanti per giocare (vedi sezione 3).
+- **Le Tue Carte**: le tre carte che ti sono state date.
+- **Taccuino del Detective**: tre schede (Personaggi, Armi, Stanze) per annotare le deduzioni.
+- **Registro Eventi**: la cronologia di movimenti, ipotesi, smentite e accuse.
+
+## 3. Svolgere il proprio turno
+
+Quando tocca a te, i pulsanti si attivano in base a ciò che è possibile fare.
+
+### Muoversi
+
+1. Premi **Lancia Dadi**: il totale dei due dadi compare sul pulsante e le caselle raggiungibili si colorano di verde.
+2. Clicca una casella verde per spostare la pedina. Puoi fermarti prima di aver usato tutti i passi.
+3. Se inizi il turno in una stanza d'angolo collegata a un passaggio segreto, compare **Passaggio Segreto**: usalo al posto dei dadi per passare nella stanza collegata.
+4. Se non vuoi muoverti, passa direttamente alle azioni successive o termina il turno.
+
+### Formulare un'ipotesi
+
+Dopo essere entrato in una stanza (o se un altro giocatore ti ci ha spostato) si attiva **Formula Ipotesi**.
+
+1. Premi il pulsante: si apre una finestra con la stanza già indicata.
+2. Scegli il **Sospettato** e l'**Arma**, poi premi **Invia Ipotesi** (oppure **Annulla**).
+3. Un cartiglio ti mostra l'esito: chi ti ha smentito e con quale carta, oppure che nessuno ha potuto farlo. La carta ricevuta viene segnata nel taccuino.
+
+### Accusare
+
+**Accusa Finale** si può usare durante il proprio turno, anche senza trovarsi nella stanza indicata.
+
+1. Scegli Colpevole, Arma del Delitto e Stanza del Delitto.
+2. Premi **Conferma Accusa**. Se è esatta vinci; se è sbagliata sei eliminato e potrai solo smentire le ipotesi degli altri. Hai **una sola accusa** per partita: premi **Annulla** se non sei sicuro.
+
+### Terminare il turno
+
+Premi **Passa Turno**. I turni dei computer proseguono da soli.
+
+## 4. I cartigli
+
+Alcune informazioni compaiono in un cartiglio al centro dello schermo:
+
+- **Ipotesi di un avversario**: indica chi ipotizza e quali carte nomina. Il turno dell'avversario prosegue solo dopo la chiusura.
+- **Richiesta di smentita**: se un avversario ipotizza e sei tu a poterlo smentire, un secondo cartiglio, più piccolo, indica chi lo chiede e quale carta mostri. La carta la sceglie il gioco.
+- **Esito della tua ipotesi**: in un cartiglio piccolo, come descritto sopra.
+
+Ogni cartiglio si chiude con **Spazio**, **Esc** o con un **clic** in qualsiasi punto. Se non fai nulla si chiude da solo dopo 10 secondi.
+
+## 5. Il taccuino
+
+Ogni voce ha tre stati; a ogni clic cambia in sequenza:
+
+| Simbolo | Significato |
+|---|---|
+| ❓ | Non so ancora |
+| ❌ | Esclusa dalla busta |
+| ✔️ | Sospettata: la usi tu come preferisci, per esempio per una carta che ritieni nella busta |
+
+Le tue carte sono segnate in automatico con ❌, così come le carte che ti vengono mostrate per smentirti. Il resto lo compili tu. Cambia scheda con i tre pulsanti sopra l'elenco. Le schede hanno la stessa altezza e mostrano tutte le voci senza scorrere.
+
+## 6. Il mouse sul tabellone e sull'elenco
+
+- **Pedine e armi**: passandoci sopra con il mouse compare un'immagine ingrandita con il nome. Se uscirebbe dal tabellone, scorre fino a restare interamente visibile.
+- **Armi**: puoi trascinare un'arma in un'altra casella libera della stessa stanza. È solo un modo per tenere in ordine il tabellone: non cambia le regole.
+- **Elenco dei personaggi**: passando il mouse su una riga, la pedina corrispondente viene evidenziata sul tabellone con onde luminose. Cliccando una riga si apre la scheda con la descrizione del personaggio. Si chiude con un clic, con **Esc** o con **Invio**.
+
+## 7. Pausa, menu, musica
+
+- **Pausa / Menu (ESC)**: in partita sospende il gioco dei computer. Dal menu di pausa puoi riprendere o tornare al menu principale. Tornando al menu, la partita in corso viene abbandonata.
+- **Musica**: il pulsante con l'altoparlante nell'intestazione attiva o disattiva il sottofondo musicale, sia nel menu iniziale sia durante la partita. La scelta viene ricordata. La musica parte al primo clic o tasto premuto, perché i browser non permettono l'audio prima di un gesto dell'utente.
+- **Regole** e **Istruzioni**: si consultano dall'intestazione in qualsiasi momento. Durante la partita il gioco si sospende finché il documento è aperto. Si chiude con il pulsante di chiusura, con **Esc** o con un clic fuori dalla finestra.
+
+## 8. Gli avversari
+
+I cinque avversari controllati dal computer seguono le stesse regole del giocatore umano. Ogni computer annota le carte che vede e deduce quelle degli altri dalle smentite. Si muove verso le stanze che potrebbero ancora essere quella del delitto e **accusa solo quando è certo** della soluzione: non sbaglia mai l'accusa. Non ci si può quindi fermare ad aspettare: il tempo gioca a favore di chi deduce più in fretta.
+
+## 9. Consigli
+
+- Registra tutto nel taccuino subito: ipotesi e smentite sono l'unica fonte di informazioni.
+- Un'ipotesi in una stanza in cui non hai ancora escluso nulla è più utile di una in una stanza già nota.
+- Il **Registro Eventi** mostra chi non ha potuto smentire: anche una mancata smentita è un indizio.
+- Accusa solo quando sei certo di tutte e tre le carte: un errore ti elimina.
+</script>
+
     <!-- SCHEDA DEL PERSONAGGIO (hover sull'elenco) -->
     <div id="char-card-backdrop"></div>
     <div id="char-card" aria-hidden="true"><div id="char-card-text"></div></div>
@@ -352,7 +641,7 @@
     </div>
 
     <script>
-        const VERSION = "v0.32";
+        const VERSION = "v0.33";
 
         const SUSPECTS = [
             { id: "Ambasciatore Ambra", color: "#f59e0b", initial: "A", spriteRow: 0, spriteCol: 0 },
@@ -534,9 +823,112 @@
             bindCharCard();
             initCinema();
             initMusic();
+            initDocs();
 
             startAnimationLoop();
         });
+
+        // ---------- Consultazione di Regole e Istruzioni (Markdown incorporato nella pagina) ----------
+        const DOC = { open: false, autoPaused: false, prevOverflow: '' };
+
+        function mdInline(t) {
+            return t.replace(/`([^`]+)`/g, '<code>$1</code>')
+                    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*([^*\s][^*]*)\*/g, '<em>$1</em>');
+        }
+
+        // Convertitore Markdown minimale: titoli, paragrafi, elenchi (anche annidati), tabelle, righe, grassetto/corsivo/codice
+        function mdToHtml(md) {
+            const esc = x => x.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const lines = md.replace(/\r/g, '').split('\n');
+            let out = '', para = [], stack = [];   // stack: { type, indent }
+            const flushPara = () => { if (para.length) { out += '<p>' + mdInline(esc(para.join(' '))) + '</p>'; para = []; } };
+            const closeLists = (toIndent) => {
+                while (stack.length && stack[stack.length - 1].indent >= toIndent) {
+                    out += '</li></' + stack.pop().type + '>';
+                }
+            };
+            for (let i = 0; i < lines.length; i++) {
+                const ln = lines[i];
+                let m;
+                if (!ln.trim()) { flushPara(); closeLists(0); continue; }
+                if ((m = ln.match(/^(#{1,4})\s+(.*)$/))) {
+                    flushPara(); closeLists(0);
+                    out += `<h${m[1].length}>` + mdInline(esc(m[2])) + `</h${m[1].length}>`;
+                    continue;
+                }
+                if (/^---+\s*$/.test(ln)) { flushPara(); closeLists(0); out += '<hr>'; continue; }
+                if (/^\s*\|/.test(ln) && i + 1 < lines.length && /^\s*\|[\s:|-]+\|\s*$/.test(lines[i + 1])) {
+                    flushPara(); closeLists(0);
+                    const cells = r => r.trim().replace(/^\||\|$/g, '').split('|').map(c => mdInline(esc(c.trim())));
+                    out += '<table><thead><tr>' + cells(ln).map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>';
+                    i += 2;
+                    while (i < lines.length && /^\s*\|/.test(lines[i])) {
+                        out += '<tr>' + cells(lines[i]).map(c => `<td>${c}</td>`).join('') + '</tr>';
+                        i++;
+                    }
+                    i--;
+                    out += '</tbody></table>';
+                    continue;
+                }
+                if ((m = ln.match(/^(\s*)([-*]|\d+\.)\s+(.*)$/))) {
+                    flushPara();
+                    const indent = m[1].length, type = /\d/.test(m[2]) ? 'ol' : 'ul';
+                    const top = stack[stack.length - 1];
+                    if (!top || indent > top.indent) { out += '<' + type + '><li>'; stack.push({ type, indent }); }
+                    else {
+                        closeLists(indent + 1);
+                        const t2 = stack[stack.length - 1];
+                        if (t2 && t2.indent === indent) out += '</li><li>';
+                        else { out += '<' + type + '><li>'; stack.push({ type, indent }); }
+                    }
+                    out += mdInline(esc(m[3]));
+                    continue;
+                }
+                if (stack.length) { out += ' ' + mdInline(esc(ln.trim())); continue; }   // continuazione di una voce
+                para.push(ln.trim());
+            }
+            flushPara(); closeLists(0);
+            return out;
+        }
+
+        function openDoc(which) {
+            const el = document.getElementById('doc-md-' + which);
+            if (!el) return;
+            document.getElementById('doc-title').textContent = which === 'regole' ? 'Regole del gioco' : 'Istruzioni di gioco';
+            const body = document.getElementById('doc-body');
+            body.innerHTML = mdToHtml(el.textContent);
+            body.scrollTop = 0;
+            // In partita, finché il documento è aperto il gioco dei computer resta in pausa
+            const inGame = !document.getElementById('game-screen').classList.contains('hidden');
+            if (inGame && !gameState.isPaused) { gameState.isPaused = true; DOC.autoPaused = true; }
+            DOC.open = true;
+            if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+            document.getElementById('doc-modal').classList.add('open');
+            DOC.prevOverflow = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+            body.focus();
+        }
+
+        function closeDoc() {
+            if (!DOC.open) return;
+            DOC.open = false;
+            document.getElementById('doc-modal').classList.remove('open');
+            document.body.style.overflow = DOC.prevOverflow || '';
+            if (DOC.autoPaused) { DOC.autoPaused = false; gameState.isPaused = false; }
+        }
+
+        function initDocs() {
+            const r = document.getElementById('btn-doc-rules');
+            if (!r || typeof r.addEventListener !== 'function') return;
+            r.addEventListener('click', () => openDoc('regole'));
+            document.getElementById('btn-doc-help').addEventListener('click', () => openDoc('istruzioni'));
+            document.getElementById('doc-close').addEventListener('click', closeDoc);
+            document.getElementById('doc-modal').addEventListener('click', (e) => { if (e.target.id === 'doc-modal') closeDoc(); });
+            window.addEventListener('keydown', (e) => {
+                if (DOC.open && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeDoc(); }
+            }, true);
+        }
 
         // ---------- Musica di sottofondo (sintesi con Web Audio, nessun file audio) ----------
         // Ciclo di 16 battute a 66 BPM (circa 58 s) in re minore armonico: pad scuro, basso, arpeggio a pizzico,
@@ -1103,6 +1495,7 @@
         }
 
         function resetFullGameState() {
+            if (typeof closeDoc === 'function') closeDoc();
             hideBotMessage(true);
             hideCharCard();
             clearTimeout(botTimer);
