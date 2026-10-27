@@ -4,7 +4,7 @@ Questo documento spiega come si usa il gioco: schermate, pulsanti e comandi. Per
 
 ## 1. Iniziare una partita
 
-1. Nella schermata iniziale scorre la presentazione del caso. Puoi metterla in **Pausa**, **Saltarla** o **Rivederla** con i pulsanti in basso a destra della finestra. Non serve aspettare la fine.
+1. Nella schermata iniziale clicca sulla finestra scura (**Clicca per iniziare**): parte la musica e scorre la presentazione del caso. Il clic serve anche a sbloccare l'audio, che i browser bloccano finché non si interagisce con la pagina. Puoi mettere la presentazione in **Pausa**, **Saltarla** o **Rivederla** con i pulsanti in basso a destra della finestra. Non serve aspettare la fine.
 2. Scegli il tuo personaggio dal menu **Scegli il tuo Personaggio**.
 3. Premi **Inizia Partita**. Gli altri cinque personaggi sono controllati dal computer.
 
@@ -43,7 +43,7 @@ Dopo essere entrato in una stanza (o se un altro giocatore ti ci ha spostato) si
 
 1. Premi il pulsante: si apre una finestra con la stanza già indicata.
 2. Scegli il **Sospettato** e l'**Arma**, poi premi **Invia Ipotesi** (oppure **Annulla**).
-3. Un cartiglio ti mostra l'esito: chi ti ha smentito e con quale carta, oppure che nessuno ha potuto farlo. La carta ricevuta viene segnata nel taccuino.
+3. Una pergamena ti mostra l'esito: chi ti ha smentito e con quale carta, oppure che nessuno ha potuto farlo. La carta ricevuta viene segnata nel taccuino.
 
 ### Accusare
 
@@ -56,15 +56,15 @@ Dopo essere entrato in una stanza (o se un altro giocatore ti ci ha spostato) si
 
 Premi **Passa Turno**. I turni dei computer proseguono da soli.
 
-## 4. I cartigli
+## 4. I messaggi a video
 
-Alcune informazioni compaiono in un cartiglio al centro dello schermo:
+Alcune informazioni compaiono al centro dello schermo, in una pergamena:
 
-- **Ipotesi di un avversario**: indica chi ipotizza e quali carte nomina. Il turno dell'avversario prosegue solo dopo la chiusura.
-- **Richiesta di smentita**: se un avversario ipotizza e sei tu a poterlo smentire, un secondo cartiglio, più piccolo, indica chi lo chiede e quale carta mostri. La carta la sceglie il gioco.
-- **Esito della tua ipotesi**: in un cartiglio piccolo, come descritto sopra.
+- **Ipotesi di un avversario** (cartiglio grande): indica chi ipotizza e quali carte nomina. Il turno dell'avversario prosegue solo dopo la chiusura.
+- **Esito dell'ipotesi** (pergamena di testo, più piccola): compare dopo il cartiglio e dice chi ha mostrato una carta a chi, oppure che nessuno ha potuto smentire. Se a smentire sei tu, indica chi chiede la smentita e quale carta mostri (la sceglie il gioco).
+- **Esito della tua ipotesi** (pergamena di testo): chi ti ha smentito e con quale carta, oppure che nessuno ha potuto farlo.
 
-Ogni cartiglio si chiude con **Spazio**, **Esc** o con un **clic** in qualsiasi punto. Se non fai nulla si chiude da solo dopo 10 secondi.
+Ogni messaggio si chiude con **Spazio**, **Esc** o con un **clic** in qualsiasi punto. Se non fai nulla si chiude da solo dopo 10 secondi.
 
 ## 5. Il taccuino
 

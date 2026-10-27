@@ -1,6 +1,6 @@
 # Giallo alla Tenuta — Regole del gioco
 
-Versione del gioco: v0.35. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
+Versione del gioco: v0.38. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
 
 ## Il caso
 

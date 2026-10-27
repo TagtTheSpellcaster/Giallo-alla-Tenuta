@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giallo alla Tenuta - v0.35</title>
+    <title>Giallo alla Tenuta - v0.38</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,6 +33,9 @@
                             display: flex; flex-direction: column; align-items: center; justify-content: center;
                             text-align: center; overflow: hidden; line-height: 1.2; color: #3b2410;
                             font-family: 'Henny Penny', cursive; }
+        /* variante con testo.png (esito delle ipotesi e conferme al giocatore) */
+        #bot-message-card.txt { background-image: url('testo.png'); }
+        #bot-message-card.txt #bot-message-text { left: 11%; width: 78%; top: 16%; height: 68%; }
         #bot-message-text .bm-who  { font-size: 0.62em; }
         #bot-message-text .bm-what { font-size: 1em; }
         #bot-message-text .bm-hint { font-size: 0.42em; margin-top: 0.6em; opacity: 0.7; }
@@ -79,6 +82,18 @@
                         font-family: 'Henny Penny', cursive; color: #f59e0b; font-size: clamp(1.4rem, 0.8rem + 2.6vw, 2.5rem);
                         text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95); }
         #cinema-final.show { opacity: 1; }
+        /* finestra di benvenuto: il clic sblocca l'audio del browser e avvia insieme presentazione e musica */
+        #cinema-start { position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 4; display: flex; flex-direction: column; align-items: center; justify-content: center;
+                        gap: 14px; padding: 0 8%; text-align: center; cursor: pointer; border: 0; color: #f1e3c0;
+                        background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.82) 100%);
+                        font-family: 'EB Garamond', Georgia, serif; transition: opacity 0.6s ease; }
+        #cinema.idle #cinema-window, #cinema.idle #cinema-final, #cinema.idle #cinema-controls { visibility: hidden; }
+        #cinema-start.gone { opacity: 0; pointer-events: none; }
+        #cinema-start .cs-title { font-family: 'Henny Penny', cursive; color: #f59e0b; font-size: clamp(1.6rem, 0.9rem + 3vw, 2.8rem); letter-spacing: 0.05em; text-transform: uppercase; line-height: 1.1; text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9); }
+        #cinema-start .cs-go { font-size: clamp(1rem, 0.8rem + 0.8vw, 1.3rem); padding: 8px 22px; border: 1px solid rgba(245, 158, 11, 0.7); border-radius: 999px;
+                               background: rgba(0, 0, 0, 0.5); animation: cs-pulse 1.8s ease-in-out infinite; }
+        #cinema-start:hover .cs-go, #cinema-start:focus-visible .cs-go { background: rgba(245, 158, 11, 0.25); color: #fff; }
+        @keyframes cs-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.45); } 50% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); } }
         #cinema-controls { position: absolute; right: 8px; bottom: 6px; z-index: 3; display: flex; gap: 6px; }
         #cinema-controls button { background: rgba(0, 0, 0, 0.55); color: #d9c79a; border: 1px solid rgba(217, 199, 154, 0.35);
                                   border-radius: 4px; padding: 2px 9px; font-size: 0.72rem; cursor: pointer; transition: background 0.2s, color 0.2s; }
@@ -120,6 +135,7 @@
         .hdr-btn { padding: 8px 12px; background: #1e293b; border: 1px solid #475569; border-radius: 8px; font-size: 0.875rem; font-weight: 600; color: #fbbf24;
                    display: flex; align-items: center; gap: 6px; transition: background 0.2s; cursor: pointer; }
         .hdr-btn:hover { background: #334155; }
+        .hdr-btn.hidden { display: none; }
 
         /* ---------- Tutorial guidato ---------- */
         #tour-layer { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 90; display: none; }
@@ -176,7 +192,7 @@
     <header class="w-full max-w-5xl flex justify-between items-center py-4 mb-4 border-b border-slate-700">
         <div>
             <h1 class="text-4xl font-extrabold tracking-wider text-amber-500 flex items-center gap-2 font-henny">
-                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.35</span>
+                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.38</span>
             </h1>
         </div>
         <div id="hdr-controls" class="flex items-center gap-2 flex-wrap justify-end">
@@ -197,7 +213,7 @@
 
         <!-- PRESENTAZIONE DEL CASO, "al cinema" -->
         <section id="case-intro" class="mb-6" aria-label="Il caso della Tenuta">
-            <div id="cinema">
+            <div id="cinema" class="idle">
                 <div id="cinema-bg"></div>
                 <div id="cinema-window">
                     <div id="cinema-crawl">
@@ -216,6 +232,10 @@
                 </div>
                 <div id="cinema-final">Chi ha ucciso Ludovico Salvaterra?</div>
                 <div id="cinema-vignette"></div>
+                <button type="button" id="cinema-start" aria-label="Avvia la presentazione del caso">
+                    <span class="cs-title">Il caso della Tenuta</span>
+                    <span class="cs-go" id="cinema-start-label">▶ Clicca per iniziare</span>
+                </button>
                 <div id="cinema-grain"></div>
                 <div id="cinema-controls">
                     <button type="button" id="cinema-pause">⏸ Pausa</button>
@@ -338,7 +358,7 @@
             <div id="log-card" class="relative bg-slate-900 rounded-xl border border-slate-800 flex-1 min-h-[8rem]">
                 <div class="absolute inset-3 flex flex-col">
                     <div class="text-xs font-bold text-slate-400 mb-1">Registro Eventi:</div>
-                    <div id="game-log" class="overflow-y-auto text-xs text-slate-300 space-y-1 font-mono flex-1 min-h-0"></div>
+                    <div id="game-log" class="overflow-y-auto text-sm leading-snug text-slate-300 space-y-1 flex-1 min-h-0"></div>
                 </div>
             </div>
         </div>
@@ -348,7 +368,7 @@
     <div id="modal-pause" class="hidden fixed inset-0 modal flex justify-center items-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-600 rounded-xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
             <h3 class="text-2xl font-bold text-amber-500 font-henny">⏸️ GIOCO IN PAUSA</h3>
-            <p class="text-xs text-slate-400">Versione v0.35</p>
+            <p class="text-xs text-slate-400">Versione v0.38</p>
             <div class="space-y-3 pt-2">
                 <button id="btn-resume-game" class="w-full py-3 bg-green-600 hover:bg-green-500 font-bold rounded-lg transition text-white">
                     ▶️ Riprendi Partita
@@ -433,7 +453,7 @@
     </div>
     <script type="text/markdown" id="doc-md-regole"># Giallo alla Tenuta — Regole del gioco
 
-Versione del gioco: v0.35. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
+Versione del gioco: v0.38. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
 
 ## Il caso
 
@@ -583,7 +603,7 @@ Questo documento spiega come si usa il gioco: schermate, pulsanti e comandi. Per
 
 ## 1. Iniziare una partita
 
-1. Nella schermata iniziale scorre la presentazione del caso. Puoi metterla in **Pausa**, **Saltarla** o **Rivederla** con i pulsanti in basso a destra della finestra. Non serve aspettare la fine.
+1. Nella schermata iniziale clicca sulla finestra scura (**Clicca per iniziare**): parte la musica e scorre la presentazione del caso. Il clic serve anche a sbloccare l'audio, che i browser bloccano finché non si interagisce con la pagina. Puoi mettere la presentazione in **Pausa**, **Saltarla** o **Rivederla** con i pulsanti in basso a destra della finestra. Non serve aspettare la fine.
 2. Scegli il tuo personaggio dal menu **Scegli il tuo Personaggio**.
 3. Premi **Inizia Partita**. Gli altri cinque personaggi sono controllati dal computer.
 
@@ -622,7 +642,7 @@ Dopo essere entrato in una stanza (o se un altro giocatore ti ci ha spostato) si
 
 1. Premi il pulsante: si apre una finestra con la stanza già indicata.
 2. Scegli il **Sospettato** e l'**Arma**, poi premi **Invia Ipotesi** (oppure **Annulla**).
-3. Un cartiglio ti mostra l'esito: chi ti ha smentito e con quale carta, oppure che nessuno ha potuto farlo. La carta ricevuta viene segnata nel taccuino.
+3. Una pergamena ti mostra l'esito: chi ti ha smentito e con quale carta, oppure che nessuno ha potuto farlo. La carta ricevuta viene segnata nel taccuino.
 
 ### Accusare
 
@@ -635,15 +655,15 @@ Dopo essere entrato in una stanza (o se un altro giocatore ti ci ha spostato) si
 
 Premi **Passa Turno**. I turni dei computer proseguono da soli.
 
-## 4. I cartigli
+## 4. I messaggi a video
 
-Alcune informazioni compaiono in un cartiglio al centro dello schermo:
+Alcune informazioni compaiono al centro dello schermo, in una pergamena:
 
-- **Ipotesi di un avversario**: indica chi ipotizza e quali carte nomina. Il turno dell'avversario prosegue solo dopo la chiusura.
-- **Richiesta di smentita**: se un avversario ipotizza e sei tu a poterlo smentire, un secondo cartiglio, più piccolo, indica chi lo chiede e quale carta mostri. La carta la sceglie il gioco.
-- **Esito della tua ipotesi**: in un cartiglio piccolo, come descritto sopra.
+- **Ipotesi di un avversario** (cartiglio grande): indica chi ipotizza e quali carte nomina. Il turno dell'avversario prosegue solo dopo la chiusura.
+- **Esito dell'ipotesi** (pergamena di testo, più piccola): compare dopo il cartiglio e dice chi ha mostrato una carta a chi, oppure che nessuno ha potuto smentire. Se a smentire sei tu, indica chi chiede la smentita e quale carta mostri (la sceglie il gioco).
+- **Esito della tua ipotesi** (pergamena di testo): chi ti ha smentito e con quale carta, oppure che nessuno ha potuto farlo.
 
-Ogni cartiglio si chiude con **Spazio**, **Esc** o con un **clic** in qualsiasi punto. Se non fai nulla si chiude da solo dopo 10 secondi.
+Ogni messaggio si chiude con **Spazio**, **Esc** o con un **clic** in qualsiasi punto. Se non fai nulla si chiude da solo dopo 10 secondi.
 
 ## 5. Il taccuino
 
@@ -694,7 +714,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
     </div>
 
     <script>
-        const VERSION = "v0.35";
+        const VERSION = "v0.38";
 
         const SUSPECTS = [
             { id: "Ambasciatore Ambra", color: "#f59e0b", initial: "A", spriteRow: 0, spriteCol: 0 },
@@ -920,8 +940,8 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
                   text: 'Annota qui le tue deduzioni. A ogni clic una voce passa da ❓ a ❌ (esclusa) a ✔️ (sospettata). Le schede Personaggi, Armi e Stanze si cambiano dai pulsanti in alto.', demo: 'notebook' },
                 { sel: '#log-card', title: 'Il registro eventi',
                   text: 'Elenca movimenti, ipotesi, smentite e accuse. Anche sapere chi non ha potuto smentire è un\'informazione utile.' },
-                { center: true, title: 'I cartigli',
-                  text: 'Le ipotesi degli avversari e le smentite che ti riguardano compaiono in un cartiglio al centro dello schermo. Si chiude con Spazio, Esc o un clic, oppure da solo dopo 10 secondi.' },
+                { center: true, title: 'I messaggi a video',
+                  text: 'Le ipotesi degli avversari compaiono in un cartiglio al centro dello schermo; subito dopo, una pergamena più piccola dice chi ha mostrato una carta (o che nessuno ha potuto smentire). Ogni messaggio si chiude con Spazio, Esc o un clic, oppure da solo dopo 10 secondi.' },
                 { sel: '#hdr-controls', title: 'Regole, istruzioni, musica',
                   text: 'Qui trovi le Regole e le Istruzioni complete, il pulsante per spegnere la musica, il Tutorial (per rivederlo) e, in partita, la Pausa (Esc).' },
                 { center: true, title: 'Buona indagine',
@@ -1464,6 +1484,9 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
         function cinemaRestart() {
             const e = cinemaEls();
             if (!e.crawl || typeof e.crawl.querySelector !== 'function') return;
+            const st0 = document.getElementById('cinema-start');
+            if (st0) st0.classList.add('gone');
+            if (e.box && e.box.classList) e.box.classList.remove('idle');
             CINEMA.done = false; CINEMA.paused = false; CINEMA.started = false;
             CINEMA.y = 0; CINEMA.hold = CINEMA.holdMs; CINEMA.last = 0;
             e.fin.classList.remove('show');
@@ -1492,12 +1515,22 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             });
             e.bSkip.addEventListener('click', () => cinemaFinish());
             e.bReplay.addEventListener('click', () => cinemaRestart());
+            // Finestra di benvenuto: la presentazione (e la musica) partono al clic dell'utente,
+            // che è anche il gesto richiesto dal browser per sbloccare l'audio.
+            const start = document.getElementById('cinema-start');
+            const label = document.getElementById('cinema-start-label');
+            if (label && MUSIC.enabled) label.textContent = '▶ Clicca per iniziare (con musica)';
+            const begin = () => {
+                if (MUSIC.enabled) musicStart();
+                if (CINEMA.reduced) { if (start) start.classList.add('gone'); e.box.classList.remove('idle'); } else cinemaRestart();
+            };
+            if (start) start.addEventListener('click', begin);
             if (CINEMA.reduced) {
                 e.box.classList.add('reduced');
                 e.bPause.classList.add('hidden'); e.bSkip.classList.add('hidden');
                 return;
             }
-            cinemaRestart();
+            cinemaLayout();
             if (document.fonts && document.fonts.ready) document.fonts.ready.then(cinemaLayout);
             window.addEventListener('resize', cinemaLayout);
         }
@@ -1637,6 +1670,8 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             ratio: 0.75,             // rapporto in uso per il cartiglio attualmente a video
             timeoutMs: 10000,        // chiusura automatica dopo 10 secondi
             aspect: 767 / 1536,      // altezza / larghezza di cartiglio.png
+            aspectText: 820 / 1392,  // altezza / larghezza di testo.png
+            cur: 767 / 1536,         // proporzione del cartiglio attualmente a video
             visible: false,
             timer: null,
             onClose: null,
@@ -1651,7 +1686,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             const refW = ref.getBoundingClientRect().width || ref.clientWidth || 600;
             const w = refW * BOT_MESSAGE.ratio;
             card.style.width = w + 'px';
-            card.style.height = (w * BOT_MESSAGE.aspect) + 'px';
+            card.style.height = (w * BOT_MESSAGE.cur) + 'px';
 
             let size = Math.min(90, Math.round(w * 0.085));
             text.style.fontSize = size + 'px';
@@ -1661,7 +1696,8 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             }
         }
 
-        // Mostra un cartiglio con righe di testo [{cls, text}]; small = versione al 75% (conferme al giocatore)
+        // Mostra un messaggio con righe di testo [{cls, text}]: grande su cartiglio.png (ipotesi dei bot) oppure,
+        // con small = true, su testo.png al 75% della larghezza (esiti delle ipotesi e conferme al giocatore)
         function showCartouche(lines, onClose, small) {
             const text = document.getElementById('bot-message-text');
             text.innerHTML = "";
@@ -1678,6 +1714,8 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
 
             clearTimeout(BOT_MESSAGE.timer);
             BOT_MESSAGE.ratio = small ? BOT_MESSAGE.smallRatio : BOT_MESSAGE.widthRatio;
+            BOT_MESSAGE.cur = small ? BOT_MESSAGE.aspectText : BOT_MESSAGE.aspect;
+            document.getElementById('bot-message-card').classList.toggle('txt', !!small);
             BOT_MESSAGE.onClose = onClose || null;
             BOT_MESSAGE.visible = true;
             // Un pulsante rimasto col focus verrebbe attivato dalla barra spaziatrice
@@ -1703,6 +1741,21 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
                 { cls: 'bm-who', text: `${proposer.character} chiede una smentita:` },
                 { cls: 'bm-what', text: `Mostri: ${cardShown}` }
             ], onClose, true);
+        }
+
+        // Esito di un'ipotesi altrui (testo.png): chi ha mostrato una carta a chi, oppure nessuna smentita
+        function showHypothesisOutcome(proposer, disprover, onClose) {
+            if (disprover) {
+                showCartouche([
+                    { cls: 'bm-who', text: `${disprover.character}` },
+                    { cls: 'bm-what', text: `ha mostrato una carta a ${proposer.character}` }
+                ], onClose, true);
+            } else {
+                showCartouche([
+                    { cls: 'bm-who', text: 'Nessuno ha potuto smentire' },
+                    { cls: 'bm-what', text: `l'ipotesi di ${proposer.character}` }
+                ], onClose, true);
+            }
         }
 
         // Esito della propria ipotesi (cartiglio piccolo): chi smentisce e con quale carta, oppure nessuno
@@ -2942,11 +2995,13 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
                 }, 300);
             };
             // Il messaggio resta a video finché il detective preme SPAZIO (o dopo 10 s); poi il turno prosegue.
-            // Se a smentire è il giocatore umano, segue un secondo cartiglio (piccolo) con la carta che mostra.
+            // Dopo il cartiglio dell'ipotesi segue sempre un messaggio su testo.png: l'esito (chi ha mostrato una carta) oppure,
+            // se a smentire è il giocatore umano, la carta che deve mostrare.
             const humanRefutes = res.disprover && !res.disprover.isBot;
-            showBotHypothesis(bot, suspect, weapon, room, humanRefutes
-                ? () => showAskedToYou(bot, res.cardShown, proceed)
-                : proceed);
+            showBotHypothesis(bot, suspect, weapon, room, () => {
+                if (humanRefutes) showAskedToYou(bot, res.cardShown, proceed);
+                else showHypothesisOutcome(bot, res.disprover, proceed);
+            });
         }
 
         function playBotTurn() {
@@ -3177,7 +3232,8 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
 
         function logEvent(t) {
             const l = document.getElementById('game-log');
-            l.innerHTML += `<p class="border-b border-slate-800 pb-0.5">${t}</p>`;
+            const html = String(t).replace(/\*\*(.+?)\*\*/g, '<strong class="text-slate-50 font-semibold">$1</strong>');
+            l.innerHTML += `<p class="border-b border-slate-800 pb-1">${html}</p>`;
             l.scrollTop = l.scrollHeight;
         }
 
