@@ -8,7 +8,9 @@ Questo documento spiega come si usa il gioco: schermate, pulsanti e comandi. Per
 2. Scegli il tuo personaggio dal menu **Scegli il tuo Personaggio**.
 3. Premi **Inizia Partita**. Gli altri cinque personaggi sono controllati dal computer.
 
-Dalla schermata iniziale puoi aprire in qualsiasi momento le **Regole**, le **Istruzioni** e il pulsante **Musica** che si trovano nell'intestazione della pagina.
+In alternativa, **Tutorial guidato (partita di prova)** avvia una partita con l'Ambasciatore Ambra e ti accompagna passo passo tra i comandi (vedi sezione 7).
+
+Dalla schermata iniziale puoi aprire in qualsiasi momento il **Tutorial**, le **Regole**, le **Istruzioni** e il pulsante **Musica** che si trovano nell'intestazione della pagina.
 
 ## 2. La schermata di gioco
 
@@ -86,6 +88,7 @@ Le tue carte sono segnate in automatico con ❌, così come le carte che ti veng
 
 - **Pausa / Menu (ESC)**: in partita sospende il gioco dei computer. Dal menu di pausa puoi riprendere o tornare al menu principale. Tornando al menu, la partita in corso viene abbandonata.
 - **Musica**: il pulsante con l'altoparlante nell'intestazione attiva o disattiva il sottofondo musicale, sia nel menu iniziale sia durante la partita. La scelta viene ricordata. La musica parte al primo clic o tasto premuto, perché i browser non permettono l'audio prima di un gesto dell'utente.
+- **Tutorial**: un percorso guidato di 15 passi. Evidenzia sul gioco vero ogni comando (tabellone, pedina, porte, elenco dei personaggi, dadi, ipotesi, accusa, passa turno, carte, taccuino, registro, intestazione) con una breve spiegazione. Si avanza con **Avanti** (o freccia destra / Invio), si torna indietro con **Indietro** (o freccia sinistra) e si esce con **Esci** o **Esc**. Mentre è aperto la partita è in pausa; si può rivedere in qualsiasi momento dal pulsante **Tutorial** dell'intestazione.
 - **Regole** e **Istruzioni**: si consultano dall'intestazione in qualsiasi momento. Durante la partita il gioco si sospende finché il documento è aperto. Si chiude con il pulsante di chiusura, con **Esc** o con un clic fuori dalla finestra.
 
 ## 8. Gli avversari

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giallo alla Tenuta - v0.34</title>
+    <title>Giallo alla Tenuta - v0.35</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -121,6 +121,35 @@
                    display: flex; align-items: center; gap: 6px; transition: background 0.2s; cursor: pointer; }
         .hdr-btn:hover { background: #334155; }
 
+        /* ---------- Tutorial guidato ---------- */
+        #tour-layer { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 90; display: none; }
+        #tour-layer.open { display: block; }
+        #tour-block { position: absolute; top: 0; right: 0; bottom: 0; left: 0; }
+        #tour-spot { position: fixed; border-radius: 10px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(2, 6, 23, 0.74);
+                     border: 2px solid #fbbf24; transition: top 0.45s ease, left 0.45s ease, width 0.45s ease, height 0.45s ease, opacity 0.3s ease; }
+        #tour-spot.pulse { animation: tour-pulse 1.4s ease-in-out infinite; }
+        @keyframes tour-pulse { 0%, 100% { border-color: #fbbf24; } 50% { border-color: #fff7d6; } }
+        #tour-spot.nospot { border-color: transparent; animation: none; }
+        #tour-balloon { position: fixed; z-index: 2; box-sizing: border-box; background: #fdf3d8; color: #3b2410; border: 2px solid #b8832a; border-radius: 12px;
+                        padding: 14px 16px 12px; box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6); transition: top 0.4s ease, left 0.4s ease;
+                        font-family: 'EB Garamond', Georgia, serif; font-size: 1.05rem; line-height: 1.45; }
+        #tour-balloon h4 { font-family: 'Henny Penny', cursive; font-weight: 400; font-size: 1.3rem; margin: 0 0 4px; color: #7a4a14; }
+        #tour-balloon p { margin: 0 0 10px; }
+        #tour-count { font-size: 0.75rem; color: #8a6a3a; font-family: ui-sans-serif, system-ui, sans-serif; }
+        #tour-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        #tour-actions button { font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.82rem; font-weight: 600; padding: 5px 12px; border-radius: 6px; cursor: pointer; border: 1px solid #b8832a; background: #f3dfae; color: #3b2410; }
+        #tour-actions button:hover:not(:disabled) { background: #ecd091; }
+        #tour-actions button:disabled { opacity: 0.4; cursor: default; }
+        #tour-next { background: #b45309 !important; color: #fff !important; border-color: #92400e !important; }
+        #tour-exit { margin-left: auto; background: transparent !important; border-color: transparent !important; color: #8a6a3a !important; }
+        #tour-cursor { position: fixed; top: 0; left: 0; z-index: 3; width: 26px; height: 26px; pointer-events: none; opacity: 0;
+                       transition: transform 0.9s cubic-bezier(.4, 0, .2, 1), opacity 0.3s ease; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6)); }
+        #tour-cursor.show { opacity: 1; }
+        #tour-cursor::after { content: ''; position: absolute; left: -9px; top: -9px; width: 22px; height: 22px; border-radius: 50%;
+                              border: 3px solid #fbbf24; opacity: 0; transform: scale(0.3); }
+        #tour-cursor.click::after { animation: tour-ripple 0.6s ease-out; }
+        @keyframes tour-ripple { 0% { opacity: 1; transform: scale(0.3); } 100% { opacity: 0; transform: scale(1.8); } }
+
         /* Scheda del personaggio: compare passando il mouse sull'elenco dei personaggi */
         #char-card-backdrop { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 54; display: none; cursor: pointer; }
         #char-card-backdrop.open { display: block; }
@@ -147,10 +176,11 @@
     <header class="w-full max-w-5xl flex justify-between items-center py-4 mb-4 border-b border-slate-700">
         <div>
             <h1 class="text-4xl font-extrabold tracking-wider text-amber-500 flex items-center gap-2 font-henny">
-                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.34</span>
+                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.35</span>
             </h1>
         </div>
-        <div class="flex items-center gap-2 flex-wrap justify-end">
+        <div id="hdr-controls" class="flex items-center gap-2 flex-wrap justify-end">
+        <button id="btn-tour" type="button" class="hdr-btn" title="Tutorial guidato"><span>🎓</span><span class="hidden sm:inline">Tutorial</span></button>
         <button id="btn-doc-rules" type="button" class="hdr-btn" title="Regole del gioco"><span>📜</span><span class="hidden sm:inline">Regole</span></button>
         <button id="btn-doc-help" type="button" class="hdr-btn" title="Istruzioni di gioco"><span>📖</span><span class="hidden sm:inline">Istruzioni</span></button>
         <button id="btn-music" type="button" title="Musica di sottofondo" aria-pressed="true" class="hdr-btn">
@@ -214,6 +244,9 @@
             <button type="button" id="btn-start-game" class="w-full mt-6 py-3 bg-green-600 hover:bg-green-500 font-bold rounded-lg text-xl shadow-lg transition font-henny tracking-wide">
                 Inizia Partita
             </button>
+            <button type="button" id="btn-start-tour" class="w-full py-2 bg-slate-700 hover:bg-slate-600 border border-slate-500 font-semibold rounded-lg text-sm transition text-amber-300">
+                🎓 Tutorial guidato (partita di prova)
+            </button>
         </div>
         </div>
     </div>
@@ -223,7 +256,7 @@
 
         <!-- CANVAS COLUMN -->
         <div class="lg:col-span-7 flex flex-col items-center">
-            <div class="w-full bg-slate-800 p-3 rounded-t-xl border-t border-x border-slate-700 flex justify-between items-center text-sm">
+            <div id="game-status-bar" class="w-full bg-slate-800 p-3 rounded-t-xl border-t border-x border-slate-700 flex justify-between items-center text-sm">
                 <div>
                     <span class="text-slate-400">Tu sei:</span> 
                     <strong id="display-your-char" class="text-amber-400 font-henny text-base">-</strong>
@@ -273,7 +306,7 @@
             </div>
 
             <!-- TACCUINO A SCHEDE -->
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md">
+            <div id="notebook-card" class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md">
                 <div class="flex justify-between items-center mb-2 border-b border-slate-700 pb-1">
                     <h3 class="text-md font-bold text-slate-200">📒 Taccuino del Detective</h3>
                     <span class="text-xs text-slate-400">Spunta indizi</span>
@@ -302,7 +335,7 @@
 
             <!-- Il registro occupa lo spazio rimasto in colonna (bottom allineato all'elenco dei personaggi);
                  il contenuto è posizionato in modo assoluto, così un registro lungo scorre invece di allungare la colonna -->
-            <div class="relative bg-slate-900 rounded-xl border border-slate-800 flex-1 min-h-[8rem]">
+            <div id="log-card" class="relative bg-slate-900 rounded-xl border border-slate-800 flex-1 min-h-[8rem]">
                 <div class="absolute inset-3 flex flex-col">
                     <div class="text-xs font-bold text-slate-400 mb-1">Registro Eventi:</div>
                     <div id="game-log" class="overflow-y-auto text-xs text-slate-300 space-y-1 font-mono flex-1 min-h-0"></div>
@@ -315,7 +348,7 @@
     <div id="modal-pause" class="hidden fixed inset-0 modal flex justify-center items-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-600 rounded-xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
             <h3 class="text-2xl font-bold text-amber-500 font-henny">⏸️ GIOCO IN PAUSA</h3>
-            <p class="text-xs text-slate-400">Versione v0.34</p>
+            <p class="text-xs text-slate-400">Versione v0.35</p>
             <div class="space-y-3 pt-2">
                 <button id="btn-resume-game" class="w-full py-3 bg-green-600 hover:bg-green-500 font-bold rounded-lg transition text-white">
                     ▶️ Riprendi Partita
@@ -374,6 +407,23 @@
         </div>
     </div>
 
+    <!-- TUTORIAL GUIDATO -->
+    <div id="tour-layer" role="dialog" aria-live="polite" aria-label="Tutorial guidato">
+        <div id="tour-block"></div>
+        <div id="tour-spot"></div>
+        <div id="tour-balloon">
+            <h4 id="tour-title"></h4>
+            <p id="tour-text"></p>
+            <div id="tour-actions">
+                <button type="button" id="tour-prev">◀ Indietro</button>
+                <button type="button" id="tour-next">Avanti ▶</button>
+                <span id="tour-count"></span>
+                <button type="button" id="tour-exit">Esci (Esc)</button>
+            </div>
+        </div>
+        <svg id="tour-cursor" viewBox="0 0 24 24"><path d="M3 2 L3 19 L8 14.5 L11.5 22 L14.5 20.7 L11 13.3 L18 13 Z" fill="#fff" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg>
+    </div>
+
     <!-- CONSULTAZIONE DI REGOLE E ISTRUZIONI (testo Markdown incorporato sotto) -->
     <div id="doc-modal" role="dialog" aria-modal="true" aria-labelledby="doc-title">
         <div id="doc-panel">
@@ -383,7 +433,7 @@
     </div>
     <script type="text/markdown" id="doc-md-regole"># Giallo alla Tenuta — Regole del gioco
 
-Versione del gioco: v0.34. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
+Versione del gioco: v0.35. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
 
 ## Il caso
 
@@ -537,7 +587,9 @@ Questo documento spiega come si usa il gioco: schermate, pulsanti e comandi. Per
 2. Scegli il tuo personaggio dal menu **Scegli il tuo Personaggio**.
 3. Premi **Inizia Partita**. Gli altri cinque personaggi sono controllati dal computer.
 
-Dalla schermata iniziale puoi aprire in qualsiasi momento le **Regole**, le **Istruzioni** e il pulsante **Musica** che si trovano nell'intestazione della pagina.
+In alternativa, **Tutorial guidato (partita di prova)** avvia una partita con l'Ambasciatore Ambra e ti accompagna passo passo tra i comandi (vedi sezione 7).
+
+Dalla schermata iniziale puoi aprire in qualsiasi momento il **Tutorial**, le **Regole**, le **Istruzioni** e il pulsante **Musica** che si trovano nell'intestazione della pagina.
 
 ## 2. La schermata di gioco
 
@@ -615,6 +667,7 @@ Le tue carte sono segnate in automatico con ❌, così come le carte che ti veng
 
 - **Pausa / Menu (ESC)**: in partita sospende il gioco dei computer. Dal menu di pausa puoi riprendere o tornare al menu principale. Tornando al menu, la partita in corso viene abbandonata.
 - **Musica**: il pulsante con l'altoparlante nell'intestazione attiva o disattiva il sottofondo musicale, sia nel menu iniziale sia durante la partita. La scelta viene ricordata. La musica parte al primo clic o tasto premuto, perché i browser non permettono l'audio prima di un gesto dell'utente.
+- **Tutorial**: un percorso guidato di 15 passi. Evidenzia sul gioco vero ogni comando (tabellone, pedina, porte, elenco dei personaggi, dadi, ipotesi, accusa, passa turno, carte, taccuino, registro, intestazione) con una breve spiegazione. Si avanza con **Avanti** (o freccia destra / Invio), si torna indietro con **Indietro** (o freccia sinistra) e si esce con **Esci** o **Esc**. Mentre è aperto la partita è in pausa; si può rivedere in qualsiasi momento dal pulsante **Tutorial** dell'intestazione.
 - **Regole** e **Istruzioni**: si consultano dall'intestazione in qualsiasi momento. Durante la partita il gioco si sospende finché il documento è aperto. Si chiude con il pulsante di chiusura, con **Esc** o con un clic fuori dalla finestra.
 
 ## 8. Gli avversari
@@ -641,7 +694,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
     </div>
 
     <script>
-        const VERSION = "v0.34";
+        const VERSION = "v0.35";
 
         const SUSPECTS = [
             { id: "Ambasciatore Ambra", color: "#f59e0b", initial: "A", spriteRow: 0, spriteCol: 0 },
@@ -824,9 +877,220 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             initCinema();
             initMusic();
             initDocs();
+            initTour();
 
             startAnimationLoop();
         });
+
+        // ---------- Tutorial guidato ----------
+        const TOUR = { active: false, i: 0, autoPaused: false, token: 0, timers: [], steps: null, tab: 'suspects' };
+
+        function tourCellRect(x, y, pad) {
+            const r = canvas.getBoundingClientRect();
+            const bx = canvas.clientLeft || 0, by = canvas.clientTop || 0;
+            const sx = canvas.clientWidth ? canvas.clientWidth / canvas.width : 1;
+            const c = CELL_PX * sx;
+            return { left: r.left + bx + x * c - pad, top: r.top + by + y * c - pad, width: c + 2 * pad, height: c + 2 * pad };
+        }
+
+        function tourBuildSteps() {
+            const me = () => gameState.players.find(p => !p.isBot);
+            return [
+                { center: true, title: 'Benvenuto nella Tenuta',
+                  text: 'Questo tutorial ti accompagna tra i comandi del gioco. Vai avanti con il pulsante o con la freccia destra, torna indietro con la freccia sinistra, esci in qualsiasi momento con Esc. La partita è in pausa finché il tutorial è aperto.' },
+                { sel: '#gameBoard', title: 'Il tabellone',
+                  text: 'Qui si svolge il gioco: nove stanze collegate da corridoi. Le pedine sono i sei personaggi, le piccole icone nelle stanze sono le armi. Passando il mouse su una pedina o su un\'arma compare l\'immagine ingrandita con il nome.' },
+                { rect: () => { const p = me(); return tourCellRect(p.x, p.y, 10); }, title: 'La tua pedina',
+                  text: 'Questa è la tua pedina. Tutti i personaggi partono dal bordo del tabellone, a 5 caselle dalla porta più vicina.' },
+                { rect: () => { const d = DOORS[1]; return tourCellRect(d.x, d.y, 6); }, title: 'Le porte',
+                  text: 'Ogni stanza ha una sola porta: il riquadro illuminato sulla mappa. Si entra solo da lì, e entrare in una stanza termina il movimento.' },
+                { sel: '#players-legend', title: 'Chi gioca',
+                  text: 'L\'elenco mostra i sei personaggi: TU indica il tuo, Computer gli avversari. La riga con il bordo giallo è di chi ha il turno. Passa il mouse su una riga per evidenziare la pedina sul tabellone, clicca per leggere la scheda del personaggio.' },
+                { sel: '#btn-roll-dice', title: 'Lancia i dadi',
+                  text: 'A inizio turno lanci due dadi e puoi muoverti di al massimo il totale. Le caselle raggiungibili diventano verdi: clicca quella dove vuoi andare. Se inizi il turno in una stanza d\'angolo con passaggio segreto, accanto a questo pulsante compare quello per usarlo.', click: true },
+                { sel: '#btn-hypothesis', title: 'Formula un\'ipotesi',
+                  text: 'Si attiva dopo che sei entrato in una stanza. Scegli un sospettato e un\'arma: l\'ipotesi riguarda sempre la stanza in cui ti trovi. Gli avversari, a turno, provano a smentirla mostrandoti una carta.', click: true },
+                { sel: '#btn-accusation', title: 'Accusa finale',
+                  text: 'Quando sei certo di personaggio, arma e stanza, accusa. Si può fare nel proprio turno, anche senza essere nella stanza. Hai una sola accusa: se sbagli sei eliminato e potrai solo smentire le ipotesi degli altri.', click: true },
+                { sel: '#btn-end-turn', title: 'Passa turno',
+                  text: 'Quando hai finito, passa il turno. I computer giocano da soli.', click: true },
+                { sel: '#my-cards-container', parent: true, title: 'Le tue carte',
+                  text: 'Sono le tre carte che hai in mano. Non fanno parte della soluzione: il gioco le segna da sé nel taccuino.' },
+                { sel: '#notebook-card', title: 'Il taccuino',
+                  text: 'Annota qui le tue deduzioni. A ogni clic una voce passa da ❓ a ❌ (esclusa) a ✔️ (sospettata). Le schede Personaggi, Armi e Stanze si cambiano dai pulsanti in alto.', demo: 'notebook' },
+                { sel: '#log-card', title: 'Il registro eventi',
+                  text: 'Elenca movimenti, ipotesi, smentite e accuse. Anche sapere chi non ha potuto smentire è un\'informazione utile.' },
+                { center: true, title: 'I cartigli',
+                  text: 'Le ipotesi degli avversari e le smentite che ti riguardano compaiono in un cartiglio al centro dello schermo. Si chiude con Spazio, Esc o un clic, oppure da solo dopo 10 secondi.' },
+                { sel: '#hdr-controls', title: 'Regole, istruzioni, musica',
+                  text: 'Qui trovi le Regole e le Istruzioni complete, il pulsante per spegnere la musica, il Tutorial (per rivederlo) e, in partita, la Pausa (Esc).' },
+                { center: true, title: 'Buona indagine',
+                  text: 'Il tutorial è finito. Ora tocca a te. Ricorda che i computer accusano solo quando sono certi della soluzione, quindi vince chi deduce più in fretta.' }
+            ];
+        }
+
+        function tourClearTimers() { TOUR.timers.forEach(clearTimeout); TOUR.timers = []; TOUR.token++; }
+        function tourLater(fn, ms) { const tk = TOUR.token; TOUR.timers.push(setTimeout(() => { if (TOUR.active && tk === TOUR.token) fn(); }, ms)); }
+
+        function tourTargetRect(step) {
+            if (step.center) return null;
+            if (step.rect) return step.rect();
+            let el = document.querySelector(step.sel);
+            if (step.parent && el) el = el.parentElement;
+            if (!el) return null;
+            const r = el.getBoundingClientRect();
+            return { left: r.left, top: r.top, width: r.width, height: r.height };
+        }
+
+        function tourMoveCursor(x, y, show) {
+            const c = document.getElementById('tour-cursor');
+            c.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+            c.classList.toggle('show', show !== false);
+        }
+        function tourClickRipple() {
+            const c = document.getElementById('tour-cursor');
+            c.classList.remove('click'); void c.offsetWidth; c.classList.add('click');
+        }
+        function tourCursorTo(el, then, delay) {
+            if (!el) return;
+            const r = el.getBoundingClientRect();
+            tourMoveCursor(r.left + r.width / 2, r.top + Math.min(r.height / 2, 24));
+            tourLater(() => { tourClickRipple(); if (then) then(); }, delay || 1000);
+        }
+
+        function tourPlace(step, animate) {
+            const spot = document.getElementById('tour-spot'), bal = document.getElementById('tour-balloon');
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const W = Math.min(380, vw - 24);
+            bal.style.width = W + 'px';
+            const r = tourTargetRect(step);
+            let top, left;
+            if (!r) {
+                spot.classList.add('nospot'); spot.classList.remove('pulse');
+                Object.assign(spot.style, { left: vw / 2 + 'px', top: vh / 2 + 'px', width: '0px', height: '0px' });
+                const H = bal.offsetHeight;
+                left = (vw - W) / 2; top = Math.max(12, (vh - H) / 2);
+            } else {
+                const pad = 6;
+                const sl = Math.max(0, r.left - pad), st = Math.max(0, r.top - pad);
+                const sw = Math.min(vw - sl, r.width + 2 * pad), sh = Math.min(vh - st, r.height + 2 * pad);
+                spot.classList.remove('nospot'); spot.classList.add('pulse');
+                Object.assign(spot.style, { left: sl + 'px', top: st + 'px', width: sw + 'px', height: sh + 'px' });
+                const H = bal.offsetHeight, gap = 14;
+                const cx = Math.min(Math.max(12, sl + sw / 2 - W / 2), vw - W - 12);
+                if (st + sh + gap + H <= vh - 12) { top = st + sh + gap; left = cx; }
+                else if (st - gap - H >= 12) { top = st - gap - H; left = cx; }
+                else if (sl + sw + gap + W <= vw - 12) { left = sl + sw + gap; top = Math.min(Math.max(12, st), vh - H - 12); }
+                else if (sl - gap - W >= 12) { left = sl - gap - W; top = Math.min(Math.max(12, st), vh - H - 12); }
+                else { left = cx; top = vh - H - 12; }   // bersaglio molto grande: il fumetto resta in basso, sopra di esso
+            }
+            if (!animate) bal.style.transition = 'none';
+            bal.style.left = Math.round(left) + 'px'; bal.style.top = Math.round(top) + 'px';
+            if (!animate) { void bal.offsetWidth; bal.style.transition = ''; }
+            return r;
+        }
+
+        function tourShow(i, forward) {
+            const steps = TOUR.steps;
+            if (i < 0 || i >= steps.length) return;
+            tourClearTimers();
+            TOUR.i = i;
+            const step = steps[i];
+            document.getElementById('tour-title').textContent = step.title;
+            document.getElementById('tour-text').textContent = step.text;
+            document.getElementById('tour-count').textContent = `${i + 1} / ${steps.length}`;
+            document.getElementById('tour-prev').disabled = (i === 0);
+            document.getElementById('tour-next').textContent = (i === steps.length - 1) ? 'Fine' : 'Avanti ▶';
+            document.getElementById('tour-cursor').classList.remove('show');
+            // se il bersaglio non è del tutto visibile, la pagina scorre
+            if (step.sel) {
+                let el = document.querySelector(step.sel);
+                if (step.parent && el) el = el.parentElement;
+                if (el) {
+                    const r = el.getBoundingClientRect();
+                    if (r.top < 0 || r.bottom > window.innerHeight) el.scrollIntoView({ block: 'center', inline: 'nearest' });
+                }
+            } else if (step.rect) {
+                const r = step.rect();
+                if (r.top < 0 || r.top + r.height > window.innerHeight) document.getElementById('gameBoard').scrollIntoView({ block: 'center' });
+            }
+            tourPlace(step, true);
+            // animazione del cursore sul bersaglio
+            if (step.click && step.sel) {
+                tourLater(() => tourCursorTo(document.querySelector(step.sel), null, 1000), 450);
+            } else if (step.demo === 'notebook') {
+                const seq = ['weapons', 'rooms', 'suspects'];
+                let t = 500;
+                seq.forEach(tab => {
+                    tourLater(() => tourCursorTo(document.getElementById('tab-btn-' + tab), () => switchNotebookTab(tab), 900), t);
+                    t += 2000;
+                });
+            } else if (step.sel === '#players-legend') {
+                tourLater(() => {
+                    const row = document.querySelectorAll('#players-legend [data-character]')[1];
+                    tourCursorTo(row, () => { try { highlightPawn(row.dataset.character, true); } catch (e) { /* ignora */ } }, 900);
+                }, 450);
+                tourLater(() => { try { highlightPawn(null, false); } catch (e) { /* ignora */ } }, 3800);
+            }
+        }
+
+        function tourNext() { if (TOUR.i >= TOUR.steps.length - 1) endTour(); else tourShow(TOUR.i + 1, true); }
+        function tourPrev() { if (TOUR.i > 0) tourShow(TOUR.i - 1, false); }
+
+        function startTour() {
+            if (TOUR.active) return;
+            if (typeof hideBotMessage === 'function') hideBotMessage();
+            closeDoc(); hideCharCard();
+            const inGame = !document.getElementById('game-screen').classList.contains('hidden');
+            if (!inGame) return;
+            document.getElementById('modal-pause').classList.add('hidden');
+            if (!gameState.isPaused) { gameState.isPaused = true; TOUR.autoPaused = true; }
+            TOUR.active = true;
+            TOUR.steps = tourBuildSteps();
+            if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+            document.getElementById('tour-layer').classList.add('open');
+            window.scrollTo(0, 0);
+            tourShow(0, true);
+        }
+
+        function endTour() {
+            if (!TOUR.active) return;
+            tourClearTimers();
+            TOUR.active = false;
+            document.getElementById('tour-layer').classList.remove('open');
+            document.getElementById('tour-cursor').classList.remove('show');
+            try { switchNotebookTab('suspects'); highlightPawn(null, false); } catch (e) { /* ignora */ }
+            if (TOUR.autoPaused) { TOUR.autoPaused = false; gameState.isPaused = false; }
+        }
+
+        // Dal menu iniziale il tutorial si svolge su una partita vera con l'Ambasciatore Ambra (che gioca per primo)
+        function launchTour() {
+            const inMenu = !document.getElementById('setup-screen').classList.contains('hidden');
+            if (inMenu) {
+                document.getElementById('select-character').value = 'Ambasciatore Ambra';
+                startGame();
+            }
+            startTour();
+        }
+
+        function initTour() {
+            const b = document.getElementById('btn-tour');
+            if (!b || typeof b.addEventListener !== 'function') return;
+            b.addEventListener('click', launchTour);
+            document.getElementById('btn-start-tour').addEventListener('click', launchTour);
+            document.getElementById('tour-next').addEventListener('click', tourNext);
+            document.getElementById('tour-prev').addEventListener('click', tourPrev);
+            document.getElementById('tour-exit').addEventListener('click', endTour);
+            window.addEventListener('keydown', (e) => {
+                if (!TOUR.active) return;
+                if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); endTour(); }
+                else if (e.key === 'ArrowRight' || e.key === 'Enter') { e.preventDefault(); e.stopImmediatePropagation(); tourNext(); }
+                else if (e.key === 'ArrowLeft') { e.preventDefault(); e.stopImmediatePropagation(); tourPrev(); }
+            }, true);
+            const re = () => { if (TOUR.active) tourPlace(TOUR.steps[TOUR.i], false); };
+            window.addEventListener('resize', re);
+            window.addEventListener('scroll', re, true);
+        }
 
         // ---------- Consultazione di Regole e Istruzioni (Markdown incorporato nella pagina) ----------
         const DOC = { open: false, autoPaused: false, prevOverflow: '' };
@@ -1504,6 +1768,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
 
         function resetFullGameState() {
             if (typeof closeDoc === 'function') closeDoc();
+            if (typeof endTour === 'function') endTour();
             hideBotMessage(true);
             hideCharCard();
             clearTimeout(botTimer);
