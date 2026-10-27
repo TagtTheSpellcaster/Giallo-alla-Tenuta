@@ -4,7 +4,7 @@ Questo documento spiega come si usa il gioco: schermate, pulsanti e comandi. Per
 
 ## 1. Iniziare una partita
 
-1. Nella schermata iniziale clicca sulla finestra scura (**Clicca per iniziare**): parte la musica e scorre la presentazione del caso. Il clic serve anche a sbloccare l'audio, che i browser bloccano finché non si interagisce con la pagina. Puoi mettere la presentazione in **Pausa**, **Saltarla** o **Rivederla** con i pulsanti in basso a destra della finestra. Non serve aspettare la fine.
+1. Nella schermata iniziale clicca sulla finestra scura (**Clicca per iniziare**, oppure premi Invio o Spazio). Finché non lo fai, il resto dell'interfaccia è disattivato (in grigio). Con il clic parte la musica e scorre la presentazione del caso *Giallo alla Tenuta Salvaterra*. Il clic serve anche a sbloccare l'audio, che i browser bloccano finché non si interagisce con la pagina. Puoi mettere la presentazione in **Pausa**, **Saltarla** o **Rivederla** con i pulsanti in basso a destra della finestra. Non serve aspettare la fine.
 2. Scegli il tuo personaggio dal menu **Scegli il tuo Personaggio**.
 3. Premi **Inizia Partita**. Gli altri cinque personaggi sono controllati dal computer.
 

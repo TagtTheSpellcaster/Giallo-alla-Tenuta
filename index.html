@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giallo alla Tenuta - v0.38</title>
+    <title>Giallo alla Tenuta - v0.39</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -88,6 +88,9 @@
                         background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.82) 100%);
                         font-family: 'EB Garamond', Georgia, serif; transition: opacity 0.6s ease; }
         #cinema.idle #cinema-window, #cinema.idle #cinema-final, #cinema.idle #cinema-controls { visibility: hidden; }
+        /* finché non si clicca sulla finestra di benvenuto il resto dell'interfaccia è disattivato (grigio) */
+        .welcome-lock #setup-form, .welcome-lock #hdr-controls { opacity: 0.3; filter: grayscale(1); pointer-events: none; user-select: none; transition: opacity 0.5s ease, filter 0.5s ease; }
+        #setup-form, #hdr-controls { transition: opacity 0.5s ease, filter 0.5s ease; }
         #cinema-start.gone { opacity: 0; pointer-events: none; }
         #cinema-start .cs-title { font-family: 'Henny Penny', cursive; color: #f59e0b; font-size: clamp(1.6rem, 0.9rem + 3vw, 2.8rem); letter-spacing: 0.05em; text-transform: uppercase; line-height: 1.1; text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9); }
         #cinema-start .cs-go { font-size: clamp(1rem, 0.8rem + 0.8vw, 1.3rem); padding: 8px 22px; border: 1px solid rgba(245, 158, 11, 0.7); border-radius: 999px;
@@ -192,7 +195,7 @@
     <header class="w-full max-w-5xl flex justify-between items-center py-4 mb-4 border-b border-slate-700">
         <div>
             <h1 class="text-4xl font-extrabold tracking-wider text-amber-500 flex items-center gap-2 font-henny">
-                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.38</span>
+                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.39</span>
             </h1>
         </div>
         <div id="hdr-controls" class="flex items-center gap-2 flex-wrap justify-end">
@@ -217,7 +220,7 @@
                 <div id="cinema-bg"></div>
                 <div id="cinema-window">
                     <div id="cinema-crawl">
-                        <div class="cn-title-block"><div class="cn-title">Il caso della Tenuta</div></div>
+                        <div class="cn-title-block"><div class="cn-title">Giallo alla Tenuta Salvaterra</div></div>
                         <p><em>Ludovico Salvaterra</em>, padrone della Tenuta e collezionista di segreti, aveva invitato per il fine settimana sei ospiti.</p>
                         <p>Ciascuno aveva ricevuto una lettera cortese e, tra le righe, un avvertimento che solo lui poteva capire.</p>
                         <p>Con loro è arrivato anche un investigatore, convocato in segreto da Salvaterra: sei tu.</p>
@@ -233,7 +236,7 @@
                 <div id="cinema-final">Chi ha ucciso Ludovico Salvaterra?</div>
                 <div id="cinema-vignette"></div>
                 <button type="button" id="cinema-start" aria-label="Avvia la presentazione del caso">
-                    <span class="cs-title">Il caso della Tenuta</span>
+                    <span class="cs-title">Giallo alla Tenuta Salvaterra</span>
                     <span class="cs-go" id="cinema-start-label">▶ Clicca per iniziare</span>
                 </button>
                 <div id="cinema-grain"></div>
@@ -245,7 +248,7 @@
             </div>
         </section>
 
-        <div class="max-w-md mx-auto">
+        <div id="setup-form" class="max-w-md mx-auto">
         <h2 class="text-2xl font-bold mb-4 text-slate-200 border-b border-slate-700 pb-2 font-henny text-amber-400">Configurazione Partita</h2>
         
         <div class="space-y-4">
@@ -368,7 +371,7 @@
     <div id="modal-pause" class="hidden fixed inset-0 modal flex justify-center items-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-600 rounded-xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
             <h3 class="text-2xl font-bold text-amber-500 font-henny">⏸️ GIOCO IN PAUSA</h3>
-            <p class="text-xs text-slate-400">Versione v0.38</p>
+            <p class="text-xs text-slate-400">Versione v0.39</p>
             <div class="space-y-3 pt-2">
                 <button id="btn-resume-game" class="w-full py-3 bg-green-600 hover:bg-green-500 font-bold rounded-lg transition text-white">
                     ▶️ Riprendi Partita
@@ -453,7 +456,7 @@
     </div>
     <script type="text/markdown" id="doc-md-regole"># Giallo alla Tenuta — Regole del gioco
 
-Versione del gioco: v0.38. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
+Versione del gioco: v0.39. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
 
 ## Il caso
 
@@ -603,7 +606,7 @@ Questo documento spiega come si usa il gioco: schermate, pulsanti e comandi. Per
 
 ## 1. Iniziare una partita
 
-1. Nella schermata iniziale clicca sulla finestra scura (**Clicca per iniziare**): parte la musica e scorre la presentazione del caso. Il clic serve anche a sbloccare l'audio, che i browser bloccano finché non si interagisce con la pagina. Puoi mettere la presentazione in **Pausa**, **Saltarla** o **Rivederla** con i pulsanti in basso a destra della finestra. Non serve aspettare la fine.
+1. Nella schermata iniziale clicca sulla finestra scura (**Clicca per iniziare**, oppure premi Invio o Spazio). Finché non lo fai, il resto dell'interfaccia è disattivato (in grigio). Con il clic parte la musica e scorre la presentazione del caso *Giallo alla Tenuta Salvaterra*. Il clic serve anche a sbloccare l'audio, che i browser bloccano finché non si interagisce con la pagina. Puoi mettere la presentazione in **Pausa**, **Saltarla** o **Rivederla** con i pulsanti in basso a destra della finestra. Non serve aspettare la fine.
 2. Scegli il tuo personaggio dal menu **Scegli il tuo Personaggio**.
 3. Premi **Inizia Partita**. Gli altri cinque personaggi sono controllati dal computer.
 
@@ -714,7 +717,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
     </div>
 
     <script>
-        const VERSION = "v0.38";
+        const VERSION = "v0.39";
 
         const SUSPECTS = [
             { id: "Ambasciatore Ambra", color: "#f59e0b", initial: "A", spriteRow: 0, spriteCol: 0 },
@@ -1520,10 +1523,23 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             const start = document.getElementById('cinema-start');
             const label = document.getElementById('cinema-start-label');
             if (label && MUSIC.enabled) label.textContent = '▶ Clicca per iniziare (con musica)';
+            // il resto dell'interfaccia resta disattivato (anche da tastiera) finché non si fa il primo clic
+            const lockEls = ['setup-form', 'hdr-controls'].map(id => document.getElementById(id)).filter(Boolean);
+            lockEls.forEach(el => { el.inert = true; el.setAttribute('aria-disabled', 'true'); });
+            if (lockEls.length === 2) document.body.classList.add('welcome-lock');
+            let begun = false;
             const begin = () => {
+                if (begun) return;
+                begun = true;
+                document.body.classList.remove('welcome-lock');
+                lockEls.forEach(el => { el.inert = false; el.removeAttribute('aria-disabled'); });
+                window.removeEventListener('keydown', onKey, true);
                 if (MUSIC.enabled) musicStart();
                 if (CINEMA.reduced) { if (start) start.classList.add('gone'); e.box.classList.remove('idle'); } else cinemaRestart();
             };
+            // anche Invio o Spazio sulla finestra di benvenuto la avviano
+            const onKey = (e) => { if (e.key === 'Enter' || e.code === 'Space') { e.preventDefault(); e.stopPropagation(); begin(); } };
+            window.addEventListener('keydown', onKey, true);
             if (start) start.addEventListener('click', begin);
             if (CINEMA.reduced) {
                 e.box.classList.add('reduced');
