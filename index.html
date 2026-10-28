@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giallo alla Tenuta - v0.40</title>
+    <title>Giallo alla Tenuta - v0.41</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -230,7 +230,7 @@
     <header class="w-full max-w-5xl flex justify-between items-center py-4 mb-4 border-b border-slate-700">
         <div>
             <h1 class="text-4xl font-extrabold tracking-wider text-amber-500 flex items-center gap-2 font-henny">
-                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.40</span>
+                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.41</span>
             </h1>
         </div>
         <div id="hdr-controls" class="flex items-center gap-2 flex-wrap justify-end">
@@ -284,11 +284,10 @@
         </section>
 
         <div id="setup-form" class="max-w-md mx-auto">
-        <h2 class="text-2xl font-bold mb-4 text-slate-200 border-b border-slate-700 pb-2 font-henny text-amber-400">Configurazione Partita</h2>
         
         <div class="space-y-4">
             <div>
-                <label class="block text-sm font-medium mb-1 text-slate-300">Scegli il tuo Personaggio:</label>
+                <label class="block text-xl mb-2 text-amber-400 font-henny">Scegli il tuo Personaggio:</label>
                 <select id="select-character" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white focus:outline-none focus:border-amber-500">
                     <option value="Ambasciatore Ambra">Ambasciatore Ambra</option>
                     <option value="Baronessa Bianchi">Baronessa Bianchi</option>
@@ -303,7 +302,7 @@
                 Inizia Partita
             </button>
             <button type="button" id="btn-start-tour" class="w-full py-2 bg-slate-700 hover:bg-slate-600 border border-slate-500 font-semibold rounded-lg text-sm transition text-amber-300">
-                🎓 Tutorial guidato (partita di prova)
+                🎓 Tutorial guidato
             </button>
         </div>
         </div>
@@ -414,7 +413,7 @@
     <div id="modal-pause" class="hidden fixed inset-0 modal flex justify-center items-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-600 rounded-xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
             <h3 class="text-2xl font-bold text-amber-500 font-henny">⏸️ GIOCO IN PAUSA</h3>
-            <p class="text-xs text-slate-400">Versione v0.40</p>
+            <p class="text-xs text-slate-400">Versione v0.41</p>
             <div class="space-y-3 pt-2">
                 <button id="btn-resume-game" class="w-full py-3 bg-green-600 hover:bg-green-500 font-bold rounded-lg transition text-white">
                     ▶️ Riprendi Partita
@@ -502,7 +501,7 @@
     </div>
     <script type="text/markdown" id="doc-md-regole"># Giallo alla Tenuta — Regole del gioco
 
-Versione del gioco: v0.40. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
+Versione del gioco: v0.41. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
 
 ## Il caso
 
@@ -656,7 +655,7 @@ Questo documento spiega come si usa il gioco: schermate, pulsanti e comandi. Per
 2. Scegli il tuo personaggio dal menu **Scegli il tuo Personaggio**.
 3. Premi **Inizia Partita**. Gli altri cinque personaggi sono controllati dal computer.
 
-In alternativa, **Tutorial guidato (partita di prova)** avvia una partita con l'Ambasciatore Ambra e ti accompagna passo passo tra i comandi (vedi sezione 8).
+In alternativa, **Tutorial guidato** avvia una partita con l'Ambasciatore Ambra e ti accompagna passo passo tra i comandi (vedi sezione 8).
 
 Dalla schermata iniziale puoi aprire in qualsiasi momento il **Tutorial**, le **Regole**, le **Istruzioni** e il pulsante **Musica** che si trovano nell'intestazione della pagina.
 
@@ -767,7 +766,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
     </div>
 
     <script>
-        const VERSION = "v0.40";
+        const VERSION = "v0.41";
 
         const SUSPECTS = [
             { id: "Ambasciatore Ambra", color: "#f59e0b", initial: "A", spriteRow: 0, spriteCol: 0 },
@@ -952,6 +951,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             initDocs();
             initTour();
             initReveal();
+            initEgg();
 
             startAnimationLoop();
         });
@@ -1162,6 +1162,38 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
                     e.preventDefault(); e.stopImmediatePropagation(); closeReveal();
                 }
             }, true);
+        }
+
+        // ---------- Codice segreto ----------
+        // Digitando la parola segreta (fuori dai campi di testo) il giocatore vince: si salta tutto e parte la rivelazione.
+        const EGG = { word: 'mysterio', buf: '' };
+
+        function eggVictory() {
+            if (typeof gameState === 'undefined') return;
+            if (gameState.gameOver || REVEAL.open || TOUR.active || DOC.open) return;
+            const inMenu = !document.getElementById('setup-screen').classList.contains('hidden');
+            if (inMenu) { releaseWelcomeLock(); cinemaStop(); startGame(); }
+            if (!gameState.players || !gameState.players.length || !gameState.solution) return;
+            // chiude tutto ciò che potrebbe essere aperto
+            hideBotMessage(true);
+            hideCharCard();
+            closeModal('modal-hypothesis'); closeModal('modal-accusation');
+            document.getElementById('modal-pause').classList.add('hidden');
+            gameState.isPaused = false;
+            const me = gameState.players.find(p => !p.isBot);
+            const sol = gameState.solution;
+            if (me) resolveAccusation(me, sol.suspect, sol.weapon, sol.room);
+        }
+
+        function initEgg() {
+            if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') return;
+            window.addEventListener('keydown', (e) => {
+                if (e.ctrlKey || e.metaKey || e.altKey || !e.key || e.key.length !== 1) return;
+                const t = e.target;
+                if (t && t.tagName && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+                EGG.buf = (EGG.buf + e.key.toLowerCase()).slice(-EGG.word.length);
+                if (EGG.buf === EGG.word) { EGG.buf = ''; eggVictory(); }
+            });
         }
 
         // ---------- Tutorial guidato ----------
@@ -1769,6 +1801,16 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             CINEMA.raf = null;
         }
 
+        // Riattiva l'interfaccia disattivata dalla finestra di benvenuto
+        function releaseWelcomeLock() {
+            if (!document.body || !document.body.classList) return;
+            document.body.classList.remove('welcome-lock');
+            ['setup-form', 'hdr-controls'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.inert = false; if (el.removeAttribute) el.removeAttribute('aria-disabled'); }
+            });
+        }
+
         function initCinema() {
             const e = cinemaEls();
             if (!e.box || !e.crawl || typeof e.crawl.querySelector !== 'function') return;
@@ -1782,8 +1824,6 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             // Finestra di benvenuto: la presentazione (e la musica) partono al clic dell'utente,
             // che è anche il gesto richiesto dal browser per sbloccare l'audio.
             const start = document.getElementById('cinema-start');
-            const label = document.getElementById('cinema-start-label');
-            if (label && MUSIC.enabled) label.textContent = '▶ Clicca per iniziare (con musica)';
             // il resto dell'interfaccia resta disattivato (anche da tastiera) finché non si fa il primo clic
             const lockEls = ['setup-form', 'hdr-controls'].map(id => document.getElementById(id)).filter(Boolean);
             lockEls.forEach(el => { el.inert = true; el.setAttribute('aria-disabled', 'true'); });
@@ -1792,8 +1832,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             const begin = () => {
                 if (begun) return;
                 begun = true;
-                document.body.classList.remove('welcome-lock');
-                lockEls.forEach(el => { el.inert = false; el.removeAttribute('aria-disabled'); });
+                releaseWelcomeLock();
                 window.removeEventListener('keydown', onKey, true);
                 if (MUSIC.enabled) musicStart();
                 if (CINEMA.reduced) { if (start) start.classList.add('gone'); e.box.classList.remove('idle'); } else cinemaRestart();
