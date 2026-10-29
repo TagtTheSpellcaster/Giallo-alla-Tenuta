@@ -1,6 +1,6 @@
 # Giallo alla Tenuta — Regole del gioco
 
-Versione del gioco: v0.41. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
+Versione del gioco: v0.42. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
 
 ## Il caso
 
@@ -54,7 +54,7 @@ Tutte le stanze hanno le stesse regole: ciascuna può essere la stanza del delit
 
 ## 5. Il turno
 
-In un turno si può, nell'ordine: muoversi, formulare un'ipotesi, terminare il turno. L'accusa si può fare in qualunque momento del proprio turno (vedi sezione 8).
+In un turno si può, nell'ordine: muoversi, formulare un'ipotesi, terminare il turno. L'accusa si può fare in qualunque momento del proprio turno (vedi sezione 6).
 
 ### 5.1 Movimento
 
@@ -110,13 +110,13 @@ Effetti:
 #### Smentita
 
 1. Si procede nell'ordine dei turni, partendo dal giocatore successivo a chi ha ipotizzato.
-2. Il primo giocatore che possiede almeno una delle tre carte nominate (personaggio, arma, stanza) la mostra a chi ha ipotizzato. Se ne ha più di una, la carta mostrata è scelta a caso dal gioco.
+2. Il primo giocatore che possiede almeno una delle tre carte nominate (personaggio, arma, stanza) la mostra a chi ha ipotizzato. Se ne ha più di una, **sceglie lui** quale mostrare: quando è un bot, la sceglie il gioco a caso; quando è il giocatore umano, la sceglie il giocatore.
 3. Gli altri giocatori non vedono la carta, ma vengono a sapere chi ha smentito e chi non ha potuto farlo.
 4. Se nessuno può smentire, non succede nulla: l'informazione è comunque utile.
 5. **I giocatori eliminati continuano a smentire** con le proprie carte.
 6. Le carte di chi ha ipotizzato non vengono mai usate per smentirlo.
 7. Quando è il giocatore umano a ipotizzare, vede chi ha smentito e con quale carta (o che nessuno ha potuto smentire); la carta ricevuta viene segnata nel taccuino come esclusa dalla busta.
-8. Quando a ipotizzare è un bot e a smentire è il giocatore umano, il gioco gli indica chi chiede la smentita e quale carta mostra (la sceglie il gioco).
+8. Quando a ipotizzare è un bot e a smentire è il giocatore umano, il gioco gli indica chi chiede la smentita. Se il giocatore ha una sola carta tra quelle nominate, la mostra; se ne ha più di una, **sceglie quale mostrare**. Il turno del bot riprende dopo la scelta.
 
 ### 5.5 Fine del turno
 
@@ -140,6 +140,23 @@ Il giocatore umano termina il turno quando ha finito; i turni dei bot terminano 
 - Non sono presenti le carte Indizio né il dado con il simbolo della lente.
 - Si muove di **al massimo** il tiro dei dadi, e il tiro è la somma di due dadi normali.
 - Restare in una stanza non consente di ipotizzare di nuovo, se non si è stati spostati lì da un altro giocatore.
-- Chi smentisce non sceglie la carta da mostrare: la sceglie il gioco a caso.
 - La pedina di un giocatore eliminato non blocca i corridoi.
 - Comincia sempre il primo personaggio dell'elenco, non quello scelto dal giocatore.
+- Il computer può giocare a tre livelli (vedi sezione 8): Facile e Normale hanno bot che possono commettere errori, anche di accusa.
+- Quando a smentire è un bot con più carte utili, la carta mostrata è scelta a caso dal gioco.
+
+## 8. I bot e i livelli di difficoltà
+
+I cinque avversari seguono le stesse regole del giocatore umano. Il livello si sceglie nel menu iniziale (predefinito: Normale) e vale per tutta la partita.
+
+- **Conoscenza.** Ogni bot annota le carte che vede e deduce quelle degli altri dalle smentite e dalle mancate smentite, compresi i casi in cui un giocatore deve avere per forza una certa carta. Sa quante carte ha in mano ciascun giocatore.
+- **Movimento.** Tira i dadi e si dirige verso la stanza più vicina che ancora potrebbe essere quella del delitto. Usa il passaggio segreto se porta in una stanza utile, oppure se non ha alcuna casella raggiungibile.
+- **Ipotesi.** Ipotizza solo nelle stanze ancora utili, sceglie personaggio e arma con più probabilità di essere nella busta e non ripete un'ipotesi già fatta nella stessa stanza. Ogni ipotesi è mostrata al centro dello schermo.
+
+| Livello | Informazioni trascurate | Mosse a caso | Accuse azzardate |
+|---|---|---|---|
+| Facile | 40% | 30% | Con al massimo 12 soluzioni possibili, 30% di probabilità di accusare a ogni controllo |
+| Normale | 15% | 10% | Con al massimo 6 soluzioni possibili, 20% di probabilità di accusare a ogni controllo |
+| Difficile | 0% | 0% | Mai: accusa solo con la soluzione dedotta con certezza |
+
+"Informazioni trascurate": ogni volta che un bot assiste a un'ipotesi altrui, ciascuna informazione ricavata (chi non ha potuto smentire, chi ha smentito) viene ignorata con quella probabilità. "Mosse a caso": invece di avvicinarsi alla stanza utile più vicina, il bot sceglie una casella raggiungibile a caso. Un bot che accusa senza certezza può sbagliare ed essere eliminato. Le carte che il bot ha visto direttamente (mostrate a lui) vengono sempre registrate.

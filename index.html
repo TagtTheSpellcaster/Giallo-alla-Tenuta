@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giallo alla Tenuta - v0.41</title>
+    <title>Giallo alla Tenuta - v0.42</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,6 +39,15 @@
         #bot-message-text .bm-who  { font-size: 0.62em; }
         #bot-message-text .bm-what { font-size: 1em; }
         #bot-message-text .bm-hint { font-size: 0.42em; margin-top: 0.6em; opacity: 0.7; }
+        /* scelta della carta da mostrare: un pulsante per ogni carta in mano che smentisce */
+        #bot-message-text .bm-choices { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.25em 0.4em; margin-top: 0.3em; }
+        #bot-message-text .bm-choice { font-family: inherit; font-size: 0.62em; color: #3b2410; background: rgba(255, 240, 200, 0.55);
+                                       border: 2px solid #7a4a14; border-radius: 0.5em; padding: 0.1em 0.6em; cursor: pointer; line-height: 1.2; }
+        #bot-message-text .bm-choice:hover, #bot-message-text .bm-choice:focus-visible { background: rgba(251, 191, 36, 0.75); outline: none; }
+
+        /* Cursore del volume nell'intestazione */
+        .vol-range { width: 4.5rem; accent-color: #f59e0b; cursor: pointer; vertical-align: middle; }
+        @media (max-width: 640px) { .vol-range { width: 4rem; } }
 
         /* Elenco dei personaggi: riga del giocatore di turno */
         #players-legend [data-character] { cursor: pointer; transition: box-shadow 0.2s ease, border-color 0.2s ease; }
@@ -230,7 +239,7 @@
     <header class="w-full max-w-5xl flex justify-between items-center py-4 mb-4 border-b border-slate-700">
         <div>
             <h1 class="text-4xl font-extrabold tracking-wider text-amber-500 flex items-center gap-2 font-henny">
-                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.41</span>
+                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.42</span>
             </h1>
         </div>
         <div id="hdr-controls" class="flex items-center gap-2 flex-wrap justify-end">
@@ -240,6 +249,7 @@
         <button id="btn-music" type="button" title="Musica di sottofondo" aria-pressed="true" class="hdr-btn">
             <span id="btn-music-icon">🔊</span><span class="hidden sm:inline">Musica</span>
         </button>
+        <input id="music-volume" type="range" min="0" max="100" step="5" value="100" class="vol-range" aria-label="Volume" title="Volume (musica ed effetti)">
         <button id="btn-pause-header" class="hidden hdr-btn">
             ⏸️ Pausa / Menu (ESC)
         </button>
@@ -295,6 +305,14 @@
                     <option value="Dottoressa Domino">Dottoressa Domino</option>
                     <option value="Generale Grigio">Generale Grigio</option>
                     <option value="Visconte Viola">Visconte Viola</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xl mb-2 text-amber-400 font-henny" for="select-difficulty">Livello dei bot:</label>
+                <select id="select-difficulty" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white focus:outline-none focus:border-amber-500">
+                    <option value="easy">Facile</option>
+                    <option value="normal" selected>Normale</option>
+                    <option value="hard">Difficile</option>
                 </select>
             </div>
 
@@ -413,7 +431,7 @@
     <div id="modal-pause" class="hidden fixed inset-0 modal flex justify-center items-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-600 rounded-xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
             <h3 class="text-2xl font-bold text-amber-500 font-henny">⏸️ GIOCO IN PAUSA</h3>
-            <p class="text-xs text-slate-400">Versione v0.41</p>
+            <p class="text-xs text-slate-400">Versione v0.42</p>
             <div class="space-y-3 pt-2">
                 <button id="btn-resume-game" class="w-full py-3 bg-green-600 hover:bg-green-500 font-bold rounded-lg transition text-white">
                     ▶️ Riprendi Partita
@@ -501,7 +519,7 @@
     </div>
     <script type="text/markdown" id="doc-md-regole"># Giallo alla Tenuta — Regole del gioco
 
-Versione del gioco: v0.41. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
+Versione del gioco: v0.42. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
 
 ## Il caso
 
@@ -555,7 +573,7 @@ Tutte le stanze hanno le stesse regole: ciascuna può essere la stanza del delit
 
 ## 5. Il turno
 
-In un turno si può, nell'ordine: muoversi, formulare un'ipotesi, terminare il turno. L'accusa si può fare in qualunque momento del proprio turno (vedi sezione 8).
+In un turno si può, nell'ordine: muoversi, formulare un'ipotesi, terminare il turno. L'accusa si può fare in qualunque momento del proprio turno (vedi sezione 6).
 
 ### 5.1 Movimento
 
@@ -611,13 +629,13 @@ Effetti:
 #### Smentita
 
 1. Si procede nell'ordine dei turni, partendo dal giocatore successivo a chi ha ipotizzato.
-2. Il primo giocatore che possiede almeno una delle tre carte nominate (personaggio, arma, stanza) la mostra a chi ha ipotizzato. Se ne ha più di una, la carta mostrata è scelta a caso dal gioco.
+2. Il primo giocatore che possiede almeno una delle tre carte nominate (personaggio, arma, stanza) la mostra a chi ha ipotizzato. Se ne ha più di una, **sceglie lui** quale mostrare: quando è un bot, la sceglie il gioco a caso; quando è il giocatore umano, la sceglie il giocatore.
 3. Gli altri giocatori non vedono la carta, ma vengono a sapere chi ha smentito e chi non ha potuto farlo.
 4. Se nessuno può smentire, non succede nulla: l'informazione è comunque utile.
 5. **I giocatori eliminati continuano a smentire** con le proprie carte.
 6. Le carte di chi ha ipotizzato non vengono mai usate per smentirlo.
 7. Quando è il giocatore umano a ipotizzare, vede chi ha smentito e con quale carta (o che nessuno ha potuto smentire); la carta ricevuta viene segnata nel taccuino come esclusa dalla busta.
-8. Quando a ipotizzare è un bot e a smentire è il giocatore umano, il gioco gli indica chi chiede la smentita e quale carta mostra (la sceglie il gioco).
+8. Quando a ipotizzare è un bot e a smentire è il giocatore umano, il gioco gli indica chi chiede la smentita. Se il giocatore ha una sola carta tra quelle nominate, la mostra; se ne ha più di una, **sceglie quale mostrare**. Il turno del bot riprende dopo la scelta.
 
 ### 5.5 Fine del turno
 
@@ -641,9 +659,26 @@ Il giocatore umano termina il turno quando ha finito; i turni dei bot terminano 
 - Non sono presenti le carte Indizio né il dado con il simbolo della lente.
 - Si muove di **al massimo** il tiro dei dadi, e il tiro è la somma di due dadi normali.
 - Restare in una stanza non consente di ipotizzare di nuovo, se non si è stati spostati lì da un altro giocatore.
-- Chi smentisce non sceglie la carta da mostrare: la sceglie il gioco a caso.
 - La pedina di un giocatore eliminato non blocca i corridoi.
 - Comincia sempre il primo personaggio dell'elenco, non quello scelto dal giocatore.
+- Il computer può giocare a tre livelli (vedi sezione 8): Facile e Normale hanno bot che possono commettere errori, anche di accusa.
+- Quando a smentire è un bot con più carte utili, la carta mostrata è scelta a caso dal gioco.
+
+## 8. I bot e i livelli di difficoltà
+
+I cinque avversari seguono le stesse regole del giocatore umano. Il livello si sceglie nel menu iniziale (predefinito: Normale) e vale per tutta la partita.
+
+- **Conoscenza.** Ogni bot annota le carte che vede e deduce quelle degli altri dalle smentite e dalle mancate smentite, compresi i casi in cui un giocatore deve avere per forza una certa carta. Sa quante carte ha in mano ciascun giocatore.
+- **Movimento.** Tira i dadi e si dirige verso la stanza più vicina che ancora potrebbe essere quella del delitto. Usa il passaggio segreto se porta in una stanza utile, oppure se non ha alcuna casella raggiungibile.
+- **Ipotesi.** Ipotizza solo nelle stanze ancora utili, sceglie personaggio e arma con più probabilità di essere nella busta e non ripete un'ipotesi già fatta nella stessa stanza. Ogni ipotesi è mostrata al centro dello schermo.
+
+| Livello | Informazioni trascurate | Mosse a caso | Accuse azzardate |
+|---|---|---|---|
+| Facile | 40% | 30% | Con al massimo 12 soluzioni possibili, 30% di probabilità di accusare a ogni controllo |
+| Normale | 15% | 10% | Con al massimo 6 soluzioni possibili, 20% di probabilità di accusare a ogni controllo |
+| Difficile | 0% | 0% | Mai: accusa solo con la soluzione dedotta con certezza |
+
+"Informazioni trascurate": ogni volta che un bot assiste a un'ipotesi altrui, ciascuna informazione ricavata (chi non ha potuto smentire, chi ha smentito) viene ignorata con quella probabilità. "Mosse a caso": invece di avvicinarsi alla stanza utile più vicina, il bot sceglie una casella raggiungibile a caso. Un bot che accusa senza certezza può sbagliare ed essere eliminato. Le carte che il bot ha visto direttamente (mostrate a lui) vengono sempre registrate.
 </script>
     <script type="text/markdown" id="doc-md-istruzioni"># Giallo alla Tenuta — Istruzioni di gioco
 
@@ -653,7 +688,10 @@ Questo documento spiega come si usa il gioco: schermate, pulsanti e comandi. Per
 
 1. Nella schermata iniziale clicca sulla finestra scura (**Clicca per iniziare**, oppure premi Invio o Spazio). Finché non lo fai, il resto dell'interfaccia è disattivato (in grigio). Con il clic parte la musica e scorre la presentazione del caso *Giallo alla Tenuta Salvaterra*. Il clic serve anche a sbloccare l'audio, che i browser bloccano finché non si interagisce con la pagina. Puoi mettere la presentazione in **Pausa**, **Saltarla** o **Rivederla** con i pulsanti in basso a destra della finestra. Non serve aspettare la fine.
 2. Scegli il tuo personaggio dal menu **Scegli il tuo Personaggio**.
-3. Premi **Inizia Partita**. Gli altri cinque personaggi sono controllati dal computer.
+3. Scegli il **Livello dei bot** (Facile, Normale o Difficile; vedi sezione 9). Il livello predefinito è Normale.
+4. Premi **Inizia Partita**. Gli altri cinque personaggi sono controllati dal computer.
+
+Il gioco ricorda nel browser l'ultimo personaggio e l'ultimo livello che hai scelto.
 
 In alternativa, **Tutorial guidato** avvia una partita con l'Ambasciatore Ambra e ti accompagna passo passo tra i comandi (vedi sezione 8).
 
@@ -708,10 +746,12 @@ Premi **Passa Turno**. I turni dei computer proseguono da soli.
 Alcune informazioni compaiono al centro dello schermo, in una pergamena:
 
 - **Ipotesi di un avversario** (cartiglio grande): indica chi ipotizza e quali carte nomina. Il turno dell'avversario prosegue solo dopo la chiusura.
-- **Esito dell'ipotesi** (pergamena di testo, più piccola): compare dopo il cartiglio e dice chi ha mostrato una carta a chi, oppure che nessuno ha potuto smentire. Se a smentire sei tu, indica chi chiede la smentita e quale carta mostri (la sceglie il gioco).
+- **Esito dell'ipotesi** (pergamena di testo, più piccola): compare dopo il cartiglio e dice chi ha mostrato una carta a chi, oppure che nessuno ha potuto smentire. Se a smentire sei tu e hai una sola carta tra quelle nominate, indica chi chiede la smentita e quale carta mostri. Se ne hai più di una, vedi il messaggio di scelta qui sotto.
 - **Esito della tua ipotesi** (pergamena di testo): chi ti ha smentito e con quale carta, oppure che nessuno ha potuto farlo.
 
-Ogni messaggio si chiude con **Spazio**, **Esc** o con un **clic** in qualsiasi punto. Se non fai nulla si chiude da solo dopo 10 secondi.
+- **Scelta della carta da mostrare** (pergamena di testo con un pulsante per carta): compare quando un avversario ipotizza e tu hai più di una delle tre carte nominate. Scegli quale mostrare con un clic sul pulsante o premendo il numero indicato (1, 2 o 3). Questo messaggio non si chiude con Spazio, Esc o clic fuori dai pulsanti e non scade: il turno dell'avversario riprende dopo la tua scelta.
+
+Tutti gli altri messaggi si chiudono con **Spazio**, **Esc** o con un **clic** in qualsiasi punto. Se non fai nulla si chiudono da soli dopo 10 secondi.
 
 ## 5. La fine della partita
 
@@ -738,13 +778,21 @@ Le tue carte sono segnate in automatico con ❌, così come le carte che ti veng
 ## 8. Pausa, menu, musica
 
 - **Pausa / Menu (ESC)**: in partita sospende il gioco dei computer. Dal menu di pausa puoi riprendere o tornare al menu principale. Tornando al menu, la partita in corso viene abbandonata.
-- **Musica**: il pulsante con l'altoparlante nell'intestazione attiva o disattiva il sottofondo musicale, sia nel menu iniziale sia durante la partita. La scelta viene ricordata. La musica parte al primo clic o tasto premuto, perché i browser non permettono l'audio prima di un gesto dell'utente.
+- **Musica e volume**: il pulsante con l'altoparlante nell'intestazione attiva o disattiva l'audio, sia nel menu iniziale sia durante la partita; il cursore accanto regola il volume (0-100%). Il volume vale per la musica e per gli effetti sonori brevi (lancio dei dadi, carta mostrata, campanello all'ipotesi di un avversario, accusa sbagliata, apertura della busta). Le due scelte vengono ricordate. L'audio parte al primo clic o tasto premuto, perché i browser non permettono l'audio prima di un gesto dell'utente.
 - **Tutorial**: un percorso guidato di 16 passi. Evidenzia sul gioco vero ogni comando (tabellone, pedina, porte, elenco dei personaggi, dadi, ipotesi, accusa, passa turno, carte, busta, taccuino, registro, intestazione) con una breve spiegazione. Si avanza con **Avanti** (o freccia destra / Invio), si torna indietro con **Indietro** (o freccia sinistra) e si esce con **Esci** o **Esc**. Mentre è aperto la partita è in pausa; si può rivedere in qualsiasi momento dal pulsante **Tutorial** dell'intestazione.
 - **Regole** e **Istruzioni**: si consultano dall'intestazione in qualsiasi momento. Durante la partita il gioco si sospende finché il documento è aperto. Si chiude con il pulsante di chiusura, con **Esc** o con un clic fuori dalla finestra.
 
-## 9. Gli avversari
+## 9. Gli avversari e i livelli
 
-I cinque avversari controllati dal computer seguono le stesse regole del giocatore umano. Ogni computer annota le carte che vede e deduce quelle degli altri dalle smentite. Si muove verso le stanze che potrebbero ancora essere quella del delitto e **accusa solo quando è certo** della soluzione: non sbaglia mai l'accusa. Non ci si può quindi fermare ad aspettare: il tempo gioca a favore di chi deduce più in fretta.
+I cinque avversari controllati dal computer seguono le stesse regole del giocatore umano. Ogni computer annota le carte che vede e deduce quelle degli altri dalle smentite. Si muove verso le stanze che potrebbero ancora essere quella del delitto. Non ci si può fermare ad aspettare: il tempo gioca a favore di chi deduce più in fretta.
+
+Il livello si sceglie nel menu iniziale e vale per tutta la partita:
+
+| Livello | Comportamento dei computer |
+|---|---|
+| **Facile** | Spesso non registrano le informazioni ricavate dalle ipotesi altrui, si muovono spesso a caso e, quando restano al massimo 12 soluzioni possibili, possono azzardare l'accusa anche senza certezza (possono sbagliare ed essere eliminati). |
+| **Normale** | Come il Facile, ma con errori molto meno frequenti; azzardano l'accusa solo con al massimo 6 soluzioni possibili. |
+| **Difficile** | Deducono tutto ciò che si può dedurre e **accusano solo quando sono certi**: non sbagliano mai l'accusa. |
 
 ## 10. Consigli
 
@@ -766,7 +814,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
     </div>
 
     <script>
-        const VERSION = "v0.41";
+        const VERSION = "v0.42";
 
         const SUSPECTS = [
             { id: "Ambasciatore Ambra", color: "#f59e0b", initial: "A", spriteRow: 0, spriteCol: 0 },
@@ -846,7 +894,8 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             draggedWeapon: null,
             dragOffset: { x: 0, y: 0 },
             dragMoved: false,
-            gameOver: false
+            gameOver: false,
+            difficulty: 'normal'
         };
 
         let canvas, ctx;
@@ -919,7 +968,12 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
                 const isSpace = (e.code === 'Space' || e.key === ' ');
                 const isEsc = (e.key === 'Escape');
                 const isEnter = (e.key === 'Enter');
-                if (BOT_MESSAGE.visible && (isSpace || isEsc)) {
+                if (BOT_MESSAGE.visible && BOT_MESSAGE.choice) {
+                    // scelta obbligata: Spazio, Esc e Invio sono consumati; i tasti 1-3 scelgono la carta
+                    const m = /^Digit([1-9])$|^Numpad([1-9])$/.exec(e.code || '');
+                    if (m) { e.preventDefault(); e.stopPropagation(); chooseShownCard(parseInt(m[1] || m[2], 10) - 1); }
+                    else if (isSpace || isEsc || isEnter) { e.preventDefault(); e.stopPropagation(); }
+                } else if (BOT_MESSAGE.visible && (isSpace || isEsc)) {
                     e.preventDefault();
                     e.stopPropagation();
                     if (isSpace) BOT_MESSAGE.swallowSpaceUp = true;
@@ -937,7 +991,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
                     BOT_MESSAGE.swallowSpaceUp = false;
                 }
             }, true);
-            document.getElementById('bot-message').addEventListener('click', () => hideBotMessage());
+            document.getElementById('bot-message').addEventListener('click', () => { if (!BOT_MESSAGE.choice) hideBotMessage(); });
             window.addEventListener('resize', () => { if (BOT_MESSAGE.visible) layoutBotMessage(); });
 
             canvas.addEventListener('mousedown', handleCanvasMouseDown);
@@ -948,6 +1002,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             bindCharCard();
             initCinema();
             initMusic();
+            initSetupMemory();
             initDocs();
             initTour();
             initReveal();
@@ -962,7 +1017,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
         function revImages() {
             if (!REVEAL.imgs && typeof Image === 'function') {
                 const mk = src => { const i = new Image(); i.src = src; return i; };
-                REVEAL.imgs = { carta: mk('carta.jpg'), closed: mk('busta_chiusa.jpg'), open: mk('busta_aperta.png') };
+                REVEAL.imgs = { carta: mk('carta.jpg'), closed: mk('busta_chiusa.jpg'), open: mk('busta_aperta.png'), rooms: mk('stanze.jpg') };
             }
             return REVEAL.imgs;
         }
@@ -1031,6 +1086,15 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             return { lines: [text], size: minSize };
         }
 
+        // stanze.jpg: griglia 3x3 di 1254 px con sottili separatori chiari; origine (x, y) del ritaglio di ogni stanza
+        // (385 px di lato, lontano dai separatori a x=414-417/835-836 e y=411-413/812-813)
+        const ROOM_IMG_SIZE = 1254, ROOM_IMG_CROP = 385;
+        const ROOM_IMG_CELLS = {
+            'Biliardo': [10, 10], 'Salone': [429, 10], 'Cucina': [848, 10],
+            'Veranda': [10, 424], 'Serra': [429, 424], 'Ingresso': [848, 424],
+            'Studio': [10, 825], 'Biblioteca': [429, 825], 'Sala da Pranzo': [848, 825]
+        };
+
         function revCardCanvas(kind, id) {
             const imgs = revImages();
             const W = 560, H = Math.round(W * 1503 / 934);
@@ -1043,10 +1107,33 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             ctx.fillText({ suspect: 'Personaggio', weapon: 'Arma', room: 'Stanza' }[kind], W / 2, H * 0.175);
             ctx.fillStyle = '#3b2410';
             if (kind === 'room') {
-                const w = revWrap(ctx, id, W * 0.66, 92, 44);
-                ctx.font = `${w.size}px "Henny Penny", cursive`;
-                const lh = w.size * 1.15, y0 = H / 2 - (w.lines.length - 1) * lh / 2;
-                w.lines.forEach((ln, i) => ctx.fillText(ln, W / 2, y0 + i * lh));
+                // Immagine della stanza (stanze.jpg, griglia 3x3) nello stesso riquadro usato per personaggi e armi
+                const size = W * 0.62, x = (W - size) / 2, y = H * 0.225;
+                const rimg = imgs.rooms, cell = ROOM_IMG_CELLS[id];
+                const hasImg = !!(rimg && rimg.complete && rimg.naturalWidth && cell);
+                if (hasImg) {
+                    const k = rimg.naturalWidth / ROOM_IMG_SIZE;
+                    ctx.save();
+                    ctx.beginPath();
+                    if (ctx.roundRect) ctx.roundRect(x, y, size, size, 16); else ctx.rect(x, y, size, size);
+                    ctx.fillStyle = '#2a1b0d'; ctx.fill(); ctx.clip();
+                    ctx.drawImage(rimg, cell[0] * k, cell[1] * k, ROOM_IMG_CROP * k, ROOM_IMG_CROP * k, x, y, size, size);
+                    ctx.restore();
+                    ctx.beginPath();
+                    if (ctx.roundRect) ctx.roundRect(x, y, size, size, 16); else ctx.rect(x, y, size, size);
+                    ctx.lineWidth = 5; ctx.strokeStyle = '#7a4a14'; ctx.stroke();
+                    ctx.fillStyle = '#3b2410';
+                    const w = revWrap(ctx, id, W * 0.7, 58, 34);
+                    ctx.font = `${w.size}px "Henny Penny", cursive`;
+                    const lh = w.size * 1.12, y1 = y + size + (H * 0.87 - (y + size)) / 2 - (w.lines.length - 1) * lh / 2;
+                    w.lines.forEach((ln, i) => ctx.fillText(ln, W / 2, y1 + i * lh));
+                } else {
+                    // immagine non disponibile: solo il nome
+                    const w = revWrap(ctx, id, W * 0.66, 92, 44);
+                    ctx.font = `${w.size}px "Henny Penny", cursive`;
+                    const lh = w.size * 1.15, y0 = H / 2 - (w.lines.length - 1) * lh / 2;
+                    w.lines.forEach((ln, i) => ctx.fillText(ln, W / 2, y0 + i * lh));
+                }
             } else {
                 const sheet = kind === 'suspect' ? charsSpriteImage : weaponsSpriteImage;
                 const def = kind === 'suspect' ? SUSPECTS.find(s => s.id === id) : WEAPONS.find(x => x.id === id);
@@ -1132,7 +1219,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             revLater(() => {                 // la busta va al centro
                 Object.assign(env.style, { left: (vw - envW) / 2 + 'px', top: (vh * 0.54 - envH / 2) + 'px', width: envW + 'px' });
             }, 500 * T);
-            revLater(() => { env.classList.add('opened', 'wiggle'); }, 1750 * T);
+            revLater(() => { env.classList.add('opened', 'wiggle'); sfx('reveal'); }, 1750 * T);
             revLater(() => {                 // la busta scende, le carte escono una alla volta
                 Object.assign(env.style, { top: (vh - envH * 0.42) + 'px', opacity: '0.95' });
             }, 2700 * T);
@@ -1239,7 +1326,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
                 { center: true, title: 'I messaggi a video',
                   text: 'Le ipotesi degli avversari compaiono in un cartiglio al centro dello schermo; subito dopo, una pergamena più piccola dice chi ha mostrato una carta (o che nessuno ha potuto smentire). Ogni messaggio si chiude con Spazio, Esc o un clic, oppure da solo dopo 10 secondi.' },
                 { sel: '#hdr-controls', title: 'Regole, istruzioni, musica',
-                  text: 'Qui trovi le Regole e le Istruzioni complete, il pulsante per spegnere la musica, il Tutorial (per rivederlo) e, in partita, la Pausa (Esc).' },
+                  text: 'Qui trovi le Regole e le Istruzioni complete, il pulsante per spegnere la musica con il cursore del volume (vale anche per gli effetti sonori), il Tutorial (per rivederlo) e, in partita, la Pausa (Esc).' },
                 { center: true, title: 'Buona indagine',
                   text: 'Il tutorial è finito. Ora tocca a te. Ricorda che i computer accusano solo quando sono certi della soluzione, quindi vince chi deduce più in fretta.' }
             ];
@@ -1515,8 +1602,11 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
         // melodia rada con vibrato e riverbero. Parte con il primo clic o tasto (vincolo dei browser).
         const MUSIC = {
             bpm: 66, level: 0.7, ctx: null, bus: null, timer: null, next: 0, bar: 0,
-            enabled: true, started: false, hooked: false
+            enabled: true, started: false, hooked: false,
+            volume: 1,            // cursore del volume (0-1): scala la musica e gli effetti sonori
+            sfxGain: null
         };
+        const SFX_LEVEL = 0.8;     // livello degli effetti rispetto al volume massimo
         const MUSIC_CHORDS = [
             { bass: 38, pad: [50, 53, 57],     arp: [62, 65, 69, 74] },   // Dm
             { bass: 46, pad: [53, 58, 62],     arp: [58, 62, 65, 70] },   // Bb
@@ -1632,6 +1722,94 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             }
         }
 
+        // ---------- Effetti sonori brevi (sintesi con Web Audio) ----------
+        // sfxPlay disegna il suono su un qualunque AudioContext (anche OfflineAudioContext, per i test) verso "dest".
+        function sfxNoise(ctx) {
+            if (!ctx.__sfxNoise) {
+                const n = Math.floor(ctx.sampleRate * 1.2), b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0);
+                let seed = 12345;                                  // rumore deterministico: lo stesso suono a ogni ascolto
+                for (let i = 0; i < n; i++) { seed = (seed * 1664525 + 1013904223) >>> 0; d[i] = (seed / 4294967296) * 2 - 1; }
+                ctx.__sfxNoise = b;
+            }
+            return ctx.__sfxNoise;
+        }
+        function sfxTone(ctx, dest, type, f0, t, dur, peak, o) {
+            o = o || {};
+            const osc = ctx.createOscillator(), g = ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(f0, t);
+            if (o.f1) osc.frequency.exponentialRampToValueAtTime(o.f1, t + dur);
+            const a = o.attack || 0.004;
+            g.gain.setValueAtTime(0.0001, t);
+            g.gain.linearRampToValueAtTime(peak, t + a);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+            osc.connect(g); g.connect(dest);
+            osc.start(t); osc.stop(t + dur + 0.05);
+        }
+        function sfxHiss(ctx, dest, t, dur, peak, f0, f1, q, attack) {
+            const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+            src.buffer = sfxNoise(ctx);
+            f.type = 'bandpass'; f.Q.value = q || 1;
+            f.frequency.setValueAtTime(f0, t);
+            if (f1) f.frequency.exponentialRampToValueAtTime(f1, t + dur);
+            const a = attack || 0.005;
+            g.gain.setValueAtTime(0.0001, t);
+            g.gain.linearRampToValueAtTime(peak, t + a);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+            src.connect(f); f.connect(g); g.connect(dest);
+            src.start(t, 0.1); src.stop(t + dur + 0.05);
+        }
+        const SFX_NAMES = ['dice', 'card', 'bell', 'wrong', 'reveal', 'pick'];
+        function sfxPlay(name, ctx, dest, t) {
+            if (name === 'dice') {                    // due dadi che rimbalzano e si fermano
+                const n = 9;
+                for (let i = 0; i < n; i++) {
+                    const ti = t + 0.62 * Math.pow(i / (n - 1), 1.6), k = 1 - i / (n + 2);
+                    sfxHiss(ctx, dest, ti, 0.05, 0.5 * k, 2400 + 500 * (i % 3), 1500, 1.2, 0.002);
+                    sfxTone(ctx, dest, 'sine', 190 + 40 * (i % 2), ti, 0.07, 0.35 * k, { f1: 110 });
+                }
+            } else if (name === 'card') {             // carta fatta scorrere sul tavolo
+                sfxHiss(ctx, dest, t, 0.2, 0.45, 3200, 1100, 0.8, 0.03);
+                sfxHiss(ctx, dest, t + 0.17, 0.07, 0.25, 2200, 1400, 1.5, 0.004);
+            } else if (name === 'bell') {             // campanello: parziali inarmonici con decadimenti diversi
+                [[1, 0.2, 1.8], [2.76, 0.09, 1.0], [5.4, 0.04, 0.55]].forEach(([r, p, d]) =>
+                    sfxTone(ctx, dest, 'sine', 660 * r, t, d, p, { attack: 0.003 }));
+            } else if (name === 'wrong') {            // due note gravi discendenti
+                sfxTone(ctx, dest, 'triangle', 196, t, 0.8, 0.28, { f1: 147, attack: 0.02 });
+                sfxTone(ctx, dest, 'triangle', 185, t + 0.02, 0.8, 0.22, { f1: 138, attack: 0.02 });
+                sfxTone(ctx, dest, 'sine', 98, t, 0.9, 0.3, { f1: 73, attack: 0.02 });
+            } else if (name === 'reveal') {           // soffio di carta e arpeggio in re minore
+                sfxHiss(ctx, dest, t, 0.7, 0.3, 500, 2400, 0.7, 0.35);
+                [62, 65, 69, 74].forEach((m, i) =>
+                    sfxTone(ctx, dest, 'triangle', midiHz(m), t + 0.55 + i * 0.13, 1.3, 0.2, { attack: 0.006 }));
+            } else if (name === 'pick') {             // conferma di una scelta
+                sfxTone(ctx, dest, 'sine', 1250, t, 0.08, 0.2, { attack: 0.002 });
+            }
+        }
+        function sfx(name) {
+            const c = MUSIC.ctx;
+            if (!MUSIC.enabled || !c || c.state !== 'running' || MUSIC.volume <= 0) return;
+            try {
+                if (!MUSIC.sfxGain) {
+                    MUSIC.sfxGain = c.createGain();
+                    MUSIC.sfxGain.gain.value = SFX_LEVEL * MUSIC.volume;
+                    MUSIC.sfxGain.connect(c.destination);
+                }
+                sfxPlay(name, c, MUSIC.sfxGain, c.currentTime + 0.02);
+            } catch (err) { /* ignora */ }
+        }
+
+        // Volume (0-100 dal cursore): scala musica ed effetti; salvato nel browser
+        function musicSetVolume(pct, save) {
+            const v = Math.max(0, Math.min(100, Number(pct))) / 100;
+            MUSIC.volume = isNaN(v) ? 1 : v;
+            try {
+                if (MUSIC.ctx && MUSIC.bus && MUSIC.enabled) MUSIC.bus.master.gain.setTargetAtTime(MUSIC.level * MUSIC.volume, MUSIC.ctx.currentTime, 0.05);
+                if (MUSIC.ctx && MUSIC.sfxGain) MUSIC.sfxGain.gain.setTargetAtTime(SFX_LEVEL * MUSIC.volume, MUSIC.ctx.currentTime, 0.05);
+            } catch (err) { /* ignora */ }
+            if (save) { try { localStorage.setItem('giallo_vol', String(Math.round(MUSIC.volume * 100))); } catch (err) { /* ignora */ } }
+        }
+
         function musicStart() {
             const AC = (typeof window !== 'undefined') && (window.AudioContext || window.webkitAudioContext);
             if (!AC || !MUSIC.enabled) return;
@@ -1653,7 +1831,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
                 if (MUSIC.ctx.state === 'suspended') MUSIC.ctx.resume().then(musicUpdateButton, () => {});
                 if (!MUSIC.hooked) { MUSIC.hooked = true; MUSIC.ctx.onstatechange = musicUpdateButton; }
                 MUSIC.bus.master.gain.cancelScheduledValues(MUSIC.ctx.currentTime);
-                MUSIC.bus.master.gain.setTargetAtTime(MUSIC.level, MUSIC.ctx.currentTime, 0.8);
+                MUSIC.bus.master.gain.setTargetAtTime(MUSIC.level * MUSIC.volume, MUSIC.ctx.currentTime, 0.8);
                 if (MUSIC.next < MUSIC.ctx.currentTime) MUSIC.next = MUSIC.ctx.currentTime + 0.1;
                 if (!MUSIC.timer) MUSIC.timer = setInterval(musicPump, 250);
                 musicPump();
@@ -1695,6 +1873,13 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             const b = document.getElementById('btn-music');
             if (!b || typeof b.setAttribute !== 'function') return;
             try { if (localStorage.getItem('giallo_music') === 'off') MUSIC.enabled = false; } catch (err) { /* ignora */ }
+            const vol = document.getElementById('music-volume');
+            if (vol && typeof vol.addEventListener === 'function') {
+                try { const sv = localStorage.getItem('giallo_vol'); if (sv !== null && sv !== '' && !isNaN(Number(sv))) musicSetVolume(sv, false); } catch (err) { /* ignora */ }
+                vol.value = String(Math.round(MUSIC.volume * 100));
+                vol.addEventListener('input', () => musicSetVolume(vol.value, true));
+                vol.addEventListener('click', (e) => e.stopPropagation());
+            }
             musicUpdateButton();
             b.addEventListener('click', (e) => { e.stopPropagation(); musicToggle(); b.blur(); });
             // La musica parte appena la pagina è caricata. Se il browser blocca l'audio automatico (di norma lo fa
@@ -1713,6 +1898,20 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             document.addEventListener('visibilitychange', () => {
                 if (!MUSIC.ctx || !MUSIC.enabled) return;
                 if (document.hidden) MUSIC.ctx.suspend(); else MUSIC.ctx.resume();
+            });
+        }
+
+        // Ricorda nel browser l'ultimo personaggio e l'ultimo livello scelti nel menu (solo scelte fatte dal giocatore:
+        // il tutorial imposta il personaggio da codice e non modifica il ricordo)
+        function initSetupMemory() {
+            [['select-character', 'giallo_char'], ['select-difficulty', 'giallo_diff']].forEach(([id, key]) => {
+                const sel = document.getElementById(id);
+                if (!sel || typeof sel.addEventListener !== 'function') return;
+                try {
+                    const v = localStorage.getItem(key);
+                    if (v && Array.prototype.some.call(sel.options || [], o => o.value === v)) sel.value = v;
+                } catch (err) { /* ignora */ }
+                sel.addEventListener('change', () => { try { localStorage.setItem(key, sel.value); } catch (err) { /* ignora */ } });
             });
         }
 
@@ -1991,7 +2190,8 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             visible: false,
             timer: null,
             onClose: null,
-            swallowSpaceUp: false
+            swallowSpaceUp: false,
+            choice: false            // true: attesa della scelta della carta; non si chiude con Spazio/Esc/clic né a tempo
         };
 
         // Dimensiona il cartiglio e sceglie il corpo del testo più grande che resta dentro la pergamena
@@ -2029,6 +2229,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             text.appendChild(hint);
 
             clearTimeout(BOT_MESSAGE.timer);
+            BOT_MESSAGE.choice = false;
             BOT_MESSAGE.ratio = small ? BOT_MESSAGE.smallRatio : BOT_MESSAGE.widthRatio;
             BOT_MESSAGE.cur = small ? BOT_MESSAGE.aspectText : BOT_MESSAGE.aspect;
             document.getElementById('bot-message-card').classList.toggle('txt', !!small);
@@ -2044,7 +2245,62 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             BOT_MESSAGE.timer = setTimeout(() => hideBotMessage(), BOT_MESSAGE.timeoutMs);
         }
 
+        // Scelta della carta da mostrare (il giocatore umano ne ha più d'una tra quelle nominate).
+        // Messaggio su testo.png con un pulsante per carta; resta a video finché non si sceglie (nessuna chiusura a tempo).
+        function showChooseCard(proposer, options, onPick) {
+            const text = document.getElementById('bot-message-text');
+            text.innerHTML = "";
+            const mk = (cls, t) => { const d = document.createElement('div'); d.className = cls; d.textContent = t; text.appendChild(d); return d; };
+            mk('bm-who', `${proposer.character} chiede una smentita:`);
+            mk('bm-what', 'Quale carta mostri?');
+            const box = document.createElement('div');
+            box.className = 'bm-choices';
+            options.forEach((c, i) => {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'bm-choice';
+                b.dataset.card = c;
+                b.textContent = `${i + 1} · ${c}`;
+                b.addEventListener('click', (ev) => { ev.stopPropagation(); chooseShownCard(i); });
+                box.appendChild(b);
+            });
+            text.appendChild(box);
+            const hint = mk('bm-hint', 'Clicca una carta o premi il suo numero');
+
+            clearTimeout(BOT_MESSAGE.timer);
+            BOT_MESSAGE.timer = null;
+            BOT_MESSAGE.ratio = BOT_MESSAGE.smallRatio;
+            BOT_MESSAGE.cur = BOT_MESSAGE.aspectText;
+            document.getElementById('bot-message-card').classList.add('txt');
+            BOT_MESSAGE.options = options.slice();
+            BOT_MESSAGE.onPick = onPick;
+            BOT_MESSAGE.onClose = null;
+            BOT_MESSAGE.choice = true;
+            BOT_MESSAGE.visible = true;
+            if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+            document.getElementById('bot-message').classList.add('open');
+            layoutBotMessage();
+            if (document.fonts && document.fonts.load) {
+                document.fonts.load('40px "Henny Penny"').then(() => { if (BOT_MESSAGE.visible) layoutBotMessage(); });
+            }
+        }
+
+        function chooseShownCard(i) {
+            if (!BOT_MESSAGE.visible || !BOT_MESSAGE.choice) return;
+            const card = BOT_MESSAGE.options && BOT_MESSAGE.options[i];
+            if (!card) return;
+            sfx('pick');
+            const cb = BOT_MESSAGE.onPick;
+            BOT_MESSAGE.choice = false;
+            BOT_MESSAGE.onPick = null;
+            BOT_MESSAGE.options = null;
+            BOT_MESSAGE.visible = false;
+            document.getElementById('bot-message').classList.remove('open');
+            if (cb) cb(card);
+        }
+
         function showBotHypothesis(proposer, suspectId, weaponId, room, onClose) {
+            sfx('bell');
             showCartouche([
                 { cls: 'bm-who', text: `${proposer.character} ipotizza:` },
                 { cls: 'bm-what', text: `${suspectId}, con ${weaponId}, in ${room.id}` }
@@ -2053,6 +2309,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
 
         // Conferma al giocatore umano (cartiglio piccolo): chi chiede e che cosa deve mostrare
         function showAskedToYou(proposer, cardShown, onClose) {
+            sfx('card');
             showCartouche([
                 { cls: 'bm-who', text: `${proposer.character} chiede una smentita:` },
                 { cls: 'bm-what', text: `Mostri: ${cardShown}` }
@@ -2061,6 +2318,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
 
         // Esito di un'ipotesi altrui (testo.png): chi ha mostrato una carta a chi, oppure nessuna smentita
         function showHypothesisOutcome(proposer, disprover, onClose) {
+            if (disprover) sfx('card');
             if (disprover) {
                 showCartouche([
                     { cls: 'bm-who', text: `${disprover.character}` },
@@ -2076,6 +2334,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
 
         // Esito della propria ipotesi (cartiglio piccolo): chi smentisce e con quale carta, oppure nessuno
         function showHypothesisResult(disprover, cardShown, onClose) {
+            if (disprover) sfx('card');
             if (disprover) {
                 showCartouche([
                     { cls: 'bm-who', text: `${disprover.character} ti smentisce:` },
@@ -2093,6 +2352,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
         function hideBotMessage(cancel) {
             if (!BOT_MESSAGE.visible) return;
             BOT_MESSAGE.visible = false;
+            if (BOT_MESSAGE.choice) { BOT_MESSAGE.choice = false; BOT_MESSAGE.onPick = null; BOT_MESSAGE.options = null; }
             clearTimeout(BOT_MESSAGE.timer);
             BOT_MESSAGE.timer = null;
             document.getElementById('bot-message').classList.remove('open');
@@ -2157,7 +2417,8 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
                 draggedWeapon: null,
                 dragOffset: { x: 0, y: 0 },
                 dragMoved: false,
-                gameOver: false
+                gameOver: false,
+                difficulty: 'normal'
             };
 
             WEAPONS.forEach(w => {
@@ -2192,6 +2453,8 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             resetFullGameState();
 
             const myCharId = document.getElementById('select-character').value;
+            const diffSel = document.getElementById('select-difficulty');
+            gameState.difficulty = (diffSel && DIFFICULTY[diffSel.value]) ? diffSel.value : 'normal';
 
             populateSelects();
             gameState.myPlayer = { character: myCharId };
@@ -2268,7 +2531,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             updateLegend();
             renderMyCards();
             drawBoard();
-            logEvent(`Partita ${VERSION} avviata.`);
+            logEvent(`Partita ${VERSION} avviata. Livello dei bot: ${DIFFICULTY[gameState.difficulty].label}.`);
             updateTurnUI();
             envelopeIntro();
 
@@ -2732,6 +2995,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             const d2 = Math.floor(Math.random() * 6) + 1;
             gameState.diceRoll = d1 + d2;
 
+            sfx('dice');
             document.getElementById('dice-result').innerText = `${d1}+${d2} = ${gameState.diceRoll}`;
             logEvent(`${currentPlayer.name} lancia dadi: **${d1} + ${d2} = ${gameState.diceRoll}**.`);
 
@@ -2949,7 +3213,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
         }
 
         // Logica comune a giocatore umano e bot
-        function resolveHypothesis(proposer, suspectId, weaponId, room) {
+        function resolveHypothesis(proposer, suspectId, weaponId, room, opts) {
             // Prima l'arma, poi il sospettato, così il sospettato evita la casella dell'arma
             const targetWeapon = WEAPONS.find(w => w.id === weaponId);
             if (targetWeapon && targetWeapon.currentRoom !== room.id) {
@@ -2978,12 +3242,12 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             let disprover = null;
             let cardShown = null;
 
+            let match = [];
             for (let i = 1; i < gameState.players.length; i++) {
                 const other = gameState.players[(start + i) % gameState.players.length];
-                const match = other.cards.filter(c => cards.includes(c));
+                match = other.cards.filter(c => cards.includes(c));
                 if (match.length > 0) {
                     disprover = other;
-                    cardShown = pickRandom(match);
                     break;
                 }
                 passed.push(other);
@@ -2991,22 +3255,34 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
 
             passed.forEach(p => logEvent(`🚫 **${p.name}** non può smentire.`));
 
-            if (disprover) {
-                const iAmDisprover = !disprover.isBot && gameState.myPlayer && disprover.character === gameState.myPlayer.character;
-                logEvent(`🔍 **${disprover.name}** ha mostrato una carta a ${proposer.name}.` + (iAmDisprover ? ` (hai mostrato: "${cardShown}")` : ''));
-                if (!proposer.isBot) {
-                    markNotebook(cardShown, "❌");
-                    showHypothesisResult(disprover, cardShown);
+            // Parte che dipende dalla carta mostrata: registro eventi, taccuino, conoscenza dei bot.
+            // Se a smentire è il giocatore umano con più carte corrispondenti, la carta la sceglie lui (opts.deferChoice):
+            // in quel caso la funzione viene eseguita dopo la scelta, tramite result.pending.finish(carta).
+            const finish = (card) => {
+                if (disprover) {
+                    const iAmDisprover = !disprover.isBot && gameState.myPlayer && disprover.character === gameState.myPlayer.character;
+                    logEvent(`🔍 **${disprover.name}** ha mostrato una carta a ${proposer.name}.` + (iAmDisprover ? ` (hai mostrato: "${card}")` : ''));
+                    if (!proposer.isBot) {
+                        markNotebook(card, "❌");
+                        showHypothesisResult(disprover, card);
+                    }
+                } else {
+                    logEvent(`❌ Nessun giocatore ha potuto smentire l'ipotesi!`);
+                    if (!proposer.isBot) showHypothesisResult(null, null);
                 }
-            } else {
-                logEvent(`❌ Nessun giocatore ha potuto smentire l'ipotesi!`);
-                if (!proposer.isBot) showHypothesisResult(null, null);
-            }
+                // Tutti i bot vedono chi ha ipotizzato, chi non ha smentito e chi ha mostrato una carta
+                gameState.players.forEach(b => {
+                    if (b.isBot && b.kb) observeHypothesis(b, proposer, cards, passed, disprover, card);
+                });
+            };
 
-            // Tutti i bot vedono chi ha ipotizzato, chi non ha smentito e chi ha mostrato una carta
-            gameState.players.forEach(b => {
-                if (b.isBot && b.kb) observeHypothesis(b, proposer, cards, passed, disprover, cardShown);
-            });
+            let pending = null;
+            if (disprover && opts && opts.deferChoice && !disprover.isBot && match.length > 1) {
+                pending = { match: match.slice(), finish };
+            } else {
+                cardShown = disprover ? pickRandom(match) : null;
+                finish(cardShown);
+            }
 
             // L'ipotesi conclude la fase di movimento del turno
             proposer.canSuggestHere = false;
@@ -3018,7 +3294,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
                     document.getElementById('btn-secret-passage').classList.add('hidden');
                 }
             }
-            return { passed, disprover, cardShown };
+            return { passed, disprover, cardShown, pending };
         }
 
         // ---------- Conoscenza e deduzione dei bot ----------
@@ -3027,6 +3303,19 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
         // kb.constraints    = { holder, cards } : holder possiede almeno una di queste carte
         // kb.handSize[pers] = quante carte ha in mano (nel gioco reale è noto a tutti)
         // kb.asked          = ipotesi già formulate dal bot (per non ripeterle)
+        // Livelli dei bot. Il livello Difficile è il comportamento originale (deduzione completa, mai un'accusa sbagliata).
+        //  ignore     = probabilità che il bot trascuri un'informazione ricavata da un'ipotesi altrui (mancata smentita, smentita);
+        //  randomMove = probabilità che il bot, invece di avvicinarsi alla stanza utile, scelga una casella raggiungibile a caso;
+        //  riskCombos/riskProb = se restano al più riskCombos soluzioni possibili, accusa comunque con probabilità riskProb
+        //               (può sbagliare ed essere eliminato).
+        const DIFFICULTY = {
+            easy:   { label: 'Facile',    ignore: 0.4,  randomMove: 0.3, riskCombos: 12, riskProb: 0.3 },
+            normal: { label: 'Normale',   ignore: 0.15, randomMove: 0.1, riskCombos: 6,  riskProb: 0.2 },
+            hard:   { label: 'Difficile', ignore: 0,    randomMove: 0,   riskCombos: 0,  riskProb: 0 }
+        };
+        // Livello del bot: bot.level (usato solo dalle simulazioni di prova) oppure il livello scelto per la partita
+        function botLevel(bot) { return (bot && DIFFICULTY[bot.level]) || DIFFICULTY[gameState.difficulty] || DIFFICULTY.hard; }
+
         function allCardList() {
             return [...CARDS_BY_CAT.suspect, ...CARDS_BY_CAT.weapon, ...CARDS_BY_CAT.room];
         }
@@ -3047,12 +3336,14 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
 
         function observeHypothesis(bot, proposer, cards, passed, disprover, cardShown) {
             const kb = bot.kb;
+            const lvl = botLevel(bot);
+            const miss = () => lvl.ignore > 0 && Math.random() < lvl.ignore;   // il bot si "distrae" e trascura l'informazione
             passed.forEach(p => {
-                if (p !== bot) cards.forEach(c => kb.noHold[p.character].add(c));
+                if (p !== bot && !miss()) cards.forEach(c => kb.noHold[p.character].add(c));
             });
             if (disprover && disprover !== bot) {
                 if (proposer === bot) kb.held[cardShown] = disprover.character;
-                else kb.constraints.push({ holder: disprover.character, cards: [...cards] });
+                else if (!miss()) kb.constraints.push({ holder: disprover.character, cards: [...cards] });
             }
             propagateKnowledge(bot);
         }
@@ -3193,6 +3484,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
 
             player.active = false;
             player.canSuggestHere = false;
+            sfx('wrong');
             logEvent(`💀 **${player.name}** ha sbagliato accusa ed è eliminat${genderEnd(player)}: potrà solo smentire le ipotesi altrui.`);
             if (!player.isBot) {
                 alert(`❌ ACCUSA ERRATA! ${player.name} è eliminat${genderEnd(player)}: potrai solo smentire le ipotesi degli altri giocatori. La partita continua.`);
@@ -3261,6 +3553,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
 
         function botChooseDestination(bot, reachable) {
             if (reachable.length === 0) return null;
+            if (botLevel(bot).randomMove > 0 && Math.random() < botLevel(bot).randomMove) return pickRandom(reachable);
             const targetIds = new Set(botCandidates(bot, 'room'));
             const targetRooms = ROOMS.filter(r => targetIds.has(r.id));
 
@@ -3292,6 +3585,23 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
                 if (!gameState.gameOver) botDelay(endTurn, 800);
                 return true;
             }
+            // Livelli Facile/Normale: con poche soluzioni ancora possibili il bot può azzardare un'accusa (e sbagliare)
+            const lvl = botLevel(bot);
+            if (lvl.riskCombos > 0) {
+                const cats = ['suspect', 'weapon', 'room'];
+                const cands = cats.map(c => botCandidates(bot, c));
+                const combos = cands.reduce((n, a) => n * a.length, 1);
+                if (combos > 1 && combos <= lvl.riskCombos && Math.random() < lvl.riskProb) {
+                    const pick = cats.map((cat, i) => {
+                        let best = cands[i][0], bs = -Infinity;
+                        cands[i].forEach(c => { const sc = botCardScore(bot, c); if (sc > bs) { bs = sc; best = c; } });
+                        return best;
+                    });
+                    resolveAccusation(bot, pick[0], pick[1], pick[2]);
+                    if (!gameState.gameOver) botDelay(endTurn, 800);
+                    return true;
+                }
+            }
             return false;
         }
 
@@ -3305,7 +3615,7 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
                 if (!bot.kb.asked.has(key)) break;
             }
             bot.kb.asked.add(key);
-            const res = resolveHypothesis(bot, suspect, weapon, room);
+            const res = resolveHypothesis(bot, suspect, weapon, room, { deferChoice: true });
             const proceed = () => {
                 botDelay(() => {
                     if (gameState.gameOver) return;
@@ -3317,7 +3627,13 @@ I cinque avversari controllati dal computer seguono le stesse regole del giocato
             // se a smentire è il giocatore umano, la carta che deve mostrare.
             const humanRefutes = res.disprover && !res.disprover.isBot;
             showBotHypothesis(bot, suspect, weapon, room, () => {
-                if (humanRefutes) showAskedToYou(bot, res.cardShown, proceed);
+                if (res.pending) {
+                    // il giocatore sceglie quale carta mostrare; il turno del bot riprende dopo la scelta
+                    showChooseCard(bot, res.pending.match, (card) => {
+                        res.pending.finish(card);
+                        proceed();
+                    });
+                } else if (humanRefutes) showAskedToYou(bot, res.cardShown, proceed);
                 else showHypothesisOutcome(bot, res.disprover, proceed);
             });
         }

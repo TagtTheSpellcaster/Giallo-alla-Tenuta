@@ -6,7 +6,10 @@ Questo documento spiega come si usa il gioco: schermate, pulsanti e comandi. Per
 
 1. Nella schermata iniziale clicca sulla finestra scura (**Clicca per iniziare**, oppure premi Invio o Spazio). Finché non lo fai, il resto dell'interfaccia è disattivato (in grigio). Con il clic parte la musica e scorre la presentazione del caso *Giallo alla Tenuta Salvaterra*. Il clic serve anche a sbloccare l'audio, che i browser bloccano finché non si interagisce con la pagina. Puoi mettere la presentazione in **Pausa**, **Saltarla** o **Rivederla** con i pulsanti in basso a destra della finestra. Non serve aspettare la fine.
 2. Scegli il tuo personaggio dal menu **Scegli il tuo Personaggio**.
-3. Premi **Inizia Partita**. Gli altri cinque personaggi sono controllati dal computer.
+3. Scegli il **Livello dei bot** (Facile, Normale o Difficile; vedi sezione 9). Il livello predefinito è Normale.
+4. Premi **Inizia Partita**. Gli altri cinque personaggi sono controllati dal computer.
+
+Il gioco ricorda nel browser l'ultimo personaggio e l'ultimo livello che hai scelto.
 
 In alternativa, **Tutorial guidato** avvia una partita con l'Ambasciatore Ambra e ti accompagna passo passo tra i comandi (vedi sezione 8).
 
@@ -61,10 +64,12 @@ Premi **Passa Turno**. I turni dei computer proseguono da soli.
 Alcune informazioni compaiono al centro dello schermo, in una pergamena:
 
 - **Ipotesi di un avversario** (cartiglio grande): indica chi ipotizza e quali carte nomina. Il turno dell'avversario prosegue solo dopo la chiusura.
-- **Esito dell'ipotesi** (pergamena di testo, più piccola): compare dopo il cartiglio e dice chi ha mostrato una carta a chi, oppure che nessuno ha potuto smentire. Se a smentire sei tu, indica chi chiede la smentita e quale carta mostri (la sceglie il gioco).
+- **Esito dell'ipotesi** (pergamena di testo, più piccola): compare dopo il cartiglio e dice chi ha mostrato una carta a chi, oppure che nessuno ha potuto smentire. Se a smentire sei tu e hai una sola carta tra quelle nominate, indica chi chiede la smentita e quale carta mostri. Se ne hai più di una, vedi il messaggio di scelta qui sotto.
 - **Esito della tua ipotesi** (pergamena di testo): chi ti ha smentito e con quale carta, oppure che nessuno ha potuto farlo.
 
-Ogni messaggio si chiude con **Spazio**, **Esc** o con un **clic** in qualsiasi punto. Se non fai nulla si chiude da solo dopo 10 secondi.
+- **Scelta della carta da mostrare** (pergamena di testo con un pulsante per carta): compare quando un avversario ipotizza e tu hai più di una delle tre carte nominate. Scegli quale mostrare con un clic sul pulsante o premendo il numero indicato (1, 2 o 3). Questo messaggio non si chiude con Spazio, Esc o clic fuori dai pulsanti e non scade: il turno dell'avversario riprende dopo la tua scelta.
+
+Tutti gli altri messaggi si chiudono con **Spazio**, **Esc** o con un **clic** in qualsiasi punto. Se non fai nulla si chiudono da soli dopo 10 secondi.
 
 ## 5. La fine della partita
 
@@ -91,13 +96,21 @@ Le tue carte sono segnate in automatico con ❌, così come le carte che ti veng
 ## 8. Pausa, menu, musica
 
 - **Pausa / Menu (ESC)**: in partita sospende il gioco dei computer. Dal menu di pausa puoi riprendere o tornare al menu principale. Tornando al menu, la partita in corso viene abbandonata.
-- **Musica**: il pulsante con l'altoparlante nell'intestazione attiva o disattiva il sottofondo musicale, sia nel menu iniziale sia durante la partita. La scelta viene ricordata. La musica parte al primo clic o tasto premuto, perché i browser non permettono l'audio prima di un gesto dell'utente.
+- **Musica e volume**: il pulsante con l'altoparlante nell'intestazione attiva o disattiva l'audio, sia nel menu iniziale sia durante la partita; il cursore accanto regola il volume (0-100%). Il volume vale per la musica e per gli effetti sonori brevi (lancio dei dadi, carta mostrata, campanello all'ipotesi di un avversario, accusa sbagliata, apertura della busta). Le due scelte vengono ricordate. L'audio parte al primo clic o tasto premuto, perché i browser non permettono l'audio prima di un gesto dell'utente.
 - **Tutorial**: un percorso guidato di 16 passi. Evidenzia sul gioco vero ogni comando (tabellone, pedina, porte, elenco dei personaggi, dadi, ipotesi, accusa, passa turno, carte, busta, taccuino, registro, intestazione) con una breve spiegazione. Si avanza con **Avanti** (o freccia destra / Invio), si torna indietro con **Indietro** (o freccia sinistra) e si esce con **Esci** o **Esc**. Mentre è aperto la partita è in pausa; si può rivedere in qualsiasi momento dal pulsante **Tutorial** dell'intestazione.
 - **Regole** e **Istruzioni**: si consultano dall'intestazione in qualsiasi momento. Durante la partita il gioco si sospende finché il documento è aperto. Si chiude con il pulsante di chiusura, con **Esc** o con un clic fuori dalla finestra.
 
-## 9. Gli avversari
+## 9. Gli avversari e i livelli
 
-I cinque avversari controllati dal computer seguono le stesse regole del giocatore umano. Ogni computer annota le carte che vede e deduce quelle degli altri dalle smentite. Si muove verso le stanze che potrebbero ancora essere quella del delitto e **accusa solo quando è certo** della soluzione: non sbaglia mai l'accusa. Non ci si può quindi fermare ad aspettare: il tempo gioca a favore di chi deduce più in fretta.
+I cinque avversari controllati dal computer seguono le stesse regole del giocatore umano. Ogni computer annota le carte che vede e deduce quelle degli altri dalle smentite. Si muove verso le stanze che potrebbero ancora essere quella del delitto. Non ci si può fermare ad aspettare: il tempo gioca a favore di chi deduce più in fretta.
+
+Il livello si sceglie nel menu iniziale e vale per tutta la partita:
+
+| Livello | Comportamento dei computer |
+|---|---|
+| **Facile** | Spesso non registrano le informazioni ricavate dalle ipotesi altrui, si muovono spesso a caso e, quando restano al massimo 12 soluzioni possibili, possono azzardare l'accusa anche senza certezza (possono sbagliare ed essere eliminati). |
+| **Normale** | Come il Facile, ma con errori molto meno frequenti; azzardano l'accusa solo con al massimo 6 soluzioni possibili. |
+| **Difficile** | Deducono tutto ciò che si può dedurre e **accusano solo quando sono certi**: non sbagliano mai l'accusa. |
 
 ## 10. Consigli
 
