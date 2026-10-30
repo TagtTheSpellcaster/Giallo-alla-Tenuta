@@ -13,7 +13,7 @@ Il gioco ricorda nel browser l'ultimo personaggio e l'ultimo livello che hai sce
 
 In alternativa, **Tutorial guidato** avvia una partita con l'Ambasciatore Ambra e ti accompagna passo passo tra i comandi (vedi sezione 8).
 
-Dalla schermata iniziale puoi aprire in qualsiasi momento il **Tutorial**, le **Regole**, le **Istruzioni** e il pulsante **Musica** che si trovano nell'intestazione della pagina.
+In cima alla pagina, sotto il titolo, c'è la **barra dei comandi esterni alla partita**, divisa in tre gruppi: **Guida** (Tutorial, Regole, Istruzioni), **Audio** (Musica ed Effetti, con i rispettivi volumi) e **Partita** (Salva, Apri e, durante il gioco, Pausa). È disponibile fin dalla schermata iniziale. Con **Apri** puoi riprendere una partita salvata (vedi sezione 8).
 
 ## 2. La schermata di gioco
 
@@ -25,9 +25,9 @@ Dalla schermata iniziale puoi aprire in qualsiasi momento il **Tutorial**, le **
 **A destra**
 
 - **Azioni Turno**: i pulsanti per giocare (vedi sezione 3).
-- **Le Tue Carte**: le tre carte che ti sono state date. Accanto c'è la **busta del caso**, chiusa, con le tre carte della soluzione. All'inizio della partita compare al centro dello schermo e va al suo posto.
-- **Taccuino del Detective**: tre schede (Personaggi, Armi, Stanze) per annotare le deduzioni.
-- **Registro Eventi**: la cronologia di movimenti, ipotesi, smentite e accuse.
+- **Le Tue Carte**: le tre carte che ti sono state date, disegnate come vere carte con tipo (Personaggio, Arma o Stanza), immagine e nome. Passandoci sopra con il mouse si ingrandiscono. In alto a destra c'è la **busta del caso**, chiusa, con le tre carte della soluzione. All'inizio della partita compare al centro dello schermo e va al suo posto: i computer cominciano a giocare solo quando l'animazione è finita.
+- **Taccuino del Detective**: quattro schede: Personaggi, Armi e Stanze per annotare le deduzioni, e **Note**, una pagina di testo libero per le tue osservazioni (fino a 10.000 caratteri). Le note vengono incluse nel file di **Salva**.
+- **Registro Eventi**: la cronologia di movimenti, ipotesi, smentite e accuse. Il pulsante **⤢** in alto a destra del registro lo apre ingrandito al centro dello schermo (si aggiorna in tempo reale e si chiude con **Esc**, con il pulsante di chiusura o con un clic fuori dalla finestra).
 
 ## 3. Svolgere il proprio turno
 
@@ -85,7 +85,7 @@ Ogni voce ha tre stati; a ogni clic cambia in sequenza:
 | ❌ | Esclusa dalla busta |
 | ✔️ | Sospettata: la usi tu come preferisci, per esempio per una carta che ritieni nella busta |
 
-Le tue carte sono segnate in automatico con ❌, così come le carte che ti vengono mostrate per smentirti. Il resto lo compili tu. Cambia scheda con i tre pulsanti sopra l'elenco. Le schede hanno la stessa altezza e mostrano tutte le voci senza scorrere.
+Le tue carte sono segnate in automatico con ❌, così come le carte che ti vengono mostrate per smentirti. Il resto lo compili tu. Cambia scheda con i quattro pulsanti sopra l'elenco; la scheda **Note** non ha simboli ma uno spazio di scrittura. Le schede hanno la stessa altezza e mostrano tutte le voci senza scorrere.
 
 ## 7. Il mouse sul tabellone e sull'elenco
 
@@ -96,10 +96,11 @@ Le tue carte sono segnate in automatico con ❌, così come le carte che ti veng
 ## 8. Pausa, menu, musica
 
 - **Pausa / Menu (ESC)**: in partita sospende il gioco dei computer. Dal menu di pausa puoi riprendere o tornare al menu principale. Tornando al menu, la partita in corso viene abbandonata.
-- **Musica ed effetti sonori**: nell'intestazione ci sono due coppie di comandi indipendenti, valide sia nel menu iniziale sia durante la partita. Il pulsante **Musica** attiva o disattiva il sottofondo musicale e il cursore accanto ne regola il volume (0-100%). Il pulsante **Effetti** attiva o disattiva gli effetti sonori brevi (lancio dei dadi, carta mostrata, campanello all'ipotesi di un avversario, accusa sbagliata, apertura della busta) e il suo cursore ne regola il volume. Si può quindi tenere la musica e togliere gli effetti, o il contrario. Tutte le scelte vengono ricordate.
+- **Musica ed effetti sonori**: nel gruppo *Audio* della barra dei comandi ci sono due coppie di comandi indipendenti, valide sia nel menu iniziale sia durante la partita. Il pulsante **Musica** attiva o disattiva il sottofondo musicale e il cursore accanto ne regola il volume (0-100%). Il pulsante **Effetti** attiva o disattiva gli effetti sonori brevi (lancio dei dadi, carta mostrata, campanello all'ipotesi di un avversario, accusa sbagliata, apertura della busta) e il suo cursore ne regola il volume. Si può quindi tenere la musica e togliere gli effetti, o il contrario. Tutte le scelte vengono ricordate.
 - **Musica della vittoria**: quando **sei tu** a risolvere il caso, il sottofondo si interrompe e, all'apertura della busta, parte un valzer più allegro in stile vittoriano, che prosegue finché non inizi una nuova partita o torni al menu. Segue le impostazioni della musica: se la musica è spenta non si sente. Quando vince un avversario non cambia nulla. L'audio parte al primo clic o tasto premuto, perché i browser non permettono l'audio prima di un gesto dell'utente.
-- **Tutorial**: un percorso guidato di 16 passi. Evidenzia sul gioco vero ogni comando (tabellone, pedina, porte, elenco dei personaggi, dadi, ipotesi, accusa, passa turno, carte, busta, taccuino, registro, intestazione) con una breve spiegazione. Si avanza con **Avanti** (o freccia destra / Invio), si torna indietro con **Indietro** (o freccia sinistra) e si esce con **Esci** o **Esc**. Mentre è aperto la partita è in pausa; si può rivedere in qualsiasi momento dal pulsante **Tutorial** dell'intestazione.
-- **Regole** e **Istruzioni**: si consultano dall'intestazione in qualsiasi momento. Durante la partita il gioco si sospende finché il documento è aperto. Si chiude con il pulsante di chiusura, con **Esc** o con un clic fuori dalla finestra.
+- **Tutorial**: un percorso guidato di 16 passi. Evidenzia sul gioco vero ogni comando (tabellone, pedina, porte, elenco dei personaggi, dadi, ipotesi, accusa, passa turno, carte, busta, taccuino, registro, barra dei comandi) con una breve spiegazione. Si avanza con **Avanti** (o freccia destra / Invio), si torna indietro con **Indietro** (o freccia sinistra) e si esce con **Esci** o **Esc**. Mentre è aperto la partita è in pausa; si può rivedere in qualsiasi momento dal pulsante **Tutorial** della barra dei comandi.
+- **Salva e Apri**: i pulsanti **Salva** e **Apri** nel gruppo *Partita* della barra dei comandi permettono di spostare una partita su un altro computer. **Salva** scarica un file `.json` con tutto lo stato della partita (giocatori, carte, posizioni, armi, taccuino, registro, conoscenza dei computer, livello). **Apri** carica un file salvato e riprende da lì; se c'è una partita in corso, chiede conferma prima di sostituirla. Se salvi durante il tuo turno, la partita riprende esattamente da quel punto; se salvi durante il turno di un avversario, riprende dall'inizio di quel turno. Il file non contiene il gioco: sull'altro computer servono `index.html` e le immagini. Non si può salvare una partita già conclusa. Un file danneggiato o modificato in modo incoerente viene rifiutato con un messaggio.
+- **Regole** e **Istruzioni**: si consultano dalla barra dei comandi in qualsiasi momento. Durante la partita il gioco si sospende finché il documento è aperto. Si chiude con il pulsante di chiusura, con **Esc** o con un clic fuori dalla finestra.
 
 ## 9. Gli avversari e i livelli
 

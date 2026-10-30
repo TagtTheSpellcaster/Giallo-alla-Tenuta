@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giallo alla Tenuta - v0.43</title>
+    <title>Giallo alla Tenuta - v0.45</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Henny+Penny&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+        html { background: #0b0805; }
+        body { background: radial-gradient(ellipse 120% 70% at 50% 0%, #2c1d0f 0%, #150e08 55%, #0b0805 100%) fixed; color: #f1e2bd; font-family: system-ui, -apple-system, sans-serif; }
         .canvas-container { position: relative; width: 600px; height: 600px; }
-        canvas { border: 4px solid #334155; border-radius: 8px; cursor: pointer; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+        canvas { border: 4px solid #4d3718; border-radius: 8px; cursor: pointer; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
         .modal { background-color: rgba(15, 23, 42, 0.95); backdrop-filter: blur(6px); }
-        .tab-btn.active { background-color: #f59e0b; color: #0f172a; font-weight: bold; }
+        .tab-btn.active { background-color: #f59e0b; color: #120c07; font-weight: bold; }
         .font-henny { font-family: 'Henny Penny', cursive; }
 
         /* Taccuino: le tre schede sono sovrapposte nella stessa cella della griglia, quindi hanno tutte
@@ -45,9 +46,6 @@
                                        border: 2px solid #7a4a14; border-radius: 0.5em; padding: 0.1em 0.6em; cursor: pointer; line-height: 1.2; }
         #bot-message-text .bm-choice:hover, #bot-message-text .bm-choice:focus-visible { background: rgba(251, 191, 36, 0.75); outline: none; }
 
-        /* Cursore del volume nell'intestazione */
-        .vol-range { width: 4.5rem; accent-color: #f59e0b; cursor: pointer; vertical-align: middle; }
-        @media (max-width: 640px) { .vol-range { width: 4rem; } }
 
         /* Elenco dei personaggi: riga del giocatore di turno */
         #players-legend [data-character] { cursor: pointer; transition: box-shadow 0.2s ease, border-color 0.2s ease; }
@@ -121,15 +119,15 @@
                      padding: 12px; background: rgba(2, 6, 23, 0.78); }
         #doc-modal.open { display: flex; }
         #doc-panel { width: 100%; max-width: 52rem; max-height: min(88vh, 900px); display: flex; flex-direction: column;
-                     background: #111827; border: 1px solid #475569; border-radius: 12px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7); overflow: hidden; }
-        #doc-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid #334155; background: #1e293b; }
+                     background: #1b130c; border: 1px solid #6d4d22; border-radius: 12px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7); overflow: hidden; }
+        #doc-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid #4d3718; background: #2a1d11; }
         #doc-title { font-family: 'Henny Penny', cursive; color: #f59e0b; font-size: 1.35rem; }
-        #doc-close { background: #334155; color: #e2e8f0; border: 1px solid #475569; border-radius: 6px; padding: 4px 12px; font-size: 0.85rem; cursor: pointer; }
-        #doc-close:hover { background: #475569; }
+        #doc-close { background: #4d3718; color: #e2e8f0; border: 1px solid #6d4d22; border-radius: 6px; padding: 4px 12px; font-size: 0.85rem; cursor: pointer; }
+        #doc-close:hover { background: #6d4d22; }
         #doc-body { overflow-y: auto; padding: 18px 22px 26px; color: #d7dde8; line-height: 1.6;
                     font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 1.12rem; }
         #doc-body h1 { font-family: 'Henny Penny', cursive; color: #f59e0b; font-size: 1.7rem; font-weight: 400; margin: 0 0 0.6em; line-height: 1.2; }
-        #doc-body h2 { font-family: 'Henny Penny', cursive; color: #fbbf24; font-size: 1.35rem; font-weight: 400; margin: 1.6em 0 0.5em; padding-bottom: 0.2em; border-bottom: 1px solid #334155; }
+        #doc-body h2 { font-family: 'Henny Penny', cursive; color: #fbbf24; font-size: 1.35rem; font-weight: 400; margin: 1.6em 0 0.5em; padding-bottom: 0.2em; border-bottom: 1px solid #4d3718; }
         #doc-body h3 { color: #fcd34d; font-size: 1.15em; font-weight: 600; margin: 1.3em 0 0.4em; }
         #doc-body h4 { color: #fde68a; font-size: 1.05em; font-weight: 600; font-style: italic; margin: 1.1em 0 0.3em; }
         #doc-body p { margin: 0 0 0.8em; }
@@ -139,15 +137,11 @@
         #doc-body li > ul { margin: 0.2em 0 0.2em; list-style: circle; }
         #doc-body strong { color: #f8fafc; font-weight: 600; }
         #doc-body em { color: #e2e8f0; }
-        #doc-body code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.85em; background: #1e293b; padding: 1px 5px; border-radius: 4px; }
+        #doc-body code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.85em; background: #2a1d11; padding: 1px 5px; border-radius: 4px; }
         #doc-body table { border-collapse: collapse; margin: 0.4em 0 1em; font-size: 0.95em; }
-        #doc-body th, #doc-body td { border: 1px solid #475569; padding: 4px 12px; text-align: left; }
-        #doc-body th { background: #1e293b; color: #fcd34d; }
-        #doc-body hr { border: 0; border-top: 1px solid #334155; margin: 1.2em 0; }
-        .hdr-btn { padding: 8px 12px; background: #1e293b; border: 1px solid #475569; border-radius: 8px; font-size: 0.875rem; font-weight: 600; color: #fbbf24;
-                   display: flex; align-items: center; gap: 6px; transition: background 0.2s; cursor: pointer; }
-        .hdr-btn:hover { background: #334155; }
-        .hdr-btn.hidden { display: none; }
+        #doc-body th, #doc-body td { border: 1px solid #6d4d22; padding: 4px 12px; text-align: left; }
+        #doc-body th { background: #2a1d11; color: #fcd34d; }
+        #doc-body hr { border: 0; border-top: 1px solid #4d3718; margin: 1.2em 0; }
 
         /* ---------- Tutorial guidato ---------- */
         #tour-layer { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 90; display: none; }
@@ -179,7 +173,7 @@
         @keyframes tour-ripple { 0% { opacity: 1; transform: scale(0.3); } 100% { opacity: 0; transform: scale(1.8); } }
 
         /* ---------- Busta del caso: nell'interfaccia, animazione iniziale e rivelazione finale ---------- */
-        #case-envelope { flex: none; width: 104px; text-align: center; cursor: help; }
+        #case-envelope { flex: none; width: 78px; text-align: center; cursor: help; }
         #case-envelope img { display: block; width: 100%; height: auto; border-radius: 3px; filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.55)); }
         #case-envelope span { display: block; margin-top: 3px; font-size: 0.62rem; line-height: 1.1; color: #94a3b8; letter-spacing: 0.02em; }
         #case-envelope img.thump { animation: env-thump 0.7s ease-out; }
@@ -231,37 +225,155 @@
         #char-card-text .cc-name { font-size: 1.4em; line-height: 1.1; }
         #char-card-text .cc-role { font-size: 0.9em; color: #7a4a14; margin: 0.1em 0 0.6em; }
         #char-card-text .cc-body { font-size: 0.78em; }
+        /* ============ Stile del gioco: legno scuro, ottone, pergamena ============ */
+        :root { --ink: #3b2410; --parch: #f3dfae; --brass: #b8862f; --brass-hi: #e6bb55; --wood0: #0e0a06; --wood1: #1a120b; --wood2: #271a0f; --cream: #f1e2bd; --muted: #b39b6e; }
+        body .text-slate-200 { color: var(--cream); }
+        body .text-slate-300 { color: #e0cfa5; }
+        body .text-slate-400 { color: var(--muted); }
+        body .text-slate-500 { color: #8f7a54; }
+        body .text-green-400 { color: #8fd0a4; }
+        body .text-amber-400 { color: #f1c75b; }
+        .panel { background: linear-gradient(180deg, var(--wood2), var(--wood1)); border: 1px solid #6a4a1e; border-radius: 12px;
+                 box-shadow: inset 0 0 0 1px rgba(230, 187, 85, 0.14), inset 0 1px 0 rgba(255, 236, 190, 0.07), 0 6px 18px rgba(0, 0, 0, 0.5); }
+        .panel-t { border-radius: 12px 12px 0 0; border-bottom-width: 0; }
+        .panel-b { border-radius: 0 0 12px 12px; border-top-width: 0; }
+        .panel-dark { background: #110b06; box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6); }
+        .panel-red { border-color: #8a2432; }
+        .panel-title { font-family: 'Henny Penny', cursive; color: #f1c75b; letter-spacing: 0.03em; border-bottom: 1px solid rgba(184, 134, 47, 0.35); }
+        #game-status-bar { gap: 8px; }
+        #gameBoard { border: 4px solid #7a4f1a; border-radius: 6px; box-shadow: 0 0 0 2px #1c120a, 0 0 0 3px #b8862f, 0 18px 28px rgba(0, 0, 0, 0.55); }
+        .field { background: #120c07; border: 1px solid #6a4a1e; color: var(--cream); }
+        .field:focus { outline: none; border-color: #e6bb55; }
+
+        /* pulsanti: ottone lucidato con testo scuro; varianti per colore */
+        .gbtn { font-family: 'Henny Penny', cursive; letter-spacing: 0.03em; color: #2a1b0d; cursor: pointer;
+                background: linear-gradient(180deg, #f2d27f 0%, #dcaa47 48%, #b47c26 100%); border: 1px solid #6d4713; border-radius: 10px;
+                text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 3px 0 #5a3a0f, 0 6px 10px rgba(0, 0, 0, 0.45);
+                transition: transform 0.08s ease, filter 0.15s ease, box-shadow 0.08s ease; }
+        .gbtn:hover:not(:disabled) { filter: brightness(1.1); }
+        .gbtn:active:not(:disabled) { transform: translateY(3px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 0 #5a3a0f, 0 2px 5px rgba(0, 0, 0, 0.45); }
+        .gbtn:focus-visible { outline: 2px solid #fff3c4; outline-offset: 2px; }
+        .gbtn:disabled { filter: grayscale(0.85) brightness(0.5); cursor: not-allowed; }
+        .gbtn-green { color: #f4ecd2; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45); border-color: #163025;
+                      background: linear-gradient(180deg, #62a181 0%, #3d6f57 50%, #284f40 100%);
+                      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 3px 0 #12271e, 0 6px 10px rgba(0, 0, 0, 0.45); }
+        .gbtn-red { color: #fbeed4; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5); border-color: #4a121c;
+                    background: linear-gradient(180deg, #c04557 0%, #912838 50%, #681b2b 100%);
+                    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 3px 0 #3d0f17, 0 6px 10px rgba(0, 0, 0, 0.45); }
+        .gbtn-wood { color: #f1e2bd; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5); border-color: #1c120a;
+                     background: linear-gradient(180deg, #7a5532 0%, #55391e 50%, #3c2813 100%);
+                     box-shadow: inset 0 1px 0 rgba(255, 230, 180, 0.22), 0 3px 0 #1c120a, 0 6px 10px rgba(0, 0, 0, 0.45); }
+        .gbtn-violet { color: #f2ecfb; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45); border-color: #2b1d4a;
+                       background: linear-gradient(180deg, #8b6cc0 0%, #5d429a 50%, #402c72 100%);
+                       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 3px 0 #21163a, 0 6px 10px rgba(0, 0, 0, 0.45); }
+        .gbtn.hidden { display: none; }
+
+        /* zona dei comandi esterni alla partita */
+        .dock { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0; padding: 6px 8px; border: 2px solid #8a5f22; border-radius: 12px;
+                background: linear-gradient(180deg, #33220f 0%, #21160b 100%);
+                box-shadow: inset 0 0 0 1px rgba(255, 220, 140, 0.16), inset 0 -8px 14px rgba(0, 0, 0, 0.35), 0 6px 16px rgba(0, 0, 0, 0.5); }
+        .dock-group { display: flex; flex-direction: column; gap: 3px; padding: 2px 14px 4px; position: relative; }
+        .dock-group + .dock-group::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 6px; width: 1px;
+                                            background: linear-gradient(180deg, transparent, #b8862f 25%, #b8862f 75%, transparent); }
+        .dock-cap { font-family: 'Henny Penny', cursive; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: #b8862f; line-height: 1; }
+        .dock-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .hdr-btn { font-family: 'Henny Penny', cursive; font-size: 0.95rem; padding: 5px 11px; display: flex; align-items: center; gap: 6px; cursor: pointer;
+                   color: #f1c75b; border: 1px solid #7a5322; border-radius: 8px; letter-spacing: 0.02em;
+                   background: linear-gradient(180deg, #5a3d20, #3a2813); box-shadow: inset 0 1px 0 rgba(255, 230, 170, 0.2), 0 2px 0 #170e06;
+                   transition: filter 0.15s ease, transform 0.08s ease; }
+        .hdr-btn:hover:not(:disabled) { filter: brightness(1.2); }
+        .hdr-btn:active:not(:disabled) { transform: translateY(2px); box-shadow: inset 0 1px 0 rgba(255, 230, 170, 0.2), 0 0 0 #170e06; }
+        .hdr-btn:disabled { filter: grayscale(0.8) brightness(0.55); cursor: not-allowed; }
+        .hdr-btn[aria-pressed="false"] { color: #9c8860; filter: saturate(0.5) brightness(0.85); }
+        .hdr-btn.hidden { display: none; }
+        .vol-range { -webkit-appearance: none; appearance: none; width: 4.5rem; height: 6px; border-radius: 4px; cursor: pointer; outline: none;
+                     background: linear-gradient(90deg, #d9a441, #5a3f1c); border: 1px solid #1c120a; }
+        .vol-range::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; border: 1px solid #4a2e0c;
+                                           background: radial-gradient(circle at 35% 30%, #fff2c2, #dcaa47 55%, #8a5a1c); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6); }
+        .vol-range::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #4a2e0c;
+                                       background: radial-gradient(circle at 35% 30%, #fff2c2, #dcaa47 55%, #8a5a1c); }
+        .vol-range:focus-visible { outline: 2px solid #fff3c4; outline-offset: 3px; }
+        @media (max-width: 720px) { .dock-group { padding: 2px 8px 4px; } .vol-range { width: 3.5rem; } }
+
+        /* elenco, taccuino, registro */
+        .prow { background: #150e08; border: 1px solid #3a2915; }
+        .prow.me { background: #2a1c0b; border-color: rgba(230, 187, 85, 0.55); }
+        .nb-tabs { border-bottom: 1px solid rgba(184, 134, 47, 0.4); }
+        .tab-btn { background: #3a2813; color: #e6d3a3; border: 1px solid #6a4a1e; border-bottom: 0; font-family: 'Henny Penny', cursive; font-size: 0.85rem; }
+        .tab-btn:hover { background: #4d3718; }
+        .tab-btn.active { background: linear-gradient(180deg, #f2d27f, #d9a441); color: #2a1b0d; border-color: #8a5f22; font-weight: 400; }
+        .nb-row { background: #150e08; border: 1px solid #2f2113; transition: background 0.15s ease; }
+        .nb-row:hover { background: #2b1d0f; }
+        .log-line { border-bottom: 1px solid #2a1c0f; }
+
+        /* Le Tue Carte: carte a figura intera */
+        .my-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .my-card { position: relative; transition: transform 0.2s ease; z-index: 1; }
+        .my-card canvas { display: block; width: 100%; height: auto; border: 0; border-radius: 7px; cursor: zoom-in; box-shadow: 0 5px 10px rgba(0, 0, 0, 0.55); }
+        .my-card:hover { transform: scale(1.7); z-index: 30; }
+        .my-card:nth-child(1):hover { transform-origin: left center; }
+        .my-card:nth-child(3):hover { transform-origin: right center; }
+        @media (hover: none) { .my-card:hover { transform: none; } }
+        #case-envelope span { color: var(--muted); }
+        .notes-area { width: 100%; height: 100%; min-height: 12rem; resize: none; border-radius: 6px; padding: 8px 10px; line-height: 1.4; font-size: 0.85rem; }
+        #notebook-tab-notes { align-content: stretch; }
+        #log-card .log-expand { position: absolute; top: 8px; right: 8px; z-index: 2; padding: 1px 9px; font-size: 1.05rem; line-height: 1.3; }
+        #log-modal { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 55; display: none; align-items: center; justify-content: center; padding: 12px; background: rgba(8, 5, 2, 0.8); }
+        #log-modal.open { display: flex; }
+        #log-panel { width: 100%; max-width: 56rem; height: min(88vh, 900px); display: flex; flex-direction: column; overflow: hidden; }
+        #log-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid #6a4a1e; background: #21160b; }
+        #log-head .panel-title { border: 0; font-size: 1.4rem; }
+        #log-big { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 20px 20px; font-size: 1rem; line-height: 1.5; color: #e0cfa5; background: #110b06; }
+        #log-big .log-line { padding: 4px 0; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-start p-4">
 
     <!-- HEADER -->
-    <header class="w-full max-w-5xl flex justify-between items-center py-4 mb-4 border-b border-slate-700">
-        <div>
-            <h1 class="text-4xl font-extrabold tracking-wider text-amber-500 flex items-center gap-2 font-henny">
-                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.43</span>
-            </h1>
-        </div>
-        <div id="hdr-controls" class="flex items-center gap-2 flex-wrap justify-end">
-        <button id="btn-tour" type="button" class="hdr-btn" title="Tutorial guidato"><span>🎓</span><span class="hidden sm:inline">Tutorial</span></button>
-        <button id="btn-doc-rules" type="button" class="hdr-btn" title="Regole del gioco"><span>📜</span><span class="hidden sm:inline">Regole</span></button>
-        <button id="btn-doc-help" type="button" class="hdr-btn" title="Istruzioni di gioco"><span>📖</span><span class="hidden sm:inline">Istruzioni</span></button>
-        <button id="btn-music" type="button" title="Musica di sottofondo" aria-pressed="true" class="hdr-btn">
-            <span id="btn-music-icon">🎵</span><span class="hidden sm:inline">Musica</span>
-        </button>
-        <input id="music-volume" type="range" min="0" max="100" step="5" value="100" class="vol-range" aria-label="Volume della musica" title="Volume della musica">
-        <button id="btn-sfx" type="button" title="Effetti sonori" aria-pressed="true" class="hdr-btn">
-            <span id="btn-sfx-icon">🔔</span><span class="hidden sm:inline">Effetti</span>
-        </button>
-        <input id="sfx-volume" type="range" min="0" max="100" step="5" value="100" class="vol-range" aria-label="Volume degli effetti sonori" title="Volume degli effetti sonori">
-        <button id="btn-pause-header" class="hidden hdr-btn">
-            ⏸️ Pausa / Menu (ESC)
-        </button>
-        </div>
+    <header class="w-full max-w-6xl flex flex-col gap-3 pt-2 pb-4 mb-4">
+        <h1 class="text-4xl font-extrabold tracking-wider text-amber-500 flex items-center gap-2 font-henny">
+            🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.45</span>
+        </h1>
+        <!-- Comandi esterni alla partita -->
+        <nav id="hdr-controls" class="dock" aria-label="Comandi esterni alla partita">
+            <div class="dock-group">
+                <span class="dock-cap">Guida</span>
+                <div class="dock-row">
+                    <button id="btn-tour" type="button" class="hdr-btn" title="Tutorial guidato"><span>🎓</span><span>Tutorial</span></button>
+                    <button id="btn-doc-rules" type="button" class="hdr-btn" title="Regole del gioco"><span>📜</span><span>Regole</span></button>
+                    <button id="btn-doc-help" type="button" class="hdr-btn" title="Istruzioni di gioco"><span>📖</span><span>Istruzioni</span></button>
+                </div>
+            </div>
+            <div class="dock-group">
+                <span class="dock-cap">Audio</span>
+                <div class="dock-row">
+                    <button id="btn-music" type="button" title="Musica di sottofondo" aria-pressed="true" class="hdr-btn">
+                        <span id="btn-music-icon">🎵</span><span>Musica</span>
+                    </button>
+                    <input id="music-volume" type="range" min="0" max="100" step="5" value="100" class="vol-range" aria-label="Volume della musica" title="Volume della musica">
+                    <button id="btn-sfx" type="button" title="Effetti sonori" aria-pressed="true" class="hdr-btn">
+                        <span id="btn-sfx-icon">🔔</span><span>Effetti</span>
+                    </button>
+                    <input id="sfx-volume" type="range" min="0" max="100" step="5" value="100" class="vol-range" aria-label="Volume degli effetti sonori" title="Volume degli effetti sonori">
+                </div>
+            </div>
+            <div class="dock-group">
+                <span class="dock-cap">Partita</span>
+                <div class="dock-row">
+                    <button id="btn-save" type="button" class="hdr-btn" title="Salva la partita in un file" disabled><span>💾</span><span>Salva</span></button>
+                    <button id="btn-load" type="button" class="hdr-btn" title="Apri una partita salvata"><span>📂</span><span>Apri</span></button>
+                    <input id="file-load" type="file" accept=".json,application/json" class="hidden" tabindex="-1" aria-hidden="true">
+                    <button id="btn-pause-header" class="hidden hdr-btn">
+                        ⏸️ <span>Pausa (ESC)</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
     </header>
 
     <!-- SETUP SCREEN -->
-    <div id="setup-screen" class="w-full max-w-3xl bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-2xl">
+    <div id="setup-screen" class="panel w-full max-w-3xl p-6 shadow-2xl">
 
         <!-- PRESENTAZIONE DEL CASO, "al cinema" -->
         <section id="case-intro" class="mb-6" aria-label="Il caso della Tenuta">
@@ -302,7 +414,7 @@
         <div class="space-y-4">
             <div>
                 <label class="block text-xl mb-2 text-amber-400 font-henny">Scegli il tuo Personaggio:</label>
-                <select id="select-character" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white focus:outline-none focus:border-amber-500">
+                <select id="select-character" class="field w-full rounded p-2 text-white focus:outline-none focus:border-amber-500">
                     <option value="Ambasciatore Ambra">Ambasciatore Ambra</option>
                     <option value="Baronessa Bianchi">Baronessa Bianchi</option>
                     <option value="Colonnello Corallo">Colonnello Corallo</option>
@@ -313,17 +425,17 @@
             </div>
             <div>
                 <label class="block text-xl mb-2 text-amber-400 font-henny" for="select-difficulty">Livello dei bot:</label>
-                <select id="select-difficulty" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white focus:outline-none focus:border-amber-500">
+                <select id="select-difficulty" class="field w-full rounded p-2 text-white focus:outline-none focus:border-amber-500">
                     <option value="easy">Facile</option>
                     <option value="normal" selected>Normale</option>
                     <option value="hard">Difficile</option>
                 </select>
             </div>
 
-            <button type="button" id="btn-start-game" class="w-full mt-6 py-3 bg-green-600 hover:bg-green-500 font-bold rounded-lg text-xl shadow-lg transition font-henny tracking-wide">
+            <button type="button" id="btn-start-game" class="gbtn gbtn-green w-full mt-6 py-3 text-2xl">
                 Inizia Partita
             </button>
-            <button type="button" id="btn-start-tour" class="w-full py-2 bg-slate-700 hover:bg-slate-600 border border-slate-500 font-semibold rounded-lg text-sm transition text-amber-300">
+            <button type="button" id="btn-start-tour" class="gbtn gbtn-wood w-full py-2 text-lg">
                 🎓 Tutorial guidato
             </button>
         </div>
@@ -335,7 +447,7 @@
 
         <!-- CANVAS COLUMN -->
         <div class="lg:col-span-7 flex flex-col items-center">
-            <div id="game-status-bar" class="w-full bg-slate-800 p-3 rounded-t-xl border-t border-x border-slate-700 flex justify-between items-center text-sm">
+            <div id="game-status-bar" class="panel panel-t w-full p-3 flex justify-between items-center text-sm">
                 <div>
                     <span class="text-slate-400">Tu sei:</span> 
                     <strong id="display-your-char" class="text-amber-400 font-henny text-base">-</strong>
@@ -348,67 +460,68 @@
             </div>
 
             <!-- LEGENDA VERTICALE -->
-            <div id="players-legend" class="w-full bg-slate-800 p-4 rounded-b-xl border-b border-x border-slate-700 mt-0 flex flex-col gap-2 text-sm"></div>
+            <div id="players-legend" class="panel panel-b w-full p-4 mt-0 flex flex-col gap-2 text-sm"></div>
         </div>
 
         <!-- CONTROLS COLUMN -->
         <div class="lg:col-span-5 flex flex-col gap-4">
 
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md">
-                <h3 class="text-md font-bold text-slate-200 mb-3 border-b border-slate-700 pb-1">Azioni Turno</h3>
+            <div class="panel p-4 shadow-md">
+                <h3 class="panel-title text-xl mb-3 pb-1">Azioni Turno</h3>
 
                 <div class="flex gap-3 mb-3">
-                    <button id="btn-roll-dice" class="flex-1 py-3 bg-amber-600 hover:bg-amber-500 font-bold rounded flex justify-center items-center gap-2 transition disabled:opacity-50">
+                    <button id="btn-roll-dice" class="gbtn flex-1 py-3 text-xl flex justify-center items-center gap-2">
                         🎲 Lancia Dadi (<span id="dice-result">-</span>)
                     </button>
-                    <button id="btn-secret-passage" class="hidden py-3 px-3 bg-purple-600 hover:bg-purple-500 font-bold rounded text-xs transition">
+                    <button id="btn-secret-passage" class="gbtn gbtn-violet hidden py-3 px-3 text-sm">
                         🌀 Passaggio Segreto
                     </button>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
-                    <button id="btn-hypothesis" disabled class="py-2 bg-blue-600 hover:bg-blue-500 font-semibold rounded text-sm transition disabled:opacity-40">
+                    <button id="btn-hypothesis" disabled class="gbtn gbtn-green py-2 text-base">
                         ❓ Formula Ipotesi
                     </button>
-                    <button id="btn-accusation" disabled class="py-2 bg-red-600 hover:bg-red-500 font-semibold rounded text-sm transition disabled:opacity-40">
+                    <button id="btn-accusation" disabled class="gbtn gbtn-red py-2 text-base">
                         ⚖️ Accusa Finale
                     </button>
                 </div>
-                <button id="btn-end-turn" disabled class="w-full mt-2 py-2 bg-slate-700 hover:bg-slate-600 font-semibold rounded text-sm transition disabled:opacity-40">
+                <button id="btn-end-turn" disabled class="gbtn gbtn-wood w-full mt-2 py-2 text-base">
                     ⏭️ Passa Turno
                 </button>
             </div>
 
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md">
-                <div class="flex items-center gap-4">
-                    <div class="flex-1 min-w-0">
-                        <h3 class="text-md font-bold text-slate-200 mb-2">Le Tue Carte</h3>
-                        <div id="my-cards-container" class="flex flex-wrap gap-2"></div>
-                    </div>
+            <div id="cards-card" class="panel p-4 shadow-md">
+                <div class="flex items-start justify-between gap-3 mb-2 pb-1">
+                    <h3 class="panel-title text-xl">Le Tue Carte</h3>
                     <div id="case-envelope" title="La busta del caso: contiene le tre carte della soluzione (personaggio, arma, stanza)">
                         <img id="case-envelope-img" src="busta_chiusa.jpg" alt="Busta del caso">
                         <span>Busta del caso</span>
                     </div>
                 </div>
+                <div id="my-cards-container" class="my-cards"></div>
             </div>
 
             <!-- TACCUINO A SCHEDE -->
-            <div id="notebook-card" class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md">
-                <div class="flex justify-between items-center mb-2 border-b border-slate-700 pb-1">
-                    <h3 class="text-md font-bold text-slate-200">📒 Taccuino del Detective</h3>
+            <div id="notebook-card" class="panel p-4 shadow-md">
+                <div class="flex justify-between items-center mb-2 pb-1">
+                    <h3 class="panel-title text-xl">📒 Taccuino del Detective</h3>
                     <span class="text-xs text-slate-400">Spunta indizi</span>
                 </div>
 
                 <!-- TAB HEADERS -->
-                <div class="flex gap-1 border-b border-slate-700 mb-2">
-                    <button id="tab-btn-suspects" onclick="switchNotebookTab('suspects')" class="tab-btn active px-3 py-1 rounded-t bg-slate-700 text-xs font-semibold">
+                <div class="flex gap-1 nb-tabs mb-2">
+                    <button id="tab-btn-suspects" onclick="switchNotebookTab('suspects')" class="tab-btn active px-3 py-1 rounded-t text-xs font-semibold">
                         👤 Personaggi
                     </button>
-                    <button id="tab-btn-weapons" onclick="switchNotebookTab('weapons')" class="tab-btn px-3 py-1 rounded-t bg-slate-700 text-xs font-semibold">
+                    <button id="tab-btn-weapons" onclick="switchNotebookTab('weapons')" class="tab-btn px-3 py-1 rounded-t text-xs font-semibold">
                         🔪 Armi
                     </button>
-                    <button id="tab-btn-rooms" onclick="switchNotebookTab('rooms')" class="tab-btn px-3 py-1 rounded-t bg-slate-700 text-xs font-semibold">
+                    <button id="tab-btn-rooms" onclick="switchNotebookTab('rooms')" class="tab-btn px-3 py-1 rounded-t text-xs font-semibold">
                         🏰 Stanze
+                    </button>
+                    <button id="tab-btn-notes" onclick="switchNotebookTab('notes')" class="tab-btn px-3 py-1 rounded-t text-xs font-semibold">
+                        📝 Note
                     </button>
                 </div>
 
@@ -417,12 +530,17 @@
                     <div id="notebook-tab-suspects" class="notebook-tab-content space-y-1 text-xs"></div>
                     <div id="notebook-tab-weapons" class="notebook-tab-content nb-off space-y-1 text-xs"></div>
                     <div id="notebook-tab-rooms" class="notebook-tab-content nb-off space-y-1 text-xs"></div>
+                    <div id="notebook-tab-notes" class="notebook-tab-content nb-off text-xs">
+                        <textarea id="notes-text" class="field notes-area" maxlength="10000" spellcheck="false" aria-label="Note del detective"
+                                  placeholder="Scrivi qui le tue osservazioni: alibi, contraddizioni, sospetti…"></textarea>
+                    </div>
                 </div>
             </div>
 
             <!-- Il registro occupa lo spazio rimasto in colonna (bottom allineato all'elenco dei personaggi);
                  il contenuto è posizionato in modo assoluto, così un registro lungo scorre invece di allungare la colonna -->
-            <div id="log-card" class="relative bg-slate-900 rounded-xl border border-slate-800 flex-1 min-h-[8rem]">
+            <div id="log-card" class="panel panel-dark relative flex-1 min-h-[8rem]">
+                <button id="btn-log-expand" type="button" class="hdr-btn log-expand" title="Ingrandisci il registro" aria-label="Ingrandisci il registro eventi">⤢</button>
                 <div class="absolute inset-3 flex flex-col">
                     <div class="text-xs font-bold text-slate-400 mb-1">Registro Eventi:</div>
                     <div id="game-log" class="overflow-y-auto text-sm leading-snug text-slate-300 space-y-1 flex-1 min-h-0"></div>
@@ -431,16 +549,24 @@
         </div>
     </div>
 
+    <!-- REGISTRO EVENTI INGRANDITO -->
+    <div id="log-modal" role="dialog" aria-modal="true" aria-labelledby="log-modal-title">
+        <div id="log-panel" class="panel">
+            <div id="log-head"><div id="log-modal-title" class="panel-title">Registro Eventi</div><button id="log-close" type="button" class="hdr-btn">✕ Chiudi (Esc)</button></div>
+            <div id="log-big"></div>
+        </div>
+    </div>
+
     <!-- MODALE PAUSA -->
     <div id="modal-pause" class="hidden fixed inset-0 modal flex justify-center items-center p-4 z-50">
-        <div class="bg-slate-800 border border-slate-600 rounded-xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
-            <h3 class="text-2xl font-bold text-amber-500 font-henny">⏸️ GIOCO IN PAUSA</h3>
-            <p class="text-xs text-slate-400">Versione v0.43</p>
+        <div class="panel max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
+            <h3 class="panel-title text-3xl">⏸️ GIOCO IN PAUSA</h3>
+            <p class="text-xs text-slate-400">Versione v0.45</p>
             <div class="space-y-3 pt-2">
-                <button id="btn-resume-game" class="w-full py-3 bg-green-600 hover:bg-green-500 font-bold rounded-lg transition text-white">
+                <button id="btn-resume-game" class="gbtn gbtn-green w-full py-3 text-lg">
                     ▶️ Riprendi Partita
                 </button>
-                <button id="btn-return-menu" class="w-full py-3 bg-red-600 hover:bg-red-500 font-bold rounded-lg transition text-white">
+                <button id="btn-return-menu" class="gbtn gbtn-red w-full py-3 text-lg">
                     🏠 Torna al Menu Principale
                 </button>
             </div>
@@ -449,47 +575,47 @@
 
     <!-- MODALE IPOTESI -->
     <div id="modal-hypothesis" class="hidden fixed inset-0 modal flex justify-center items-center p-4 z-50">
-        <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-md w-full p-6 shadow-2xl">
+        <div class="panel max-w-md w-full p-6 shadow-2xl">
             <h3 class="text-xl font-bold text-amber-500 mb-4 font-henny">Formula un'Ipotesi</h3>
             <p class="text-xs text-slate-300 mb-4">Stanza: <strong id="hypo-room-name" class="text-amber-400 font-henny"></strong></p>
             <div class="space-y-3 text-sm">
                 <div>
                     <label class="block mb-1 text-slate-400">Sospettato:</label>
-                    <select id="hypo-suspect" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"></select>
+                    <select id="hypo-suspect" class="field w-full rounded p-2 text-white"></select>
                 </div>
                 <div>
                     <label class="block mb-1 text-slate-400">Arma:</label>
-                    <select id="hypo-weapon" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"></select>
+                    <select id="hypo-weapon" class="field w-full rounded p-2 text-white"></select>
                 </div>
             </div>
             <div class="flex gap-3 mt-6">
-                <button id="btn-submit-hypo" class="flex-1 py-2 bg-blue-600 hover:bg-blue-500 rounded font-bold">Invia Ipotesi</button>
-                <button id="btn-cancel-hypo" class="py-2 px-4 bg-slate-700 hover:bg-slate-600 rounded">Annulla</button>
+                <button id="btn-submit-hypo" class="gbtn gbtn-green flex-1 py-2 text-lg">Invia Ipotesi</button>
+                <button id="btn-cancel-hypo" class="gbtn gbtn-wood py-2 px-4 text-lg">Annulla</button>
             </div>
         </div>
     </div>
 
     <!-- MODALE ACCUSA -->
     <div id="modal-accusation" class="hidden fixed inset-0 modal flex justify-center items-center p-4 z-50">
-        <div class="bg-slate-800 border border-red-900 rounded-xl max-w-md w-full p-6 shadow-2xl">
+        <div class="panel panel-red max-w-md w-full p-6 shadow-2xl">
             <h3 class="text-xl font-bold text-red-500 mb-2 font-henny">⚠️ ACCUSA FINALE</h3>
             <div class="space-y-3 text-sm">
                 <div>
                     <label class="block mb-1 text-slate-400">Colpevole:</label>
-                    <select id="acc-suspect" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"></select>
+                    <select id="acc-suspect" class="field w-full rounded p-2 text-white"></select>
                 </div>
                 <div>
                     <label class="block mb-1 text-slate-400">Arma del Delitto:</label>
-                    <select id="acc-weapon" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"></select>
+                    <select id="acc-weapon" class="field w-full rounded p-2 text-white"></select>
                 </div>
                 <div>
                     <label class="block mb-1 text-slate-400">Stanza del Delitto:</label>
-                    <select id="acc-room" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"></select>
+                    <select id="acc-room" class="field w-full rounded p-2 text-white"></select>
                 </div>
             </div>
             <div class="flex gap-3 mt-6">
-                <button id="btn-submit-acc" class="flex-1 py-2 bg-red-600 hover:bg-red-500 rounded font-bold">Conferma Accusa</button>
-                <button id="btn-cancel-acc" class="py-2 px-4 bg-slate-700 hover:bg-slate-600 rounded">Annulla</button>
+                <button id="btn-submit-acc" class="gbtn gbtn-red flex-1 py-2 text-lg">Conferma Accusa</button>
+                <button id="btn-cancel-acc" class="gbtn gbtn-wood py-2 px-4 text-lg">Annulla</button>
             </div>
         </div>
     </div>
@@ -523,7 +649,7 @@
     </div>
     <script type="text/markdown" id="doc-md-regole"># Giallo alla Tenuta — Regole del gioco
 
-Versione del gioco: v0.43. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
+Versione del gioco: v0.45. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
 
 ## Il caso
 
@@ -699,7 +825,7 @@ Il gioco ricorda nel browser l'ultimo personaggio e l'ultimo livello che hai sce
 
 In alternativa, **Tutorial guidato** avvia una partita con l'Ambasciatore Ambra e ti accompagna passo passo tra i comandi (vedi sezione 8).
 
-Dalla schermata iniziale puoi aprire in qualsiasi momento il **Tutorial**, le **Regole**, le **Istruzioni** e il pulsante **Musica** che si trovano nell'intestazione della pagina.
+In cima alla pagina, sotto il titolo, c'è la **barra dei comandi esterni alla partita**, divisa in tre gruppi: **Guida** (Tutorial, Regole, Istruzioni), **Audio** (Musica ed Effetti, con i rispettivi volumi) e **Partita** (Salva, Apri e, durante il gioco, Pausa). È disponibile fin dalla schermata iniziale. Con **Apri** puoi riprendere una partita salvata (vedi sezione 8).
 
 ## 2. La schermata di gioco
 
@@ -711,9 +837,9 @@ Dalla schermata iniziale puoi aprire in qualsiasi momento il **Tutorial**, le **
 **A destra**
 
 - **Azioni Turno**: i pulsanti per giocare (vedi sezione 3).
-- **Le Tue Carte**: le tre carte che ti sono state date. Accanto c'è la **busta del caso**, chiusa, con le tre carte della soluzione. All'inizio della partita compare al centro dello schermo e va al suo posto.
-- **Taccuino del Detective**: tre schede (Personaggi, Armi, Stanze) per annotare le deduzioni.
-- **Registro Eventi**: la cronologia di movimenti, ipotesi, smentite e accuse.
+- **Le Tue Carte**: le tre carte che ti sono state date, disegnate come vere carte con tipo (Personaggio, Arma o Stanza), immagine e nome. Passandoci sopra con il mouse si ingrandiscono. In alto a destra c'è la **busta del caso**, chiusa, con le tre carte della soluzione. All'inizio della partita compare al centro dello schermo e va al suo posto: i computer cominciano a giocare solo quando l'animazione è finita.
+- **Taccuino del Detective**: quattro schede: Personaggi, Armi e Stanze per annotare le deduzioni, e **Note**, una pagina di testo libero per le tue osservazioni (fino a 10.000 caratteri). Le note vengono incluse nel file di **Salva**.
+- **Registro Eventi**: la cronologia di movimenti, ipotesi, smentite e accuse. Il pulsante **⤢** in alto a destra del registro lo apre ingrandito al centro dello schermo (si aggiorna in tempo reale e si chiude con **Esc**, con il pulsante di chiusura o con un clic fuori dalla finestra).
 
 ## 3. Svolgere il proprio turno
 
@@ -771,7 +897,7 @@ Ogni voce ha tre stati; a ogni clic cambia in sequenza:
 | ❌ | Esclusa dalla busta |
 | ✔️ | Sospettata: la usi tu come preferisci, per esempio per una carta che ritieni nella busta |
 
-Le tue carte sono segnate in automatico con ❌, così come le carte che ti vengono mostrate per smentirti. Il resto lo compili tu. Cambia scheda con i tre pulsanti sopra l'elenco. Le schede hanno la stessa altezza e mostrano tutte le voci senza scorrere.
+Le tue carte sono segnate in automatico con ❌, così come le carte che ti vengono mostrate per smentirti. Il resto lo compili tu. Cambia scheda con i quattro pulsanti sopra l'elenco; la scheda **Note** non ha simboli ma uno spazio di scrittura. Le schede hanno la stessa altezza e mostrano tutte le voci senza scorrere.
 
 ## 7. Il mouse sul tabellone e sull'elenco
 
@@ -782,10 +908,11 @@ Le tue carte sono segnate in automatico con ❌, così come le carte che ti veng
 ## 8. Pausa, menu, musica
 
 - **Pausa / Menu (ESC)**: in partita sospende il gioco dei computer. Dal menu di pausa puoi riprendere o tornare al menu principale. Tornando al menu, la partita in corso viene abbandonata.
-- **Musica ed effetti sonori**: nell'intestazione ci sono due coppie di comandi indipendenti, valide sia nel menu iniziale sia durante la partita. Il pulsante **Musica** attiva o disattiva il sottofondo musicale e il cursore accanto ne regola il volume (0-100%). Il pulsante **Effetti** attiva o disattiva gli effetti sonori brevi (lancio dei dadi, carta mostrata, campanello all'ipotesi di un avversario, accusa sbagliata, apertura della busta) e il suo cursore ne regola il volume. Si può quindi tenere la musica e togliere gli effetti, o il contrario. Tutte le scelte vengono ricordate.
+- **Musica ed effetti sonori**: nel gruppo *Audio* della barra dei comandi ci sono due coppie di comandi indipendenti, valide sia nel menu iniziale sia durante la partita. Il pulsante **Musica** attiva o disattiva il sottofondo musicale e il cursore accanto ne regola il volume (0-100%). Il pulsante **Effetti** attiva o disattiva gli effetti sonori brevi (lancio dei dadi, carta mostrata, campanello all'ipotesi di un avversario, accusa sbagliata, apertura della busta) e il suo cursore ne regola il volume. Si può quindi tenere la musica e togliere gli effetti, o il contrario. Tutte le scelte vengono ricordate.
 - **Musica della vittoria**: quando **sei tu** a risolvere il caso, il sottofondo si interrompe e, all'apertura della busta, parte un valzer più allegro in stile vittoriano, che prosegue finché non inizi una nuova partita o torni al menu. Segue le impostazioni della musica: se la musica è spenta non si sente. Quando vince un avversario non cambia nulla. L'audio parte al primo clic o tasto premuto, perché i browser non permettono l'audio prima di un gesto dell'utente.
-- **Tutorial**: un percorso guidato di 16 passi. Evidenzia sul gioco vero ogni comando (tabellone, pedina, porte, elenco dei personaggi, dadi, ipotesi, accusa, passa turno, carte, busta, taccuino, registro, intestazione) con una breve spiegazione. Si avanza con **Avanti** (o freccia destra / Invio), si torna indietro con **Indietro** (o freccia sinistra) e si esce con **Esci** o **Esc**. Mentre è aperto la partita è in pausa; si può rivedere in qualsiasi momento dal pulsante **Tutorial** dell'intestazione.
-- **Regole** e **Istruzioni**: si consultano dall'intestazione in qualsiasi momento. Durante la partita il gioco si sospende finché il documento è aperto. Si chiude con il pulsante di chiusura, con **Esc** o con un clic fuori dalla finestra.
+- **Tutorial**: un percorso guidato di 16 passi. Evidenzia sul gioco vero ogni comando (tabellone, pedina, porte, elenco dei personaggi, dadi, ipotesi, accusa, passa turno, carte, busta, taccuino, registro, barra dei comandi) con una breve spiegazione. Si avanza con **Avanti** (o freccia destra / Invio), si torna indietro con **Indietro** (o freccia sinistra) e si esce con **Esci** o **Esc**. Mentre è aperto la partita è in pausa; si può rivedere in qualsiasi momento dal pulsante **Tutorial** della barra dei comandi.
+- **Salva e Apri**: i pulsanti **Salva** e **Apri** nel gruppo *Partita* della barra dei comandi permettono di spostare una partita su un altro computer. **Salva** scarica un file `.json` con tutto lo stato della partita (giocatori, carte, posizioni, armi, taccuino, registro, conoscenza dei computer, livello). **Apri** carica un file salvato e riprende da lì; se c'è una partita in corso, chiede conferma prima di sostituirla. Se salvi durante il tuo turno, la partita riprende esattamente da quel punto; se salvi durante il turno di un avversario, riprende dall'inizio di quel turno. Il file non contiene il gioco: sull'altro computer servono `index.html` e le immagini. Non si può salvare una partita già conclusa. Un file danneggiato o modificato in modo incoerente viene rifiutato con un messaggio.
+- **Regole** e **Istruzioni**: si consultano dalla barra dei comandi in qualsiasi momento. Durante la partita il gioco si sospende finché il documento è aperto. Si chiude con il pulsante di chiusura, con **Esc** o con un clic fuori dalla finestra.
 
 ## 9. Gli avversari e i livelli
 
@@ -819,7 +946,7 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
     </div>
 
     <script>
-        const VERSION = "v0.43";
+        const VERSION = "v0.45";
 
         const SUSPECTS = [
             { id: "Ambasciatore Ambra", color: "#f59e0b", initial: "A", spriteRow: 0, spriteCol: 0 },
@@ -1007,6 +1134,8 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
             bindCharCard();
             initCinema();
             initMusic();
+            initSaveLoad();
+            initLogBig();
             initSetupMemory();
             initDocs();
             initTour();
@@ -1339,8 +1468,8 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
                   text: 'Elenca movimenti, ipotesi, smentite e accuse. Anche sapere chi non ha potuto smentire è un\'informazione utile.' },
                 { center: true, title: 'I messaggi a video',
                   text: 'Le ipotesi degli avversari compaiono in un cartiglio al centro dello schermo; subito dopo, una pergamena più piccola dice chi ha mostrato una carta (o che nessuno ha potuto smentire). Ogni messaggio si chiude con Spazio, Esc o un clic, oppure da solo dopo 10 secondi.' },
-                { sel: '#hdr-controls', title: 'Regole, istruzioni, musica',
-                  text: 'Qui trovi le Regole e le Istruzioni complete, i pulsanti per attivare o spegnere separatamente la musica e gli effetti sonori, ciascuno con il proprio cursore del volume, il Tutorial (per rivederlo) e, in partita, la Pausa (Esc).' },
+                { sel: '#hdr-controls', title: 'Comandi esterni alla partita',
+                  text: 'In questa zona ci sono i comandi che non fanno parte della partita: Tutorial, Regole e Istruzioni; Musica ed Effetti sonori, accendibili e regolabili separatamente; Salva e Apri per salvare la partita in un file e riprenderla anche su un altro computer; e, in partita, la Pausa (Esc).' },
                 { center: true, title: 'Buona indagine',
                   text: 'Il tutorial è finito. Ora tocca a te. Ricorda che i computer accusano solo quando sono certi della soluzione, quindi vince chi deduce più in fretta.' }
             ];
@@ -2539,6 +2668,9 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
             hideCharCard();
             clearTimeout(botTimer);
             botTimer = null;
+            LOG_LINES = [];
+            if (typeof closeLogBig === 'function') closeLogBig();
+            { const nt = document.getElementById('notes-text'); if (nt) nt.value = ''; }
             if (typeof musicSetMode === 'function') musicSetMode('bg');
             gameState = {
                 myPlayer: null,
@@ -2575,6 +2707,7 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
             document.getElementById('btn-accusation').disabled = true;
             document.getElementById('btn-end-turn').disabled = true;
             document.getElementById('btn-roll-dice').disabled = false;
+            if (typeof updateSaveButton === 'function') updateSaveButton();
         }
 
         function returnToMenu() {
@@ -2670,6 +2803,8 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
             drawBoard();
             logEvent(`Partita ${VERSION} avviata. Livello dei bot: ${DIFFICULTY[gameState.difficulty].label}.`);
             updateTurnUI();
+            SAVE.snap = captureGame();
+            updateSaveButton();
             envelopeIntro();
 
             // Se il primo di turno è un bot, il suo turno deve partire da solo
@@ -3610,6 +3745,7 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
 
             if (suspect === sol.suspect && weapon === sol.weapon && room === sol.room) {
                 gameState.gameOver = true;
+                updateSaveButton();
                 clearTimeout(botTimer);
                 botTimer = null;
                 gameState.reachableCells = [];
@@ -3630,6 +3766,7 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
 
             if (!gameState.players.some(p => p.active)) {
                 gameState.gameOver = true;
+                updateSaveButton();
                 clearTimeout(botTimer);
                 botTimer = null;
                 disableAllActions();
@@ -3656,6 +3793,7 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
 
             updateTurnUI();
             drawBoard();
+            SAVE.snap = captureGame();      // punto di ripresa: inizio di questo turno
 
             const currPlayer = gameState.players[gameState.currentTurnIndex];
             if (currPlayer.isBot) botDelay(playBotTurn, 800);
@@ -3779,6 +3917,8 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
             if (gameState.gameOver || !gameState.players.length) return;
             const bot = gameState.players[gameState.currentTurnIndex];
             if (!bot || !bot.isBot || !bot.active) return;
+            // I bot non iniziano finché è in corso l'animazione iniziale della busta (altrimenti i messaggi si sovrapporrebbero)
+            if (REVEAL.intro) { botDelay(playBotTurn, 250); return; }
 
             if (botAccuseIfSolved(bot)) return;
 
@@ -3847,7 +3987,7 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
             document.getElementById('btn-accusation').disabled = !isMyTurn;
             document.getElementById('btn-end-turn').disabled = !isMyTurn;
 
-            if (canSuggestNow) {
+            if (canSuggestNow && !SAVE.restoring) {
                 logEvent(`ℹ️ Sei stato spostato in **${currentRoom.id}**: puoi formulare un'ipotesi senza muoverti.`);
             }
 
@@ -3896,7 +4036,7 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
 
         function createNotebookRow(label, key) {
             return `
-                <div class="flex justify-between items-center bg-slate-900 px-2.5 py-1.5 rounded cursor-pointer hover:bg-slate-700 transition" onclick="toggleNb('${key}')">
+                <div class="nb-row flex justify-between items-center px-2.5 py-1.5 rounded cursor-pointer" onclick="toggleNb('${key}')">
                     <span>${label}</span>
                     <span id="nb-${key.replace(/\s+/g, '-')}" class="font-bold text-amber-400">❓</span>
                 </div>
@@ -3919,6 +4059,21 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
             if (el) el.innerText = nxt;
         }
 
+        // Le tre carte del giocatore, disegnate come le carte della soluzione (tipo, immagine, nome).
+        // Se immagini e carattere non sono ancora pronti, le carte vengono ridisegnate appena lo sono.
+        const MYCARDS = { gen: 0 };
+        function myCardsDraw(container, me) {
+            container.innerHTML = "";
+            const order = { suspect: 0, weapon: 1, room: 2 };
+            const kindOf = c => SUSPECTS.some(x => x.id === c) ? 'suspect' : WEAPONS.some(x => x.id === c) ? 'weapon' : 'room';
+            [...me.cards].sort((x, y) => order[kindOf(x)] - order[kindOf(y)]).forEach(card => {
+                const wrap = document.createElement('div');
+                wrap.className = 'my-card';
+                wrap.title = card;
+                wrap.appendChild(revCardCanvas(kindOf(card), card));
+                container.appendChild(wrap);
+            });
+        }
         function renderMyCards() {
             const container = document.getElementById('my-cards-container');
             container.innerHTML = "";
@@ -3926,11 +4081,21 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
             if (!me) return;
 
             me.cards.forEach(card => {
-                container.innerHTML += `<span class="px-2 py-1 bg-amber-900/60 border border-amber-600 rounded text-xs text-amber-200">📜 ${card}</span>`;
                 gameState.notebook[card] = "❌";
                 const el = document.getElementById(`nb-${card.replace(/\s+/g, '-')}`);
                 if (el) el.innerText = "❌";
             });
+
+            if (!revDom() || typeof container.appendChild !== 'function') return;
+            const gen = ++MYCARDS.gen;
+            const draw = () => { if (gen === MYCARDS.gen) { try { myCardsDraw(container, me); } catch (err) { /* ignora */ } } };
+            draw();
+            // ridisegno quando tutte le immagini e il carattere sono pronti
+            const imgs = revImages();
+            const list = [imgs && imgs.carta, imgs && imgs.rooms, charsSpriteImage, weaponsSpriteImage]
+                .filter(i => i && typeof i.addEventListener === 'function' && !(i.complete && i.naturalWidth));
+            list.forEach(i => i.addEventListener('load', draw, { once: true }));
+            if (document.fonts && document.fonts.load) document.fonts.load('40px "Henny Penny"').then(draw, () => {});
         }
 
         function updateLegend() {
@@ -3944,7 +4109,7 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
                 
                 const row = document.createElement('div');
                 row.dataset.character = p.character;
-                row.className = `flex items-center gap-3 bg-slate-900 p-2 rounded-lg border ${isMe ? 'border-amber-500/50 bg-amber-950/20' : 'border-slate-800'} ${p.active ? '' : 'opacity-50'}`;
+                row.className = `prow flex items-center gap-3 p-2 rounded-lg ${isMe ? 'me' : ''} ${p.active ? '' : 'opacity-50'}`;
 
                 const iconCanvas = document.createElement('canvas');
                 iconCanvas.width = 32;
@@ -4001,11 +4166,278 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
             return (c && c.female) ? 'a' : 'o';
         }
 
+        // ---------- Salvataggio e apertura della partita (file JSON) ----------
+        // Il file contiene tutto lo stato della partita: giocatori, carte, posizioni, conoscenza dei bot, armi, taccuino,
+        // registro, livello. Se si salva durante il proprio turno, la partita riprende esattamente da lì; durante il turno di
+        // un avversario si salva all'inizio di quel turno (il turno del bot ricomincia da capo).
+        const SAVE = { snap: null, restoring: false, FORMAT: 'giallo-alla-tenuta-salvataggio', VERSION: 1, MAX_BYTES: 2000000 };
+
+        function allCardIds() { return [...SUSPECTS.map(x => x.id), ...WEAPONS.map(x => x.id), ...ROOMS.map(x => x.id)]; }
+
+        function captureGame() {
+            const g = gameState;
+            const kbOut = kb => ({
+                held: Object.assign({}, kb.held),
+                noHold: Object.fromEntries(Object.entries(kb.noHold).map(([k, v]) => [k, [...v]])),
+                constraints: kb.constraints.map(c => ({ holder: c.holder, cards: [...c.cards] })),
+                handSize: Object.assign({}, kb.handSize),
+                asked: [...kb.asked]
+            });
+            const btn = id => { const e = document.getElementById(id); return !!(e && e.disabled); };
+            const pass = document.getElementById('btn-secret-passage');
+            return {
+                format: SAVE.FORMAT, version: SAVE.VERSION, game: VERSION,
+                difficulty: g.difficulty, myCharacter: g.myPlayer ? g.myPlayer.character : null,
+                currentTurnIndex: g.currentTurnIndex, diceRoll: g.diceRoll, hasMoved: !!g.hasMoved,
+                reachableCells: g.reachableCells.map(c => ({ x: c.x, y: c.y })),
+                solution: Object.assign({}, g.solution),
+                players: g.players.map(p => ({
+                    character: p.character, x: p.x, y: p.y, cards: [...p.cards], isBot: !!p.isBot, active: !!p.active,
+                    canSuggestHere: !!p.canSuggestHere, kb: p.kb ? kbOut(p.kb) : null
+                })),
+                weapons: WEAPONS.map(w => ({ id: w.id, currentRoom: w.currentRoom, tile: w.tile ? { x: w.tile.x, y: w.tile.y } : null })),
+                notebook: Object.assign({}, g.notebook),
+                notes: String((document.getElementById('notes-text') || {}).value || ''),
+                log: LOG_LINES.slice(),
+                ui: {
+                    roll: btn('btn-roll-dice'), hypo: btn('btn-hypothesis'), acc: btn('btn-accusation'), end: btn('btn-end-turn'),
+                    passHidden: !!(!pass || pass.classList.contains('hidden')), passText: (pass && !pass.classList.contains('hidden')) ? String(pass.innerText || '').trim() : '',
+                    dice: String(document.getElementById('dice-result').innerText || '-')
+                }
+            };
+        }
+
+        // Controlla un file letto: restituisce un messaggio d'errore oppure null se è valido
+        function validateSave(o) {
+            const isInt = (n, a, b) => Number.isInteger(n) && n >= a && n <= b;
+            const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
+            if (!isObj(o) || o.format !== SAVE.FORMAT) return 'Il file non è un salvataggio di Giallo alla Tenuta.';
+            if (o.version !== SAVE.VERSION) return 'Versione del salvataggio non supportata.';
+            const ids = allCardIds(), idSet = new Set(ids);
+            const chars = SUSPECTS.map(x => x.id);
+            if (typeof o.difficulty !== 'string' || !Object.prototype.hasOwnProperty.call(DIFFICULTY, o.difficulty)) return 'Livello di difficoltà non valido.';
+            if (!Array.isArray(o.players) || o.players.length !== chars.length) return 'Elenco dei giocatori non valido.';
+            const seenChars = new Set(), seenCards = new Set();
+            let humans = 0;
+            for (const p of o.players) {
+                if (!isObj(p) || !chars.includes(p.character) || seenChars.has(p.character)) return 'Personaggi non validi.';
+                seenChars.add(p.character);
+                if (!isInt(p.x, 0, GRID_SIZE - 1) || !isInt(p.y, 0, GRID_SIZE - 1)) return 'Posizione di una pedina non valida.';
+                if (!(isValidTile(p.x, p.y) || getCurrentRoom(p.x, p.y))) return 'Posizione di una pedina non valida.';
+                if (!Array.isArray(p.cards) || p.cards.length > 18) return 'Carte non valide.';
+                for (const c of p.cards) { if (!idSet.has(c) || seenCards.has(c)) return 'Carte non valide o duplicate.'; seenCards.add(c); }
+                if (typeof p.isBot !== 'boolean' || typeof p.active !== 'boolean' || typeof p.canSuggestHere !== 'boolean') return 'Dati di un giocatore non validi.';
+                if (!p.isBot) humans++;
+            }
+            if (humans !== 1) return 'Deve esserci esattamente un giocatore umano.';
+            if (!isObj(o.solution)) return 'Soluzione non valida.';
+            const sol = o.solution;
+            if (!SUSPECTS.some(x => x.id === sol.suspect) || !WEAPONS.some(x => x.id === sol.weapon) || !ROOMS.some(x => x.id === sol.room)) return 'Soluzione non valida.';
+            for (const c of [sol.suspect, sol.weapon, sol.room]) { if (seenCards.has(c)) return 'Soluzione incoerente con le carte dei giocatori.'; seenCards.add(c); }
+            if (seenCards.size !== ids.length) return 'Le carte non sono tutte e sole le 21 del gioco.';
+            const human = o.players.find(p => !p.isBot);
+            if (o.myCharacter !== human.character) return 'Personaggio del giocatore incoerente.';
+            if (!isInt(o.currentTurnIndex, 0, o.players.length - 1) || !o.players[o.currentTurnIndex].active) return 'Turno corrente non valido.';
+            if (!o.players.some(p => p.active)) return 'Nessun giocatore attivo.';
+            if (!isInt(o.diceRoll, 0, 12) || typeof o.hasMoved !== 'boolean') return 'Dati del turno non validi.';
+            if (!Array.isArray(o.reachableCells) || o.reachableCells.length > GRID_SIZE * GRID_SIZE ||
+                !o.reachableCells.every(c => isObj(c) && isInt(c.x, 0, GRID_SIZE - 1) && isInt(c.y, 0, GRID_SIZE - 1))) return 'Caselle raggiungibili non valide.';
+            if (!Array.isArray(o.weapons) || o.weapons.length !== WEAPONS.length) return 'Armi non valide.';
+            const seenW = new Set();
+            for (const w of o.weapons) {
+                const def = isObj(w) && WEAPONS.find(x => x.id === w.id);
+                const room = def && ROOMS.find(r => r.id === w.currentRoom);
+                if (!def || seenW.has(w.id) || !room) return 'Armi non valide.';
+                seenW.add(w.id);
+                if (!isObj(w.tile) || !room.tiles.some(t => t.x === w.tile.x && t.y === w.tile.y)) return 'Posizione di un\'arma non valida.';
+            }
+            if (!isObj(o.notebook) || !Object.entries(o.notebook).every(([k, v]) => idSet.has(k) && ['❓', '❌', '✔️'].includes(v))) return 'Taccuino non valido.';
+            if (o.notes !== undefined && (typeof o.notes !== 'string' || o.notes.length > 10000)) return 'Note non valide.';
+            if (!Array.isArray(o.log) || o.log.length > 700 || !o.log.every(l => typeof l === 'string' && l.length < 1000)) return 'Registro non valido.';
+            if (!isObj(o.ui) || !['roll', 'hypo', 'acc', 'end', 'passHidden'].every(k => typeof o.ui[k] === 'boolean') ||
+                typeof o.ui.passText !== 'string' || typeof o.ui.dice !== 'string' || o.ui.passText.length > 80 || o.ui.dice.length > 20) return 'Stato dei comandi non valido.';
+            // conoscenza dei bot
+            for (const p of o.players) {
+                if (p.isBot) {
+                    const kb = p.kb;
+                    if (!isObj(kb) || !isObj(kb.held) || !isObj(kb.noHold) || !Array.isArray(kb.constraints) || !isObj(kb.handSize) || !Array.isArray(kb.asked)) return 'Conoscenza di un bot non valida.';
+                    if (!Object.entries(kb.held).every(([c, h]) => idSet.has(c) && chars.includes(h))) return 'Conoscenza di un bot non valida.';
+                    if (!chars.every(ch => Array.isArray(kb.noHold[ch]) && kb.noHold[ch].every(c => idSet.has(c)))) return 'Conoscenza di un bot non valida.';
+                    if (!chars.every(ch => isInt(kb.handSize[ch], 0, 18))) return 'Conoscenza di un bot non valida.';
+                    if (!kb.constraints.every(c => isObj(c) && chars.includes(c.holder) && Array.isArray(c.cards) && c.cards.length > 0 && c.cards.every(x => idSet.has(x)))) return 'Conoscenza di un bot non valida.';
+                    if (kb.asked.length > 2000 || !kb.asked.every(a => typeof a === 'string' && a.length < 120)) return 'Conoscenza di un bot non valida.';
+                } else if (p.kb !== null && p.kb !== undefined) return 'Dati di un giocatore non validi.';
+            }
+            return null;
+        }
+
+        // Ripristina la partita da un salvataggio già validato
+        function applySave(o) {
+            SAVE.restoring = true;
+            try {
+                resetFullGameState();
+                gameState.difficulty = o.difficulty;
+                gameState.myPlayer = { character: o.myCharacter };
+                populateSelects();
+                CARDS_BY_CAT = { suspect: SUSPECTS.map(x => x.id), weapon: WEAPONS.map(x => x.id), room: ROOMS.map(x => x.id) };
+                gameState.solution = { suspect: o.solution.suspect, weapon: o.solution.weapon, room: o.solution.room };
+                gameState.players = o.players.map(sp => {
+                    const def = SUSPECTS.find(x => x.id === sp.character);
+                    const p = {
+                        name: def.id, character: def.id, color: def.color, initial: def.initial, spriteRow: def.spriteRow, spriteCol: def.spriteCol,
+                        x: sp.x, y: sp.y, cards: [...sp.cards], isBot: sp.isBot, active: sp.active, canSuggestHere: sp.canSuggestHere
+                    };
+                    if (sp.isBot) {
+                        const k = sp.kb;
+                        p.kb = {
+                            held: Object.assign({}, k.held),
+                            noHold: Object.fromEntries(Object.entries(k.noHold).map(([ch, v]) => [ch, new Set(v)])),
+                            constraints: k.constraints.map(c => ({ holder: c.holder, cards: [...c.cards] })),
+                            handSize: Object.assign({}, k.handSize),
+                            asked: new Set(k.asked)
+                        };
+                    }
+                    return p;
+                });
+                o.weapons.forEach(sw => { const w = WEAPONS.find(x => x.id === sw.id); w.currentRoom = sw.currentRoom; w.tile = { x: sw.tile.x, y: sw.tile.y }; });
+                initNotebook();
+                Object.entries(o.notebook).forEach(([c, v]) => markNotebook(c, v));
+                { const nt = document.getElementById('notes-text'); if (nt) nt.value = o.notes || ''; }
+
+                document.getElementById('setup-screen').classList.add('hidden');
+                if (typeof cinemaStop === 'function') cinemaStop();
+                document.getElementById('game-screen').classList.remove('hidden');
+                document.getElementById('btn-pause-header').classList.remove('hidden');
+                document.getElementById('display-your-char').innerText = o.myCharacter;
+                updateLegend();
+                renderMyCards();
+                o.log.forEach(l => logEvent(l));
+                logEvent(`💾 Partita caricata (livello dei bot: ${DIFFICULTY[o.difficulty].label}).`);
+                gameState.currentTurnIndex = o.currentTurnIndex;
+                gameState.diceRoll = o.diceRoll;
+                gameState.hasMoved = o.hasMoved;
+                gameState.reachableCells = o.reachableCells.map(c => ({ x: c.x, y: c.y }));
+                updateTurnUI();
+                const cur = gameState.players[gameState.currentTurnIndex];
+                if (!cur.isBot) {
+                    // stato dei pulsanti come al momento del salvataggio
+                    const set = (id, v) => { document.getElementById(id).disabled = v; };
+                    set('btn-roll-dice', o.ui.roll); set('btn-hypothesis', o.ui.hypo); set('btn-accusation', o.ui.acc); set('btn-end-turn', o.ui.end);
+                    const pass = document.getElementById('btn-secret-passage');
+                    pass.classList.toggle('hidden', o.ui.passHidden);
+                    if (!o.ui.passHidden && o.ui.passText) pass.innerText = o.ui.passText;
+                    document.getElementById('dice-result').innerText = o.ui.dice;
+                }
+                const slot = document.getElementById('case-envelope-img');
+                if (slot) { slot.src = 'busta_chiusa.jpg'; if (slot.style) slot.style.visibility = 'visible'; }
+                drawBoard();
+                SAVE.snap = captureGame();
+                if (cur.isBot) botDelay(playBotTurn, 800);
+            } finally {
+                SAVE.restoring = false;
+                updateSaveButton();
+            }
+        }
+
+        function showNotice(title, text) {
+            showCartouche([{ cls: 'bm-who', text: title }, { cls: 'bm-what', text }], null, true);
+        }
+
+        function updateSaveButton() {
+            const b = document.getElementById('btn-save');
+            if (!b || typeof b.setAttribute !== 'function') return;
+            const can = !!(gameState.players && gameState.players.length && !gameState.gameOver);
+            b.disabled = !can;
+            b.title = can ? 'Salva la partita in un file' : 'Salva la partita in un file (disponibile durante una partita)';
+        }
+
+        function saveGameToFile() {
+            if (!gameState.players.length || gameState.gameOver) return;
+            const cur = gameState.players[gameState.currentTurnIndex];
+            const live = !!(cur && !cur.isBot && cur.active && !BOT_MESSAGE.visible && !REVEAL.open);
+            const data = live ? captureGame() : (SAVE.snap || captureGame());
+            data.savedAt = new Date().toISOString();
+            data.notes = String((document.getElementById('notes-text') || {}).value || '');   // le note sono sempre quelle attuali
+            const when = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            const name = `giallo-alla-tenuta_${data.myCharacter.split(' ').pop().toLowerCase()}_${when.getFullYear()}${pad(when.getMonth() + 1)}${pad(when.getDate())}-${pad(when.getHours())}${pad(when.getMinutes())}.json`;
+            const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = name;
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+            const turnOf = data.players[data.currentTurnIndex].character;
+            showNotice('Partita salvata', live ? name : `All'inizio del turno di ${turnOf}`);
+        }
+
+        function loadGameText(text) {
+            let o;
+            try { o = JSON.parse(text); } catch (err) { showNotice('Salvataggio non valido', 'Il file non contiene dati leggibili.'); return false; }
+            const err = validateSave(o);
+            if (err) { showNotice('Salvataggio non valido', err); return false; }
+            const running = !document.getElementById('game-screen').classList.contains('hidden') && !gameState.gameOver;
+            if (running && typeof confirm === 'function' && !confirm('Aprire un salvataggio sostituisce la partita in corso. Continuare?')) return false;
+            if (typeof releaseWelcomeLock === 'function') releaseWelcomeLock();
+            applySave(o);
+            return true;
+        }
+
+        function initSaveLoad() {
+            const bs = document.getElementById('btn-save'), bl = document.getElementById('btn-load'), fi = document.getElementById('file-load');
+            if (!bs || typeof bs.addEventListener !== 'function') return;
+            bs.addEventListener('click', saveGameToFile);
+            bl.addEventListener('click', () => fi.click());
+            fi.addEventListener('change', () => {
+                const f = fi.files && fi.files[0];
+                if (!f) return;
+                if (f.size > SAVE.MAX_BYTES) { showNotice('Salvataggio non valido', 'Il file è troppo grande.'); fi.value = ''; return; }
+                f.text().then(t => { loadGameText(t); fi.value = ''; }, () => { showNotice('Salvataggio non valido', 'Impossibile leggere il file.'); fi.value = ''; });
+            });
+            updateSaveButton();
+        }
+
+        // ---------- Registro eventi ingrandito ----------
+        const LOGBIG = { open: false };
+        function logBigSync() {
+            const big = document.getElementById('log-big'), l = document.getElementById('game-log');
+            const atEnd = big.scrollHeight - big.scrollTop - big.clientHeight < 40;
+            big.innerHTML = l.innerHTML;
+            if (atEnd) big.scrollTop = big.scrollHeight;
+        }
+        function openLogBig() {
+            LOGBIG.open = true;
+            document.getElementById('log-modal').classList.add('open');
+            logBigSync();
+            document.getElementById('log-big').scrollTop = document.getElementById('log-big').scrollHeight;
+        }
+        function closeLogBig() {
+            LOGBIG.open = false;
+            document.getElementById('log-modal').classList.remove('open');
+        }
+        function initLogBig() {
+            const b = document.getElementById('btn-log-expand');
+            if (!b || typeof b.addEventListener !== 'function') return;
+            b.addEventListener('click', openLogBig);
+            document.getElementById('log-close').addEventListener('click', closeLogBig);
+            document.getElementById('log-modal').addEventListener('click', (e) => { if (e.target.id === 'log-modal') closeLogBig(); });
+            window.addEventListener('keydown', (e) => {
+                if (LOGBIG.open && !BOT_MESSAGE.visible && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeLogBig(); }
+            }, true);
+        }
+
+        // Il registro è anche conservato come elenco di righe (per il salvataggio della partita)
+        let LOG_LINES = [];
         function logEvent(t) {
             const l = document.getElementById('game-log');
-            const html = String(t).replace(/\*\*(.+?)\*\*/g, '<strong class="text-slate-50 font-semibold">$1</strong>');
-            l.innerHTML += `<p class="border-b border-slate-800 pb-1">${html}</p>`;
+            const raw = String(t);
+            LOG_LINES.push(raw);
+            if (LOG_LINES.length > 600) LOG_LINES.shift();
+            const html = raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/\*\*(.+?)\*\*/g, '<strong class="text-slate-50 font-semibold">$1</strong>');
+            l.innerHTML += `<p class="log-line pb-1">${html}</p>`;
             l.scrollTop = l.scrollHeight;
+            if (typeof LOGBIG !== 'undefined' && LOGBIG.open) logBigSync();
         }
 
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
