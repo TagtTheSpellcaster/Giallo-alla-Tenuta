@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giallo alla Tenuta - v0.42</title>
+    <title>Giallo alla Tenuta - v0.43</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -239,7 +239,7 @@
     <header class="w-full max-w-5xl flex justify-between items-center py-4 mb-4 border-b border-slate-700">
         <div>
             <h1 class="text-4xl font-extrabold tracking-wider text-amber-500 flex items-center gap-2 font-henny">
-                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.42</span>
+                🕵️ GIALLO ALLA TENUTA <span class="text-xs px-2 py-0.5 bg-amber-900/60 border border-amber-600 rounded text-amber-300 font-mono font-normal">v0.43</span>
             </h1>
         </div>
         <div id="hdr-controls" class="flex items-center gap-2 flex-wrap justify-end">
@@ -247,9 +247,13 @@
         <button id="btn-doc-rules" type="button" class="hdr-btn" title="Regole del gioco"><span>📜</span><span class="hidden sm:inline">Regole</span></button>
         <button id="btn-doc-help" type="button" class="hdr-btn" title="Istruzioni di gioco"><span>📖</span><span class="hidden sm:inline">Istruzioni</span></button>
         <button id="btn-music" type="button" title="Musica di sottofondo" aria-pressed="true" class="hdr-btn">
-            <span id="btn-music-icon">🔊</span><span class="hidden sm:inline">Musica</span>
+            <span id="btn-music-icon">🎵</span><span class="hidden sm:inline">Musica</span>
         </button>
-        <input id="music-volume" type="range" min="0" max="100" step="5" value="100" class="vol-range" aria-label="Volume" title="Volume (musica ed effetti)">
+        <input id="music-volume" type="range" min="0" max="100" step="5" value="100" class="vol-range" aria-label="Volume della musica" title="Volume della musica">
+        <button id="btn-sfx" type="button" title="Effetti sonori" aria-pressed="true" class="hdr-btn">
+            <span id="btn-sfx-icon">🔔</span><span class="hidden sm:inline">Effetti</span>
+        </button>
+        <input id="sfx-volume" type="range" min="0" max="100" step="5" value="100" class="vol-range" aria-label="Volume degli effetti sonori" title="Volume degli effetti sonori">
         <button id="btn-pause-header" class="hidden hdr-btn">
             ⏸️ Pausa / Menu (ESC)
         </button>
@@ -431,7 +435,7 @@
     <div id="modal-pause" class="hidden fixed inset-0 modal flex justify-center items-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-600 rounded-xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
             <h3 class="text-2xl font-bold text-amber-500 font-henny">⏸️ GIOCO IN PAUSA</h3>
-            <p class="text-xs text-slate-400">Versione v0.42</p>
+            <p class="text-xs text-slate-400">Versione v0.43</p>
             <div class="space-y-3 pt-2">
                 <button id="btn-resume-game" class="w-full py-3 bg-green-600 hover:bg-green-500 font-bold rounded-lg transition text-white">
                     ▶️ Riprendi Partita
@@ -519,7 +523,7 @@
     </div>
     <script type="text/markdown" id="doc-md-regole"># Giallo alla Tenuta — Regole del gioco
 
-Versione del gioco: v0.42. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
+Versione del gioco: v0.43. Gioco in stile Cluedo, per un giocatore umano contro 5 avversari controllati dal computer (bot). Per i comandi e l'uso dell'interfaccia vedi il documento *Istruzioni di gioco*.
 
 ## Il caso
 
@@ -778,7 +782,8 @@ Le tue carte sono segnate in automatico con ❌, così come le carte che ti veng
 ## 8. Pausa, menu, musica
 
 - **Pausa / Menu (ESC)**: in partita sospende il gioco dei computer. Dal menu di pausa puoi riprendere o tornare al menu principale. Tornando al menu, la partita in corso viene abbandonata.
-- **Musica e volume**: il pulsante con l'altoparlante nell'intestazione attiva o disattiva l'audio, sia nel menu iniziale sia durante la partita; il cursore accanto regola il volume (0-100%). Il volume vale per la musica e per gli effetti sonori brevi (lancio dei dadi, carta mostrata, campanello all'ipotesi di un avversario, accusa sbagliata, apertura della busta). Le due scelte vengono ricordate. L'audio parte al primo clic o tasto premuto, perché i browser non permettono l'audio prima di un gesto dell'utente.
+- **Musica ed effetti sonori**: nell'intestazione ci sono due coppie di comandi indipendenti, valide sia nel menu iniziale sia durante la partita. Il pulsante **Musica** attiva o disattiva il sottofondo musicale e il cursore accanto ne regola il volume (0-100%). Il pulsante **Effetti** attiva o disattiva gli effetti sonori brevi (lancio dei dadi, carta mostrata, campanello all'ipotesi di un avversario, accusa sbagliata, apertura della busta) e il suo cursore ne regola il volume. Si può quindi tenere la musica e togliere gli effetti, o il contrario. Tutte le scelte vengono ricordate.
+- **Musica della vittoria**: quando **sei tu** a risolvere il caso, il sottofondo si interrompe e, all'apertura della busta, parte un valzer più allegro in stile vittoriano, che prosegue finché non inizi una nuova partita o torni al menu. Segue le impostazioni della musica: se la musica è spenta non si sente. Quando vince un avversario non cambia nulla. L'audio parte al primo clic o tasto premuto, perché i browser non permettono l'audio prima di un gesto dell'utente.
 - **Tutorial**: un percorso guidato di 16 passi. Evidenzia sul gioco vero ogni comando (tabellone, pedina, porte, elenco dei personaggi, dadi, ipotesi, accusa, passa turno, carte, busta, taccuino, registro, intestazione) con una breve spiegazione. Si avanza con **Avanti** (o freccia destra / Invio), si torna indietro con **Indietro** (o freccia sinistra) e si esce con **Esci** o **Esc**. Mentre è aperto la partita è in pausa; si può rivedere in qualsiasi momento dal pulsante **Tutorial** dell'intestazione.
 - **Regole** e **Istruzioni**: si consultano dall'intestazione in qualsiasi momento. Durante la partita il gioco si sospende finché il documento è aperto. Si chiude con il pulsante di chiusura, con **Esc** o con un clic fuori dalla finestra.
 
@@ -814,7 +819,7 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
     </div>
 
     <script>
-        const VERSION = "v0.42";
+        const VERSION = "v0.43";
 
         const SUSPECTS = [
             { id: "Ambasciatore Ambra", color: "#f59e0b", initial: "A", spriteRow: 0, spriteCol: 0 },
@@ -1161,6 +1166,8 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
 
         // kind: 'won' | 'unsolved'
         function showSolutionReveal(kind, winnerName, sol, winnerIsHuman) {
+            // Vittoria del giocatore: il sottofondo si interrompe subito; il tema della vittoria parte all'apertura della busta
+            if (kind === 'won' && winnerIsHuman) musicSetMode('silent');
             REVEAL.last = { kind, winner: winnerName, sol: { suspect: sol.suspect, weapon: sol.weapon, room: sol.room } };
             try { revealBuild(kind, winnerName, sol, winnerIsHuman); } catch (err) { REVEAL.last.error = String(err); }
         }
@@ -1219,7 +1226,12 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
             revLater(() => {                 // la busta va al centro
                 Object.assign(env.style, { left: (vw - envW) / 2 + 'px', top: (vh * 0.54 - envH / 2) + 'px', width: envW + 'px' });
             }, 500 * T);
-            revLater(() => { env.classList.add('opened', 'wiggle'); sfx('reveal'); }, 1750 * T);
+            revLater(() => {
+                env.classList.add('opened', 'wiggle');
+                const vic = kind === 'won' && winnerIsHuman;
+                if (vic) musicSetMode('victory');
+                if (!(vic && MUSIC.enabled)) sfx('reveal');
+            }, 1750 * T);
             revLater(() => {                 // la busta scende, le carte escono una alla volta
                 Object.assign(env.style, { top: (vh - envH * 0.42) + 'px', opacity: '0.95' });
             }, 2700 * T);
@@ -1233,6 +1245,8 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
             if (!REVEAL.open) return;
             REVEAL.open = false;
             REVEAL.timers.forEach(clearTimeout); REVEAL.timers = [];
+            // chiusa prima dell'apertura della busta: il tema della vittoria parte comunque
+            if (MUSIC.mode === 'silent') musicSetMode('victory');
             const root = document.getElementById('reveal');
             if (root && root.classList) { root.classList.remove('show'); root.classList.remove('open'); root.innerHTML = ''; }
             const slot = document.getElementById('case-envelope-img');
@@ -1326,7 +1340,7 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
                 { center: true, title: 'I messaggi a video',
                   text: 'Le ipotesi degli avversari compaiono in un cartiglio al centro dello schermo; subito dopo, una pergamena più piccola dice chi ha mostrato una carta (o che nessuno ha potuto smentire). Ogni messaggio si chiude con Spazio, Esc o un clic, oppure da solo dopo 10 secondi.' },
                 { sel: '#hdr-controls', title: 'Regole, istruzioni, musica',
-                  text: 'Qui trovi le Regole e le Istruzioni complete, il pulsante per spegnere la musica con il cursore del volume (vale anche per gli effetti sonori), il Tutorial (per rivederlo) e, in partita, la Pausa (Esc).' },
+                  text: 'Qui trovi le Regole e le Istruzioni complete, i pulsanti per attivare o spegnere separatamente la musica e gli effetti sonori, ciascuno con il proprio cursore del volume, il Tutorial (per rivederlo) e, in partita, la Pausa (Esc).' },
                 { center: true, title: 'Buona indagine',
                   text: 'Il tutorial è finito. Ora tocca a te. Ricorda che i computer accusano solo quando sono certi della soluzione, quindi vince chi deduce più in fretta.' }
             ];
@@ -1603,10 +1617,14 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
         const MUSIC = {
             bpm: 66, level: 0.7, ctx: null, bus: null, timer: null, next: 0, bar: 0,
             enabled: true, started: false, hooked: false,
-            volume: 1,            // cursore del volume (0-1): scala la musica e gli effetti sonori
-            sfxGain: null
+            volume: 1,            // volume della musica (0-1)
+            mode: 'bg',           // 'bg' sottofondo, 'victory' tema della vittoria del giocatore, 'silent' nessuna musica
+            vbus: null, vnext: 0, vbar: 0, sfxGain: null
         };
+        // Effetti sonori: attivazione e volume indipendenti da quelli della musica
+        const SFXS = { enabled: true, volume: 1 };
         const SFX_LEVEL = 0.8;     // livello degli effetti rispetto al volume massimo
+        const VICTORY_LEVEL = 1.3; // livello del tema della vittoria rispetto al volume massimo
         const MUSIC_CHORDS = [
             { bass: 38, pad: [50, 53, 57],     arp: [62, 65, 69, 74] },   // Dm
             { bass: 46, pad: [53, 58, 62],     arp: [58, 62, 65, 70] },   // Bb
@@ -1714,11 +1732,19 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
         }
 
         function musicPump() {
-            if (!MUSIC.ctx) return;
-            const barDur = 60 / MUSIC.bpm * 4;
-            while (MUSIC.next < MUSIC.ctx.currentTime + 2.5) {
-                musicScheduleBar(MUSIC.ctx, MUSIC.bus, MUSIC.next, MUSIC.bar % 16);
-                MUSIC.next += barDur; MUSIC.bar++;
+            if (!MUSIC.ctx || !MUSIC.enabled) return;
+            if (MUSIC.mode === 'bg') {
+                const barDur = 60 / MUSIC.bpm * 4;
+                while (MUSIC.next < MUSIC.ctx.currentTime + 2.5) {
+                    musicScheduleBar(MUSIC.ctx, MUSIC.bus, MUSIC.next, MUSIC.bar % 16);
+                    MUSIC.next += barDur; MUSIC.bar++;
+                }
+            } else if (MUSIC.mode === 'victory') {
+                const barDur = 60 / VICTORY_BPM * 3;
+                while (MUSIC.vnext < MUSIC.ctx.currentTime + 2.5) {
+                    victoryScheduleBar(MUSIC.ctx, MUSIC.vbus, MUSIC.vnext, MUSIC.vbar % 16, MUSIC.vbar);
+                    MUSIC.vnext += barDur; MUSIC.vbar++;
+                }
             }
         }
 
@@ -1786,40 +1812,86 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
                 sfxTone(ctx, dest, 'sine', 1250, t, 0.08, 0.2, { attack: 0.002 });
             }
         }
-        function sfx(name) {
+        // ---------- Tema della vittoria (solo quando vince il giocatore umano) ----------
+        // Valzer vittoriano in re maggiore, 3/4 a 108 BPM, 16 battute in ciclo (circa 27 s): carillon (melodia), clavicembalo
+        // (raddoppio dal secondo giro), accompagnamento "uno-due-tre" a pizzico, archi leggeri. L'atmosfera di mistero resta
+        // nelle dominanti secondarie (A7, F#7, B7), nel cromatismo del Mi# e nel riverbero.
+        const VICTORY_BPM = 108;
+        const VICTORY_BARS = [
+            { b: 38, c: [57, 62, 66], m: [[0,78,1],[1,81,1],[2,78,1]] },                 // D
+            { b: 45, c: [55, 61, 64], m: [[0,76,1.5],[1.5,73,0.5],[2,76,1]] },           // A7
+            { b: 38, c: [57, 62, 66], m: [[0,78,1],[1,81,1],[2,86,1]] },                 // D
+            { b: 45, c: [55, 61, 64], m: [[0,85,2],[2,81,1]] },                          // A7
+            { b: 47, c: [59, 62, 66], m: [[0,83,1],[1,81,1],[2,78,1]] },                 // Bm
+            { b: 42, c: [58, 61, 64], m: [[0,77,1.5],[1.5,78,0.5],[2,81,1]] },           // F#7 (Mi# di passaggio)
+            { b: 47, c: [59, 62, 66], m: [[0,83,1],[1,78,1],[2,74,1]] },                 // Bm
+            { b: 45, c: [55, 61, 64], m: [[0,76,2],[2,73,1]] },                          // A7 (semicadenza)
+            { b: 43, c: [59, 62, 67], m: [[0,79,1],[1,83,1],[2,86,1]] },                 // G
+            { b: 42, c: [57, 62, 66], m: [[0,85,1.5],[1.5,83,0.5],[2,81,1]] },           // D/F#
+            { b: 40, c: [55, 59, 64], m: [[0,79,1],[1,83,1],[2,79,1]] },                 // Em
+            { b: 45, c: [55, 61, 64], m: [[0,81,1.5],[1.5,79,0.5],[2,76,1]] },           // A7
+            { b: 38, c: [57, 62, 66], m: [[0,78,1],[1,81,1],[2,86,1]] },                 // D
+            { b: 47, c: [57, 63, 66], m: [[0,87,1.5],[1.5,85,0.5],[2,83,1]] },           // B7
+            { b: 40, c: [55, 59, 64], c2: [55, 61, 64], m: [[0,83,1],[1,81,1],[2,85,1]] }, // Em - A7
+            { b: 38, c: [57, 62, 66], m: [[0,86,3]] }                                    // D
+        ];
+
+        function victoryScheduleBar(ctx, bus, t, barIndex, absBar) {
+            const beat = 60 / VICTORY_BPM, barDur = beat * 3;
+            const bar = VICTORY_BARS[barIndex], second = Math.floor(absBar / 16) % 2 === 1;
+            // basso sulla prima pulsazione, accordi a pizzico sulla seconda e sulla terza
+            musicNote(ctx, bus, 'sine', midiHz(bar.b), t, beat * 2.2, 0.2, { pluck: true, attack: 0.012, reverb: 0.2 });
+            [1, 2].forEach(k => {
+                const ch = (k === 2 && bar.c2) ? bar.c2 : bar.c;
+                ch.forEach((m, i) => musicNote(ctx, bus, 'triangle', midiHz(m), t + k * beat + i * 0.012, beat * 0.9, 0.05,
+                    { pluck: true, attack: 0.006, reverb: 0.3 }));
+            });
+            // archi leggeri
+            bar.c.forEach(m => [-6, 6].forEach(dt => musicNote(ctx, bus, 'sawtooth', midiHz(m + 12), t, barDur + 0.6, 0.007,
+                { attack: 0.5, release: 0.7, detune: dt, lp: 900, reverb: 0.5 })));
+            // melodia: carillon; dal secondo giro raddoppiata da un clavicembalo
+            bar.m.forEach(([bt, m, d]) => {
+                const tt = t + bt * beat, dd = d * beat;
+                musicNote(ctx, bus, 'sine', midiHz(m), tt, 0.9 + dd * 0.5, 0.11, { pluck: true, attack: 0.004, reverb: 0.5, echo: 0.3 });
+                musicNote(ctx, bus, 'triangle', midiHz(m) * 2, tt, 0.5 + dd * 0.2, 0.025, { pluck: true, attack: 0.004, reverb: 0.5 });
+                if (second) musicNote(ctx, bus, 'sawtooth', midiHz(m - 12), tt, 0.45 + dd * 0.15, 0.03, { pluck: true, attack: 0.004, lp: 2200, reverb: 0.3 });
+            });
+            // all'inizio un breve arpeggio di campanelli
+            if (absBar === 0) [62, 66, 69, 74, 78, 81].forEach((m, i) =>
+                musicNote(ctx, bus, 'sine', midiHz(m + 12), t + i * 0.09, 1.6, 0.07, { pluck: true, attack: 0.003, reverb: 0.7, echo: 0.4 }));
+        }
+
+        // Applica ai bus i livelli dovuti a modalità, attivazione e volumi. tc = costante di tempo della dissolvenza.
+        function audioApplyGains(tc) {
             const c = MUSIC.ctx;
-            if (!MUSIC.enabled || !c || c.state !== 'running' || MUSIC.volume <= 0) return;
+            if (!c || !MUSIC.bus) return;
+            const now = c.currentTime, on = MUSIC.enabled;
             try {
-                if (!MUSIC.sfxGain) {
-                    MUSIC.sfxGain = c.createGain();
-                    MUSIC.sfxGain.gain.value = SFX_LEVEL * MUSIC.volume;
-                    MUSIC.sfxGain.connect(c.destination);
+                MUSIC.bus.master.gain.cancelScheduledValues(now);
+                MUSIC.bus.master.gain.setTargetAtTime(on && MUSIC.mode === 'bg' ? MUSIC.level * MUSIC.volume : 0, now, tc);
+                if (MUSIC.vbus) {
+                    MUSIC.vbus.master.gain.cancelScheduledValues(now);
+                    MUSIC.vbus.master.gain.setTargetAtTime(on && MUSIC.mode === 'victory' ? VICTORY_LEVEL * MUSIC.volume : 0, now, tc);
                 }
-                sfxPlay(name, c, MUSIC.sfxGain, c.currentTime + 0.02);
+                if (MUSIC.sfxGain) MUSIC.sfxGain.gain.setTargetAtTime(SFXS.enabled ? SFX_LEVEL * SFXS.volume : 0, now, 0.05);
             } catch (err) { /* ignora */ }
         }
 
-        // Volume (0-100 dal cursore): scala musica ed effetti; salvato nel browser
-        function musicSetVolume(pct, save) {
-            const v = Math.max(0, Math.min(100, Number(pct))) / 100;
-            MUSIC.volume = isNaN(v) ? 1 : v;
-            try {
-                if (MUSIC.ctx && MUSIC.bus && MUSIC.enabled) MUSIC.bus.master.gain.setTargetAtTime(MUSIC.level * MUSIC.volume, MUSIC.ctx.currentTime, 0.05);
-                if (MUSIC.ctx && MUSIC.sfxGain) MUSIC.sfxGain.gain.setTargetAtTime(SFX_LEVEL * MUSIC.volume, MUSIC.ctx.currentTime, 0.05);
-            } catch (err) { /* ignora */ }
-            if (save) { try { localStorage.setItem('giallo_vol', String(Math.round(MUSIC.volume * 100))); } catch (err) { /* ignora */ } }
-        }
-
-        function musicStart() {
+        // Crea (una volta) il contesto audio e i bus; non avvia nessuna musica. Restituisce il contesto o null.
+        function audioEnsure() {
             const AC = (typeof window !== 'undefined') && (window.AudioContext || window.webkitAudioContext);
-            if (!AC || !MUSIC.enabled) return;
+            if (!AC) return null;
             try {
                 if (!MUSIC.ctx) {
-                    MUSIC.ctx = new AC();
-                    MUSIC.bus = musicBuildBus(MUSIC.ctx);
-                    MUSIC.next = MUSIC.ctx.currentTime + 0.15; MUSIC.bar = 0;
-                    // vento: rumore filtrato con lenta modulazione
-                    const c = MUSIC.ctx, nb = c.createBuffer(1, c.sampleRate * 4, c.sampleRate), d = nb.getChannelData(0);
+                    const c = MUSIC.ctx = new AC();
+                    MUSIC.bus = musicBuildBus(c);
+                    MUSIC.vbus = musicBuildBus(c);
+                    MUSIC.sfxGain = c.createGain();
+                    MUSIC.sfxGain.gain.value = SFXS.enabled ? SFX_LEVEL * SFXS.volume : 0;
+                    MUSIC.sfxGain.connect(c.destination);
+                    MUSIC.next = c.currentTime + 0.15; MUSIC.bar = 0;
+                    // vento: rumore filtrato con lenta modulazione (solo sottofondo)
+                    const nb = c.createBuffer(1, c.sampleRate * 4, c.sampleRate), d = nb.getChannelData(0);
                     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
                     const src = c.createBufferSource(); src.buffer = nb; src.loop = true;
                     const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 380; bp.Q.value = 0.6;
@@ -1830,9 +1902,56 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
                 }
                 if (MUSIC.ctx.state === 'suspended') MUSIC.ctx.resume().then(musicUpdateButton, () => {});
                 if (!MUSIC.hooked) { MUSIC.hooked = true; MUSIC.ctx.onstatechange = musicUpdateButton; }
-                MUSIC.bus.master.gain.cancelScheduledValues(MUSIC.ctx.currentTime);
-                MUSIC.bus.master.gain.setTargetAtTime(MUSIC.level * MUSIC.volume, MUSIC.ctx.currentTime, 0.8);
+                return MUSIC.ctx;
+            } catch (err) { return null; }
+        }
+
+        // Avvia l'audio che l'utente ha attivato (musica e/o effetti)
+        function audioWake() {
+            if (MUSIC.enabled) musicStart();
+            else if (SFXS.enabled) audioEnsure();
+        }
+
+        function sfx(name) {
+            if (!SFXS.enabled || SFXS.volume <= 0) return;
+            const c = MUSIC.ctx || audioEnsure();
+            if (!c || c.state !== 'running' || !MUSIC.sfxGain) return;
+            try { sfxPlay(name, c, MUSIC.sfxGain, c.currentTime + 0.02); } catch (err) { /* ignora */ }
+        }
+
+        // Volumi (0-100 dai cursori): indipendenti per musica ed effetti; salvati nel browser
+        function audioClampVolume(pct) { const v = Math.max(0, Math.min(100, Number(pct))) / 100; return isNaN(v) ? 1 : v; }
+        function musicSetVolume(pct, save) {
+            MUSIC.volume = audioClampVolume(pct);
+            audioApplyGains(0.05);
+            if (save) { try { localStorage.setItem('giallo_vol', String(Math.round(MUSIC.volume * 100))); } catch (err) { /* ignora */ } }
+        }
+        function sfxSetVolume(pct, save) {
+            SFXS.volume = audioClampVolume(pct);
+            audioApplyGains(0.05);
+            if (save) { try { localStorage.setItem('giallo_sfxvol', String(Math.round(SFXS.volume * 100))); } catch (err) { /* ignora */ } }
+        }
+
+        // Modalità musicale: 'bg' sottofondo, 'victory' tema della vittoria, 'silent' nessuna musica
+        function musicSetMode(mode) {
+            if (MUSIC.mode === mode) return;
+            MUSIC.mode = mode;
+            const c = MUSIC.ctx;
+            if (!c) return;
+            if (mode === 'victory') { MUSIC.vnext = c.currentTime + 0.15; MUSIC.vbar = 0; }
+            if (mode === 'bg' && MUSIC.next < c.currentTime) MUSIC.next = c.currentTime + 0.1;
+            audioApplyGains(mode === 'victory' ? 0.5 : 0.4);
+            if (MUSIC.enabled && !MUSIC.timer) { MUSIC.timer = setInterval(musicPump, 250); }
+            musicPump();
+        }
+
+        function musicStart() {
+            if (!MUSIC.enabled) return;
+            try {
+                if (!audioEnsure()) { MUSIC.started = false; return; }
+                audioApplyGains(0.8);
                 if (MUSIC.next < MUSIC.ctx.currentTime) MUSIC.next = MUSIC.ctx.currentTime + 0.1;
+                if (MUSIC.vnext < MUSIC.ctx.currentTime) MUSIC.vnext = MUSIC.ctx.currentTime + 0.1;
                 if (!MUSIC.timer) MUSIC.timer = setInterval(musicPump, 250);
                 musicPump();
                 MUSIC.started = true;
@@ -1841,25 +1960,28 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
 
         function musicStop() {
             if (!MUSIC.ctx) return;
-            try {
-                MUSIC.bus.master.gain.cancelScheduledValues(MUSIC.ctx.currentTime);
-                MUSIC.bus.master.gain.setTargetAtTime(0, MUSIC.ctx.currentTime, 0.2);
-            } catch (err) { /* ignora */ }
+            audioApplyGains(0.2);
             clearInterval(MUSIC.timer); MUSIC.timer = null;
             const ctx = MUSIC.ctx;
-            // dopo la dissolvenza si ferma il clock audio; al riavvio la partitura riparte dal tempo corrente
-            setTimeout(() => { if (!MUSIC.enabled && ctx.state === 'running') ctx.suspend(); }, 1200);
+            // dopo la dissolvenza, se nemmeno gli effetti sono attivi, si ferma il clock audio; al riavvio la partitura riparte dal tempo corrente
+            setTimeout(() => { if (!MUSIC.enabled && !SFXS.enabled && ctx.state === 'running') ctx.suspend(); }, 1200);
         }
 
         function musicUpdateButton() {
             const b = document.getElementById('btn-music');
             if (!b) return;
-            document.getElementById('btn-music-icon').innerText = MUSIC.enabled ? '🔊' : '🔇';
+            const waiting = (MUSIC.enabled || SFXS.enabled) && MUSIC.ctx && MUSIC.ctx.state === 'suspended' && !document.hidden;
+            document.getElementById('btn-music-icon').innerText = MUSIC.enabled ? '🎵' : '🔇';
             b.setAttribute('aria-pressed', MUSIC.enabled ? 'true' : 'false');
-            const waiting = MUSIC.enabled && MUSIC.ctx && MUSIC.ctx.state === 'suspended' && !document.hidden;
             b.title = !MUSIC.enabled ? 'Musica disattivata: clicca per attivarla'
                     : waiting ? 'Il browser blocca l\'audio automatico: clicca ovunque per avviare la musica'
                     : 'Musica attiva: clicca per disattivarla';
+            const e = document.getElementById('btn-sfx');
+            if (e && typeof e.setAttribute === 'function') {
+                document.getElementById('btn-sfx-icon').innerText = SFXS.enabled ? '🔔' : '🔕';
+                e.setAttribute('aria-pressed', SFXS.enabled ? 'true' : 'false');
+                e.title = SFXS.enabled ? 'Effetti sonori attivi: clicca per disattivarli' : 'Effetti sonori disattivati: clicca per attivarli';
+            }
         }
 
         function musicToggle() {
@@ -1869,34 +1991,48 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
             musicUpdateButton();
         }
 
+        function sfxToggle() {
+            SFXS.enabled = !SFXS.enabled;
+            try { localStorage.setItem('giallo_sfx', SFXS.enabled ? 'on' : 'off'); } catch (err) { /* ignora */ }
+            if (SFXS.enabled) { audioWake(); audioApplyGains(0.05); setTimeout(() => sfx('pick'), 60); }
+            else { audioApplyGains(0.05); if (!MUSIC.enabled) musicStop(); }
+            musicUpdateButton();
+        }
+
         function initMusic() {
             const b = document.getElementById('btn-music');
             if (!b || typeof b.setAttribute !== 'function') return;
             try { if (localStorage.getItem('giallo_music') === 'off') MUSIC.enabled = false; } catch (err) { /* ignora */ }
-            const vol = document.getElementById('music-volume');
-            if (vol && typeof vol.addEventListener === 'function') {
-                try { const sv = localStorage.getItem('giallo_vol'); if (sv !== null && sv !== '' && !isNaN(Number(sv))) musicSetVolume(sv, false); } catch (err) { /* ignora */ }
-                vol.value = String(Math.round(MUSIC.volume * 100));
-                vol.addEventListener('input', () => musicSetVolume(vol.value, true));
-                vol.addEventListener('click', (e) => e.stopPropagation());
-            }
+            try { if (localStorage.getItem('giallo_sfx') === 'off') SFXS.enabled = false; } catch (err) { /* ignora */ }
+            const bindVol = (id, key, setter, getter) => {
+                const el = document.getElementById(id);
+                if (!el || typeof el.addEventListener !== 'function') return;
+                try { const sv = localStorage.getItem(key); if (sv !== null && sv !== '' && !isNaN(Number(sv))) setter(sv, false); } catch (err) { /* ignora */ }
+                el.value = String(Math.round(getter() * 100));
+                el.addEventListener('input', () => setter(el.value, true));
+                el.addEventListener('click', (e) => e.stopPropagation());
+            };
+            bindVol('music-volume', 'giallo_vol', musicSetVolume, () => MUSIC.volume);
+            bindVol('sfx-volume', 'giallo_sfxvol', sfxSetVolume, () => SFXS.volume);
             musicUpdateButton();
             b.addEventListener('click', (e) => { e.stopPropagation(); musicToggle(); b.blur(); });
-            // La musica parte appena la pagina è caricata. Se il browser blocca l'audio automatico (di norma lo fa
+            const be = document.getElementById('btn-sfx');
+            if (be && typeof be.addEventListener === 'function') be.addEventListener('click', (e) => { e.stopPropagation(); sfxToggle(); be.blur(); });
+            // L'audio parte appena la pagina è caricata. Se il browser blocca l'audio automatico (di norma lo fa
             // finché l'utente non interagisce con la pagina), l'audio resta in attesa e parte al primo clic o tasto.
             const first = (e) => {
-                if (e.target && e.target.closest && e.target.closest('#btn-music')) return;
-                if (!MUSIC.enabled) return;
-                musicStart();
+                if (e.target && e.target.closest && e.target.closest('#btn-music, #btn-sfx')) return;
+                if (!MUSIC.enabled && !SFXS.enabled) return;
+                audioWake();
                 if (MUSIC.ctx && MUSIC.ctx.state === 'running') {
                     ['pointerdown', 'keydown', 'touchstart'].forEach(t => window.removeEventListener(t, first, true));
                 }
             };
             ['pointerdown', 'keydown', 'touchstart'].forEach(t => window.addEventListener(t, first, true));
-            const auto = () => { if (MUSIC.enabled) { musicStart(); musicUpdateButton(); } };
+            const auto = () => { if (MUSIC.enabled || SFXS.enabled) { audioWake(); musicUpdateButton(); } };
             if (document.readyState === 'complete') auto(); else window.addEventListener('load', auto);
             document.addEventListener('visibilitychange', () => {
-                if (!MUSIC.ctx || !MUSIC.enabled) return;
+                if (!MUSIC.ctx || (!MUSIC.enabled && !SFXS.enabled)) return;
                 if (document.hidden) MUSIC.ctx.suspend(); else MUSIC.ctx.resume();
             });
         }
@@ -2033,7 +2169,7 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
                 begun = true;
                 releaseWelcomeLock();
                 window.removeEventListener('keydown', onKey, true);
-                if (MUSIC.enabled) musicStart();
+                audioWake();
                 if (CINEMA.reduced) { if (start) start.classList.add('gone'); e.box.classList.remove('idle'); } else cinemaRestart();
             };
             // anche Invio o Spazio sulla finestra di benvenuto la avviano
@@ -2403,6 +2539,7 @@ Il livello si sceglie nel menu iniziale e vale per tutta la partita:
             hideCharCard();
             clearTimeout(botTimer);
             botTimer = null;
+            if (typeof musicSetMode === 'function') musicSetMode('bg');
             gameState = {
                 myPlayer: null,
                 players: [],
